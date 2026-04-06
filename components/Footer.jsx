@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import Image from 'next/image';
 
 export default function Footer() {
   return (
@@ -7,10 +8,19 @@ export default function Footer() {
         
         {/* اللوغو */}
         <Link href="/" className="flex items-center gap-4 group">
-          <div className="w-10 h-10 rounded-xl bg-brown-gradient flex items-center justify-center shadow-lg transition-transform group-hover:scale-110 duration-300">
-            <i className="fa-solid fa-palette text-white text-xl"></i>
+          <div className="relative w-10 h-10 transition-transform group-hover:scale-110 duration-300">
+            <Image
+              src="/images/logo.png"
+              alt="أثر"
+              fill
+              className="object-contain"
+            />
           </div>
-          <span className="text-lg font-bold text-[#1a0f0a] font-kufi tracking-wider">ATHAR</span>
+          <div className="flex items-center gap-2">
+            <span className="text-2xl font-bold text-[#1a0f0a] font-ornamental">أثر</span>
+            <span className="text-gray-300 font-light">|</span>
+            <span className="text-sm font-bold tracking-widest text-[#2c1e15] font-kufi uppercase">Athar</span>
+          </div>
         </Link>
 
         {/* حقوق النشر */}

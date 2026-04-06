@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 // Lucide icons removed in favor of Font Awesome via CDN
 import { useCart } from '../contexts/CartContext';
 import { Button } from './ui/button';
@@ -19,13 +20,18 @@ export const Header = () => {
           
           {/* Logo */}
           <Link href="/" className="flex items-center gap-4 group">
-            <div className="w-10 h-10 rounded-xl bg-brown-gradient flex items-center justify-center shadow-lg transition-transform group-hover:scale-110 duration-300">
-              <i className="fa-solid fa-palette text-white text-xl"></i>
+            <div className="relative w-12 h-12 transition-transform group-hover:scale-110 duration-300">
+              <Image 
+                src="/images/logo.png" 
+                alt="Logo Athar" 
+                fill 
+                className="object-contain"
+              />
             </div>
             <div className="flex items-center gap-3">
               <span className="text-5xl font-bold font-ornamental text-[#1a0f0a]">أثر</span>
               <span className="text-gray-300 text-2xl font-light">|</span>
-              <span className="text-xl font-bold tracking-widest text-[#2c1e15] font-kufi">ATHAR</span>
+              <span className="text-xl font-bold tracking-widest text-[#2c1e15] font-kufi uppercase">Athar</span>
             </div>
           </Link>
 
