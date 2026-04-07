@@ -6,7 +6,8 @@ import Image from 'next/image';
 
 export default function SignupPage() {
   const [formData, setFormData] = useState({
-    fullName: '',
+    firstName: '',
+    lastName: '',
     email: '',
     password: '',
     confirmPassword: '',
@@ -24,9 +25,16 @@ export default function SignupPage() {
     let error = '';
 
     switch (name) {
-      case 'fullName':
+      case 'firstName':
         if (!value.trim()) {
-          error = 'الاسم الكامل مطلوب';
+          error = 'الاسم الأول مطلوب';
+        } else if (value.trim().length < 2) {
+          error = 'يجب أن يتكون الاسم من حرفين على الأقل';
+        }
+        break;
+      case 'lastName':
+        if (!value.trim()) {
+          error = 'اسم العائلة مطلوب';
         } else if (value.trim().length < 2) {
           error = 'يجب أن يتكون الاسم من حرفين على الأقل';
         }
@@ -140,27 +148,54 @@ export default function SignupPage() {
           {/* الفورم */}
           <form className="space-y-6" onSubmit={handleSubmit} noValidate>
 
-            {/* الاسم الكامل */}
-            <div>
-              <label className="block text-sm font-bold text-[#3b2012] mb-2 font-amiri">
-                الاسم الكامل
-              </label>
-              <div className="relative">
-                <span className="absolute right-4 top-1/2 -translate-y-1/2 text-[#9c7b65]">
-                  <i className="fa-regular fa-user"></i>
-                </span>
-                <input
-                  name="fullName"
-                  type="text"
-                  placeholder="بتول سويسه"
-                  value={formData.fullName}
-                  onChange={handleChange}
-                  onBlur={handleBlur}
-                  className={`w-full h-14 bg-white border ${errors.fullName ? 'border-red-400 focus:border-red-500' : 'border-[#e0d5c8] focus:border-[#6b4c3b]'} rounded-xl pr-12 pl-4 text-sm text-[#3b2012] placeholder:text-[#c5b0a0] outline-none transition-colors font-amiri shadow-sm`}
-                />
+            {/* الاسم الأول واسم العائلة */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* الاسم الأول */}
+              <div>
+                <label className="block text-sm font-bold text-[#3b2012] mb-2 font-amiri">
+                  الاسم الأول
+                </label>
+                <div className="relative">
+                  <span className="absolute right-4 top-1/2 -translate-y-1/2 text-[#9c7b65]">
+                    <i className="fa-regular fa-user"></i>
+                  </span>
+                  <input
+                    name="firstName"
+                    type="text"
+                    placeholder="بتول"
+                    value={formData.firstName}
+                    onChange={handleChange}
+                    onBlur={handleBlur}
+                    className={`w-full h-14 bg-white border ${errors.firstName ? 'border-red-400 focus:border-red-500' : 'border-[#e0d5c8] focus:border-[#6b4c3b]'} rounded-xl pr-12 pl-4 text-sm text-[#3b2012] placeholder:text-[#c5b0a0] outline-none transition-colors font-amiri shadow-sm`}
+                  />
+                </div>
+                <div className={`overflow-hidden transition-all duration-300 ease-in-out ${errors.firstName ? 'max-h-10 opacity-100 mt-1.5' : 'max-h-0 opacity-0'}`}>
+                  <p className="text-xs text-red-500 font-bold font-amiri">{errors.firstName}</p>
+                </div>
               </div>
-              <div className={`overflow-hidden transition-all duration-300 ease-in-out ${errors.fullName ? 'max-h-10 opacity-100 mt-1.5' : 'max-h-0 opacity-0'}`}>
-                <p className="text-xs text-red-500 font-bold font-amiri">{errors.fullName}</p>
+
+              {/* اسم العائلة */}
+              <div>
+                <label className="block text-sm font-bold text-[#3b2012] mb-2 font-amiri">
+                  اسم العائلة
+                </label>
+                <div className="relative">
+                  <span className="absolute right-4 top-1/2 -translate-y-1/2 text-[#9c7b65]">
+                    <i className="fa-regular fa-user"></i>
+                  </span>
+                  <input
+                    name="lastName"
+                    type="text"
+                    placeholder="سويسه"
+                    value={formData.lastName}
+                    onChange={handleChange}
+                    onBlur={handleBlur}
+                    className={`w-full h-14 bg-white border ${errors.lastName ? 'border-red-400 focus:border-red-500' : 'border-[#e0d5c8] focus:border-[#6b4c3b]'} rounded-xl pr-12 pl-4 text-sm text-[#3b2012] placeholder:text-[#c5b0a0] outline-none transition-colors font-amiri shadow-sm`}
+                  />
+                </div>
+                <div className={`overflow-hidden transition-all duration-300 ease-in-out ${errors.lastName ? 'max-h-10 opacity-100 mt-1.5' : 'max-h-0 opacity-0'}`}>
+                  <p className="text-xs text-red-500 font-bold font-amiri">{errors.lastName}</p>
+                </div>
               </div>
             </div>
 
