@@ -3,8 +3,12 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
+import { useAuth } from '../../contexts/AuthContext';
+import { useRouter } from 'next/navigation';
 
 export default function SignupPage() {
+  const { login } = useAuth();
+  const router = useRouter();
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
@@ -17,6 +21,7 @@ export default function SignupPage() {
   const [touched, setTouched] = useState({});
   const [isFormValid, setIsFormValid] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [generalError, setGeneralError] = useState('');
 
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -121,33 +126,48 @@ export default function SignupPage() {
 
     if (Object.keys(checkErrors).length === 0) {
       setIsLoading(true);
+      setGeneralError('');
       
-      const successResponse = {
-        "status": "success",
-        "message": "User created successfully",
-        "data": {
-          "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI3MjBiNzJlYy03ZTRkLTQ3MzUtOTY2MS0wYTEyOGRlNDQ5ODQiLCJlbWFpbCI6Im1hcmt1amh5YW1AZXhhbXBsZS5jb20iLCJyb2xlIjoidXNlciIsImlhdCI6MTc3NTYzOTg4MywiZXhwIjoxNzc2MjQ0NjgzfQ.m5HGX105tXxpzfxzncl4eEBtt19F-RMFKfjhVPcypqU",
-          "user": {
-            "id": "720b72ec-7e4d-4735-9661-0a128de44984",
-            "email": formData.email,
-            "role": "user"
-          }
-        }
+      const payload = {
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        email: formData.email,
+        password: formData.password,
+        confirmPassword: formData.confirmPassword
       };
 
-      setTimeout(() => {
+      try {
+        const response = await fetch('/api/auth/signup', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(payload),
+        });
+
+        const result = await response.json();
+
+        if (response.ok) {
+          console.log('بيانات الطلب المرسلة (Signup Payload):', payload);
+          console.log('استجابة نجاح إنشاء الحساب (Signup Success Response):', result);
+          
+          // تحديث حالة المصادقة
+          login(result.data.user);
+          
+          alert(`تم إنشاء الحساب بنجاح! مرحباً ${result.data.user.firstName}`);
+          
+          // التوجه للصفحة الرئيسية
+          router.push('/');
+        } else {
+          setGeneralError(result.message || 'حدث خطأ أثناء إنشاء الحساب');
+          console.error('خطأ في الساين اب (Signup Error):', result);
+        }
+      } catch (err) {
+        setGeneralError('لا يمكن الاتصال بالخادم. تأكد من تشغيل الباك آند.');
+        console.error('فشل الاتصال (Connection Failed):', err);
+      } finally {
         setIsLoading(false);
-        const payload = {
-          firstName: formData.firstName,
-          lastName: formData.lastName,
-          email: formData.email,
-          password: formData.password,
-          confirmPassword: formData.confirmPassword
-        };
-        console.log('بيانات الطلب المرسلة (Signup Payload):', payload);
-        console.log('استجابة نجاح إنشاء الحساب (Signup Success Response):', successResponse);
-        alert(`تم إنشاء الحساب بنجاح لـ: ${formData.email}\n(تفاصيل الـ Payload والـ Response في الكونسول)`);
-      }, 1500);
+      }
     }
   };
 
@@ -310,6 +330,14 @@ export default function SignupPage() {
                 <p className="text-xs text-red-500 font-bold font-amiri">{errors.confirmPassword}</p>
               </div>
             </div>
+
+            {/* رسالة الخطأ العامة */}
+            {generalError && (
+              <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-xl flex items-center gap-3 animate-shake font-amiri">
+                <i className="fa-solid fa-circle-exclamation"></i>
+                <span className="text-sm font-bold">{generalError}</span>
+              </div>
+            )}
 
             {/* زر إنشاء حساب */}
             <button

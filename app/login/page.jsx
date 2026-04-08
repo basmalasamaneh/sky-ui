@@ -3,8 +3,14 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
+import { useAuth } from '../../contexts/AuthContext';
+import { useRouter } from 'next/navigation';
+
+import { Input } from '@/components/ui/input';
 
 export default function LoginPage() {
+  const { login } = useAuth();
+  const router = useRouter();
   const [formData, setFormData] = useState({
     email: '',
     password: '',
@@ -16,6 +22,7 @@ export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false);
 
   const [showPassword, setShowPassword] = useState(false);
+  const [loginError, setLoginError] = useState('');
 
   const validateField = (name, value) => {
     let error = '';
@@ -31,6 +38,8 @@ export default function LoginPage() {
       case 'password':
         if (!value) {
           error = 'كلمة المرور مطلوبة';
+        } else if (value.length < 8) {
+          error = 'يجب أن تكون كلمة المرور 8 أحرف على الأقل';
         }
         break;
       default:
@@ -68,6 +77,7 @@ export default function LoginPage() {
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
+    if (loginError) setLoginError('');
   };
 
   const handleBlur = (e) => {
@@ -80,6 +90,7 @@ export default function LoginPage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setLoginError('');
 
     const allTouched = Object.keys(formData).reduce((acc, key) => {
       acc[key] = true;
@@ -92,9 +103,26 @@ export default function LoginPage() {
 
     if (Object.keys(checkErrors).length === 0) {
       setIsLoading(true);
+      
+      // Simulation of a login process
       setTimeout(() => {
         setIsLoading(false);
-        console.log('تم الدخول بنجاح:', formData);
+        // For demonstration purposes, if password is "password123", we show an error
+        if (formData.password === 'password123') {
+          setLoginError('البريد الإلكتروني أو كلمة المرور غير صحيحة');
+        } else {
+          console.log('تم الدخول بنجاح:', formData);
+          
+          // محاكاة بيانات المستخدم (في الحقيقة تأتي من السيرفر)
+          const mockUser = {
+            firstName: 'بتول',
+            lastName: 'سويسه',
+            email: formData.email
+          };
+          
+          login(mockUser);
+          router.push('/');
+        }
       }, 1500);
     }
   };
@@ -120,66 +148,57 @@ export default function LoginPage() {
           <form className="space-y-6" onSubmit={handleSubmit} noValidate>
 
             {/* البريد الإلكتروني */}
-            <div>
-              <label className="block text-sm font-bold text-[#3b2012] mb-2 font-amiri">
-                البريد الإلكتروني
-              </label>
-              <div className="relative">
-                <span className="absolute right-4 top-1/2 -translate-y-1/2 text-[#9c7b65]">
-                  <i className="fa-regular fa-envelope"></i>
-                </span>
-                <input
-                  name="email"
-                  type="email"
-                  placeholder="batool@gmail.com"
-                  dir="ltr"
-                  value={formData.email}
-                  onChange={handleChange}
-                  onBlur={handleBlur}
-                  className={`w-full h-14 bg-white border ${errors.email ? 'border-red-400 focus:border-red-500' : 'border-[#e0d5c8] focus:border-[#6b4c3b]'} rounded-xl pr-12 pl-4 text-sm text-left text-[#3b2012] placeholder:text-[#c5b0a0] outline-none transition-colors font-amiri shadow-sm`}
-                />
-              </div>
-              <div className={`overflow-hidden transition-all duration-300 ease-in-out ${errors.email ? 'max-h-10 opacity-100 mt-1.5' : 'max-h-0 opacity-0'}`}>
-                <p className="text-xs text-red-500 font-bold font-amiri">{errors.email}</p>
-              </div>
-            </div>
+            <Input
+              name="email"
+              type="email"
+              label="البريد الإلكتروني"
+              placeholder="batool@gmail.com"
+              dir="ltr"
+              value={formData.email}
+              onChange={handleChange}
+              onBlur={handleBlur}
+              error={errors.email}
+              icon={<i className="fa-regular fa-envelope"></i>}
+            />
 
             {/* كلمة المرور */}
-            <div>
-              <div className="flex items-center justify-between mb-2">
-                <label className="text-sm font-bold text-[#3b2012] font-amiri">
-                  كلمة المرور
-                </label>
-                <Link href="/forgot-password" className="text-sm text-[#6b4c3b] hover:font-bold hover:underline transition-all font-amiri">
-                  هل نسيت كلمة المرور؟
-                </Link>
-              </div>
-              <div className="relative">
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute left-4 top-1/2 -translate-y-1/2 text-[#9c7b65] hover:text-[#3b2012] transition-colors"
-                >
-                  {showPassword ? <i className="fa-regular fa-eye-slash"></i> : <i className="fa-regular fa-eye"></i>}
-                </button>
-                <span className="absolute right-4 top-1/2 -translate-y-1/2 text-[#9c7b65]">
-                  <i className="fa-solid fa-lock"></i>
-                </span>
-                <input
-                  name="password"
-                  type={showPassword ? 'text' : 'password'}
-                  placeholder="••••••••"
-                  dir="ltr"
-                  value={formData.password}
-                  onChange={handleChange}
-                  onBlur={handleBlur}
-                  className={`w-full h-14 bg-white border ${errors.password ? 'border-red-400 focus:border-red-500' : 'border-[#e0d5c8] focus:border-[#6b4c3b]'} rounded-xl pr-12 pl-12 text-sm text-left text-[#3b2012] placeholder:text-[#c5b0a0] outline-none transition-colors font-amiri shadow-sm`}
-                />
-              </div>
-              <div className={`overflow-hidden transition-all duration-300 ease-in-out ${errors.password ? 'max-h-20 opacity-100 mt-1.5' : 'max-h-0 opacity-0'}`}>
-                <p className="text-xs text-red-500 font-bold font-amiri">{errors.password}</p>
-              </div>
+            <div className="relative">
+              <Input
+                name="password"
+                type={showPassword ? 'text' : 'password'}
+                label="كلمة المرور"
+                labelExtra={
+                  <Link href="/forgot-password" size="sm" className="text-sm text-[#6b4c3b] hover:font-bold hover:underline transition-all font-amiri">
+                    هل نسيت كلمة المرور؟
+                  </Link>
+                }
+                placeholder="••••••••"
+                dir="ltr"
+                value={formData.password}
+                onChange={handleChange}
+                onBlur={handleBlur}
+                error={errors.password}
+                icon={<i className="fa-solid fa-lock"></i>}
+                className="pl-12"
+              />
+              
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute left-4 top-[46px] text-[#9c7b65] hover:text-[#3b2012] transition-colors"
+                style={{ zIndex: 10 }}
+              >
+                {showPassword ? <i className="fa-regular fa-eye-slash"></i> : <i className="fa-regular fa-eye"></i>}
+              </button>
             </div>
+
+            {/* رسالة الخطأ العامة */}
+            {loginError && (
+              <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-xl flex items-center gap-3 animate-shake font-amiri">
+                <i className="fa-solid fa-circle-exclamation"></i>
+                <span className="text-sm font-bold">{loginError}</span>
+              </div>
+            )}
 
             {/* زر الدخول */}
             <button
@@ -213,7 +232,7 @@ export default function LoginPage() {
       {/* الصورة - يسار */}
       <div className="relative hidden lg:block border-r border-[#e0d5c8]/50 lg:order-2">
         <Image
-          src="/images/login-art.jpg"
+          src="/images/login-art.png"
           alt="فن أثر"
           fill
           className="object-cover"

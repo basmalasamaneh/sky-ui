@@ -5,11 +5,13 @@ import Link from 'next/link';
 import Image from 'next/image';
 // Lucide icons removed in favor of Font Awesome via CDN
 import { useCart } from '../contexts/CartContext';
+import { useAuth } from '../contexts/AuthContext';
 import { Button } from './ui/button';
 import { motion, AnimatePresence } from 'framer-motion';
 
 export const Header = () => {
   const { totalItems } = useCart();
+  const { isAuthenticated, user } = useAuth();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [isSearchVisible, setIsSearchVisible] = useState(false);
 
@@ -86,14 +88,25 @@ export const Header = () => {
             </div>
 
             <div className="hidden md:flex items-center gap-6" dir="rtl">
-              <Link href="/signup">
-                <Button className="bg-brown-gradient hover:opacity-90 text-[14px] font-bold px-10 py-3.5 h-auto rounded-full shadow-lg transition-transform hover:scale-105 font-art text-white">
-                  إنشاء حساب
-                </Button>
-              </Link>
-              <Link href="/login" className="text-[14px] font-bold text-gray-500 hover:text-[#5c4436] transition-colors font-art">
-                تسجيل الدخول
-              </Link>
+              {!isAuthenticated ? (
+                <>
+                  <Link href="/signup">
+                    <Button className="bg-brown-gradient hover:opacity-90 text-[14px] font-bold px-10 py-3.5 h-auto rounded-full shadow-lg transition-transform hover:scale-105 font-art text-white">
+                      إنشاء حساب
+                    </Button>
+                  </Link>
+                  <Link href="/login" className="text-[14px] font-bold text-gray-500 hover:text-[#5c4436] transition-colors font-art">
+                    تسجيل الدخول
+                  </Link>
+                </>
+              ) : (
+                <div className="flex items-center gap-3 bg-[#fdfaf7] px-4 py-2 rounded-full border border-[#e8dcc4]/50 shadow-sm border-2">
+                  <span className="text-[#3b2012] font-bold font-art text-sm">{user?.firstName}</span>
+                  <div className="w-9 h-9 bg-brown-gradient rounded-full flex items-center justify-center text-white font-bold shadow-md border-2 border-white">
+                    {user?.firstName?.charAt(0).toUpperCase()}
+                  </div>
+                </div>
+              )}
             </div>
 
             <button 
@@ -120,8 +133,24 @@ export const Header = () => {
               <Link href="/products" className="py-5 px-4 text-xl font-bold text-gray-800 rounded-xl hover:bg-gray-50 text-right font-art">المنتجات</Link>
               <Link href="/about" className="py-5 px-4 text-xl font-bold text-gray-800 rounded-xl hover:bg-gray-50 text-right font-art">عن أثر</Link>
               <div className="pt-6 border-t border-gray-100 mt-2 flex flex-col gap-3">
-                <Link href="/signup" className="bg-brown-gradient text-white text-center py-5 rounded-xl text-lg font-bold font-art shadow-md">إنشاء حساب</Link>
-                <Link href="/login" className="border border-gray-200 text-center py-5 rounded-xl text-lg font-bold text-gray-700 font-art">تسجيل الدخول</Link>
+                {!isAuthenticated ? (
+                  <>
+                    <Link href="/signup" className="bg-brown-gradient text-white text-center py-5 rounded-xl text-lg font-bold font-art shadow-md">إنشاء حساب</Link>
+                    <Link href="/login" className="border border-gray-200 text-center py-5 rounded-xl text-lg font-bold text-gray-700 font-art">تسجيل الدخول</Link>
+                  </>
+                ) : (
+                  <div className="flex items-center justify-between bg-[#fdfaf7] p-5 rounded-2xl border border-[#e8dcc4]/50 shadow-sm">
+                    <div className="flex items-center gap-4">
+                      <div className="w-12 h-12 bg-brown-gradient rounded-full flex items-center justify-center text-white text-xl font-bold shadow-md border-2 border-white">
+                        {user?.firstName?.charAt(0).toUpperCase()}
+                      </div>
+                      <span className="text-[#3b2012] font-bold font-art text-xl">{user?.firstName}</span>
+                    </div>
+                    <Link href="/profile" className="text-[#9c7b65] hover:text-[#3b2012] transition-colors">
+                      <i className="fa-solid fa-chevron-left text-lg"></i>
+                    </Link>
+                  </div>
+                )}
               </div>
             </div>
           </motion.div>

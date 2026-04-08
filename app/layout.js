@@ -5,21 +5,21 @@ import { AuthProvider } from '../contexts/AuthContext'
 import { CartProvider } from '../contexts/CartContext'
 
 export const metadata = {
-  title: 'فنانو فلسطين - Athar |أثر',
-  description: '',
-  keywords: [],
+  title: 'متجر أثر | الرفاهية والعراقة في مكان واحد',
+  description: 'أثر هو وجهتك الأولى لاكتساب أفخر أنواع العود والعطور الشرقية التي تعكس الهوية والفخامة.',
+  keywords: ['عود', 'مسك', 'بخور', 'عطور شرقية', 'الهوية العربية'],
 }
 
 export default function RootLayout({ children }) {
   return (
     <html lang="ar" dir="rtl">
       <head>
-        <link
-          rel="stylesheet"
-          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
-          integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA=="
-          crossOrigin="anonymous"
-          referrerPolicy="no-referrer"
+        <link 
+          rel="stylesheet" 
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" 
+          integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" 
+          crossOrigin="anonymous" 
+          referrerPolicy="no-referrer" 
         />
       </head>
       <body className="antialiased selection:bg-gold selection:text-white bg-white">
