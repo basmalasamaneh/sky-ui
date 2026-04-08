@@ -1,10 +1,15 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
+import { useAuth } from '@/contexts/AuthContext';
 
 export default function SignupPage() {
+  const router = useRouter();
+  const { login } = useAuth();
+  
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
@@ -17,6 +22,7 @@ export default function SignupPage() {
   const [touched, setTouched] = useState({});
   const [isFormValid, setIsFormValid] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [serverError, setServerError] = useState('');
 
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -109,6 +115,7 @@ export default function SignupPage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setServerError('');
 
     const allTouched = Object.keys(formData).reduce((acc, key) => {
       acc[key] = true;
@@ -122,32 +129,53 @@ export default function SignupPage() {
     if (Object.keys(checkErrors).length === 0) {
       setIsLoading(true);
       
-      const successResponse = {
-        "status": "success",
-        "message": "User created successfully",
-        "data": {
-          "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI3MjBiNzJlYy03ZTRkLTQ3MzUtOTY2MS0wYTEyOGRlNDQ5ODQiLCJlbWFpbCI6Im1hcmt1amh5YW1AZXhhbXBsZS5jb20iLCJyb2xlIjoidXNlciIsImlhdCI6MTc3NTYzOTg4MywiZXhwIjoxNzc2MjQ0NjgzfQ.m5HGX105tXxpzfxzncl4eEBtt19F-RMFKfjhVPcypqU",
-          "user": {
-            "id": "720b72ec-7e4d-4735-9661-0a128de44984",
-            "email": formData.email,
-            "role": "user"
-          }
-        }
-      };
+      try {
+        const response = await fetch('http://localhost:3001/api/auth/signup', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            firstName: formData.firstName,
+            lastName: formData.lastName,
+            email: formData.email,
+            password: formData.password,
+            confirmPassword: formData.confirmPassword,
+          }),
+        });
 
-      setTimeout(() => {
+        const data = await response.json();
+
+        if (!response.ok) {
+          // Handle field-specific errors from backend validation
+          if (data.errors && Array.isArray(data.errors)) {
+            const fieldErrors = {};
+            data.errors.forEach((error) => {
+              fieldErrors[error.field] = error.message;
+            });
+            setErrors(fieldErrors);
+          }
+          setServerError(data.message || 'فشل إنشاء الحساب');
+          setIsLoading(false);
+          return;
+        }
+
+        // Store token in localStorage
+        if (data.data?.token) {
+          localStorage.setItem('token', data.data.token);
+        }
+
+        // Update auth context
+        login(data.data.user);
+
+        // Redirect to home or dashboard
+        router.push('/');
+        
+      } catch (error) {
+        console.error('Signup error:', error);
+        setServerError('حدث خطأ في الاتصال بالخادم. تأكد من أن backend يعمل على http://localhost:3001');
         setIsLoading(false);
-        const payload = {
-          firstName: formData.firstName,
-          lastName: formData.lastName,
-          email: formData.email,
-          password: formData.password,
-          confirmPassword: formData.confirmPassword
-        };
-        console.log('بيانات الطلب المرسلة (Signup Payload):', payload);
-        console.log('استجابة نجاح إنشاء الحساب (Signup Success Response):', successResponse);
-        alert(`تم إنشاء الحساب بنجاح لـ: ${formData.email}\n(تفاصيل الـ Payload والـ Response في الكونسول)`);
-      }, 1500);
+      }
     }
   };
 
@@ -170,6 +198,13 @@ export default function SignupPage() {
 
           {/* الفورم */}
           <form className="space-y-6" onSubmit={handleSubmit} noValidate>
+            
+            {/* Server Error Message */}
+            {serverError && (
+              <div className="bg-red-50 border border-red-300 text-red-700 px-4 py-3 rounded-lg text-sm font-amiri">
+                {serverError}
+              </div>
+            )}
 
             {/* الاسم الأول واسم العائلة */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
