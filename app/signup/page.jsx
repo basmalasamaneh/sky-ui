@@ -1,14 +1,14 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
-import { useAuth } from '../../contexts/AuthContext';
-import { useRouter } from 'next/navigation';
+import { useAuth } from '@/contexts/AuthContext';
 
 export default function SignupPage() {
-  const { login } = useAuth();
   const router = useRouter();
+  const { login } = useAuth();
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
@@ -21,7 +21,7 @@ export default function SignupPage() {
   const [touched, setTouched] = useState({});
   const [isFormValid, setIsFormValid] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [generalError, setGeneralError] = useState('');
+  const [serverError, setServerError] = useState('');
 
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -114,6 +114,7 @@ export default function SignupPage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setServerError('');
 
     const allTouched = Object.keys(formData).reduce((acc, key) => {
       acc[key] = true;
@@ -126,7 +127,7 @@ export default function SignupPage() {
 
     if (Object.keys(checkErrors).length === 0) {
       setIsLoading(true);
-      setGeneralError('');
+      setServerError('');
       
       const payload = {
         firstName: formData.firstName,
@@ -137,6 +138,7 @@ export default function SignupPage() {
       };
 
       try {
+        console.log('جاري إرسال طلب إنشاء الحساب... (Sending signup request...)');
         const response = await fetch('/api/auth/signup', {
           method: 'POST',
           headers: {
@@ -151,19 +153,37 @@ export default function SignupPage() {
           console.log('بيانات الطلب المرسلة (Signup Payload):', payload);
           console.log('استجابة نجاح إنشاء الحساب (Signup Success Response):', result);
           
-          // تحديث حالة المصادقة
-          login(result.data.user);
+          // Store token in localStorage if available
+          if (result.data?.token) {
+            localStorage.setItem('token', result.data.token);
+          }
+
+          // Update auth context with the data from the form to guarantee the name shows up
+          const userWithNames = {
+            ...result.data.user,
+            firstName: formData.firstName,
+            lastName: formData.lastName
+          };
           
-          alert(`تم إنشاء الحساب بنجاح! مرحباً ${result.data.user.firstName}`);
+          login(userWithNames);
           
-          // التوجه للصفحة الرئيسية
+          // Redirect to home
           router.push('/');
         } else {
-          setGeneralError(result.message || 'حدث خطأ أثناء إنشاء الحساب');
+          // Handle field-specific errors from backend validation
+          if (result.errors && Array.isArray(result.errors)) {
+            const fieldErrors = {};
+            result.errors.forEach((error) => {
+              fieldErrors[error.field] = error.message;
+            });
+            setErrors(fieldErrors);
+          }
+          
+          setServerError(result.message || 'حدث خطأ أثناء إنشاء الحساب');
           console.error('خطأ في الساين اب (Signup Error):', result);
         }
       } catch (err) {
-        setGeneralError('لا يمكن الاتصال بالخادم. تأكد من تشغيل الباك آند.');
+        setServerError('لا يمكن الاتصال بالخادم. تأكد من تشغيل الباك آند على المنفذ 3001.');
         console.error('فشل الاتصال (Connection Failed):', err);
       } finally {
         setIsLoading(false);
@@ -190,6 +210,7 @@ export default function SignupPage() {
 
           {/* الفورم */}
           <form className="space-y-6" onSubmit={handleSubmit} noValidate>
+            
 
             {/* الاسم الأول واسم العائلة */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -332,10 +353,10 @@ export default function SignupPage() {
             </div>
 
             {/* رسالة الخطأ العامة */}
-            {generalError && (
+            {serverError && (
               <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-xl flex items-center gap-3 animate-shake font-amiri">
                 <i className="fa-solid fa-circle-exclamation"></i>
-                <span className="text-sm font-bold">{generalError}</span>
+                <span className="text-sm font-bold">{serverError}</span>
               </div>
             )}
 

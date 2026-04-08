@@ -11,8 +11,9 @@ import { motion, AnimatePresence } from 'framer-motion';
 
 export const Header = () => {
   const { totalItems } = useCart();
-  const { isAuthenticated, user } = useAuth();
+  const { isAuthenticated, user, logout } = useAuth();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [isSearchVisible, setIsSearchVisible] = useState(false);
 
   return (
@@ -100,11 +101,56 @@ export const Header = () => {
                   </Link>
                 </>
               ) : (
-                <div className="flex items-center gap-3 bg-[#fdfaf7] px-4 py-2 rounded-full border border-[#e8dcc4]/50 shadow-sm border-2">
-                  <span className="text-[#3b2012] font-bold font-art text-sm">{user?.firstName}</span>
-                  <div className="w-9 h-9 bg-brown-gradient rounded-full flex items-center justify-center text-white font-bold shadow-md border-2 border-white">
-                    {user?.firstName?.charAt(0).toUpperCase()}
-                  </div>
+                <div className="relative">
+                  <button 
+                    onClick={() => setUserMenuOpen(!userMenuOpen)}
+                    className="flex items-center gap-3 bg-white px-3 py-1.5 rounded-full border-2 border-[#e8dcc4] shadow-sm hover:shadow-md hover:border-[#6b4c3b] transition-all duration-300 group"
+                  >
+                    <div className="w-8 h-8 bg-brown-gradient rounded-full flex items-center justify-center text-white font-bold shadow-sm border border-white/50 text-xs transition-transform group-hover:scale-110">
+                      {(user?.firstName || user?.first_name || 'م')?.charAt(0).toUpperCase()}
+                    </div>
+                    <span className="text-[#3b2012] font-bold font-art text-sm whitespace-nowrap">
+                      {user?.firstName || user?.first_name || 'مستخدم'}
+                    </span>
+                    <i className={`fa-solid fa-chevron-down text-[10px] text-[#9c7b65] transition-transform duration-300 ${userMenuOpen ? 'rotate-180' : ''}`}></i>
+                  </button>
+
+                  {/* Dropdown Menu */}
+                  <AnimatePresence>
+                    {userMenuOpen && (
+                      <>
+                        <div className="fixed inset-0 z-10" onClick={() => setUserMenuOpen(false)}></div>
+                        <motion.div
+                          initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                          animate={{ opacity: 1, y: 0, scale: 1 }}
+                          exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                          className="absolute left-0 mt-3 w-48 bg-white rounded-2xl shadow-xl border border-[#e8dcc4]/50 z-20 overflow-hidden py-2"
+                        >
+                          <Link 
+                            href="/settings" 
+                            className="flex items-center gap-3 px-5 py-3 text-gray-700 hover:bg-[#fdfaf7] hover:text-[#3b2012] transition-colors text-right font-art"
+                            onClick={() => setUserMenuOpen(false)}
+                          >
+                            <i className="fa-solid fa-gear text-[#9c7b65]"></i>
+                            <span className="text-sm font-bold">الإعدادات</span>
+                          </Link>
+                          
+                          <div className="h-px bg-gray-100 my-1 mx-4"></div>
+                          
+                          <button 
+                            onClick={() => {
+                              logout();
+                              setUserMenuOpen(false);
+                            }}
+                            className="w-full flex items-center gap-3 px-5 py-3 text-red-600 hover:bg-red-50 transition-colors text-right font-art"
+                          >
+                            <i className="fa-solid fa-arrow-right-from-bracket rotate-180"></i>
+                            <span className="text-sm font-bold">تسجيل الخروج</span>
+                          </button>
+                        </motion.div>
+                      </>
+                    )}
+                  </AnimatePresence>
                 </div>
               )}
             </div>
@@ -139,16 +185,28 @@ export const Header = () => {
                     <Link href="/login" className="border border-gray-200 text-center py-5 rounded-xl text-lg font-bold text-gray-700 font-art">تسجيل الدخول</Link>
                   </>
                 ) : (
-                  <div className="flex items-center justify-between bg-[#fdfaf7] p-5 rounded-2xl border border-[#e8dcc4]/50 shadow-sm">
-                    <div className="flex items-center gap-4">
-                      <div className="w-12 h-12 bg-brown-gradient rounded-full flex items-center justify-center text-white text-xl font-bold shadow-md border-2 border-white">
-                        {user?.firstName?.charAt(0).toUpperCase()}
+                  <div className="flex flex-col gap-3" dir="rtl">
+                    <div className="flex items-center justify-between bg-[#fdfaf7] p-5 rounded-2xl border border-[#e8dcc4]/50 shadow-sm">
+                      <div className="flex items-center gap-4">
+                        <div className="w-12 h-12 bg-brown-gradient rounded-full flex items-center justify-center text-white text-xl font-bold shadow-md border-2 border-white">
+                          {user?.firstName?.charAt(0).toUpperCase()}
+                        </div>
+                        <span className="text-[#3b2012] font-bold font-art text-xl">{user?.firstName}</span>
                       </div>
-                      <span className="text-[#3b2012] font-bold font-art text-xl">{user?.firstName}</span>
+                      <Link href="/settings" className="text-[#9c7b65] hover:text-[#3b2012] transition-colors">
+                        <i className="fa-solid fa-gear text-xl"></i>
+                      </Link>
                     </div>
-                    <Link href="/profile" className="text-[#9c7b65] hover:text-[#3b2012] transition-colors">
-                      <i className="fa-solid fa-chevron-left text-lg"></i>
-                    </Link>
+                    <button 
+                      onClick={() => {
+                        logout();
+                        setMobileMenuOpen(false);
+                      }}
+                      className="w-full flex items-center justify-center gap-3 py-4 border border-red-100 text-red-600 rounded-xl font-bold font-art hover:bg-red-50 transition-colors"
+                    >
+                      <i className="fa-solid fa-arrow-right-from-bracket rotate-180"></i>
+                      <span>تسجيل الخروج</span>
+                    </button>
                   </div>
                 )}
               </div>
