@@ -121,19 +121,32 @@ export default function SignupPage() {
 
     if (Object.keys(checkErrors).length === 0) {
       setIsLoading(true);
-      // محاكاة طلب API باستخدام العقد (Contract) المطلوب
-      const jsonPayload = {
-        firstName: formData.firstName,
-        lastName: formData.lastName,
-        email: formData.email,
-        password: formData.password,
-        confirmPassword: formData.confirmPassword
+      
+      const successResponse = {
+        "status": "success",
+        "message": "User created successfully",
+        "data": {
+          "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI3MjBiNzJlYy03ZTRkLTQ3MzUtOTY2MS0wYTEyOGRlNDQ5ODQiLCJlbWFpbCI6Im1hcmt1amh5YW1AZXhhbXBsZS5jb20iLCJyb2xlIjoidXNlciIsImlhdCI6MTc3NTYzOTg4MywiZXhwIjoxNzc2MjQ0NjgzfQ.m5HGX105tXxpzfxzncl4eEBtt19F-RMFKfjhVPcypqU",
+          "user": {
+            "id": "720b72ec-7e4d-4735-9661-0a128de44984",
+            "email": formData.email,
+            "role": "user"
+          }
+        }
       };
 
       setTimeout(() => {
         setIsLoading(false);
-        console.log('تم إرسال البيانات بناءً على العقد المطللوب (JSON Contract):', jsonPayload);
-        alert('تم إنشاء الحساب بنجاح (راجع الكونسول لرؤية الـ JSON)');
+        const payload = {
+          firstName: formData.firstName,
+          lastName: formData.lastName,
+          email: formData.email,
+          password: formData.password,
+          confirmPassword: formData.confirmPassword
+        };
+        console.log('بيانات الطلب المرسلة (Signup Payload):', payload);
+        console.log('استجابة نجاح إنشاء الحساب (Signup Success Response):', successResponse);
+        alert(`تم إنشاء الحساب بنجاح لـ: ${formData.email}\n(تفاصيل الـ Payload والـ Response في الكونسول)`);
       }, 1500);
     }
   };
