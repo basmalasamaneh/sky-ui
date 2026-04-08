@@ -121,9 +121,19 @@ export default function SignupPage() {
 
     if (Object.keys(checkErrors).length === 0) {
       setIsLoading(true);
+      // محاكاة طلب API باستخدام العقد (Contract) المطلوب
+      const jsonPayload = {
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        email: formData.email,
+        password: formData.password,
+        confirmPassword: formData.confirmPassword
+      };
+
       setTimeout(() => {
         setIsLoading(false);
-        console.log('تم الإرسال بنجاح:', formData);
+        console.log('تم إرسال البيانات بناءً على العقد المطللوب (JSON Contract):', jsonPayload);
+        alert('تم إنشاء الحساب بنجاح (راجع الكونسول لرؤية الـ JSON)');
       }, 1500);
     }
   };

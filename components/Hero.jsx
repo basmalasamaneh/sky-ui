@@ -19,7 +19,7 @@ export default function Hero() {
           <Link href="/products" className="flex items-center gap-2 px-6 py-3 border border-gray-300 rounded-lg text-sm font-bold text-gray-700 hover:bg-gray-50 transition-colors">
             ▶ استعراض
           </Link>
-          <Link href="/register" className="px-6 py-3 bg-gradient-to-r from-[#6f370f] via-[#a3785a] to-[#d4af37] text-white rounded-lg text-sm font-bold hover:opacity-90 transition-all shadow-md">
+          <Link href="/signup" className="px-6 py-3 bg-gradient-to-r from-[#6f370f] via-[#a3785a] to-[#d4af37] text-white rounded-lg text-sm font-bold hover:opacity-90 transition-all shadow-md">
             تسوق الآن
           </Link>
         </div>
