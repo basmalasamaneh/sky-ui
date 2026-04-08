@@ -343,7 +343,7 @@ export default function SignupPage() {
       {/* الصورة - يسار */}
       <div className="relative hidden lg:block border-r border-[#e0d5c8]/50 lg:order-2">
         <Image
-          src="/images/login-art.jpg"
+          src="/images/login-art.png"
           alt="فن أثر"
           fill
           className="object-cover"
