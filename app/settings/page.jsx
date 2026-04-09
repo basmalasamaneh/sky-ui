@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 
 export default function SettingsPage() {
-  const { user, isAuthenticated, isLoading, login } = useAuth();
+  const { user, isAuthenticated, isLoading, token, login, logout } = useAuth();
   const router = useRouter();
 
   const [formData, setFormData] = useState({
@@ -16,27 +16,76 @@ export default function SettingsPage() {
   });
 
   const [isSaving, setIsSaving] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
   const [saveMessage, setSaveMessage] = useState('');
+  const [deleteMessage, setDeleteMessage] = useState('');
 
   const handleSave = async () => {
     setIsSaving(true);
     setSaveMessage('');
 
-    // Simulation of a save request (Logic to update local state and context)
-    setTimeout(() => {
-      const updatedUser = {
-        ...user,
-        firstName: formData.firstName,
-        lastName: formData.lastName
-      };
-      
-      login(updatedUser);
-      setIsSaving(false);
+    try {
+      const response = await fetch('/api/users/me', {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          firstName: formData.firstName,
+          lastName: formData.lastName,
+        }),
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        setSaveMessage(result.message || 'حدث خطأ أثناء التحديث');
+        return;
+      }
+
+      // Refresh auth context with new token + updated user from DB
+      login(result.data?.user, result.data?.token);
       setSaveMessage('تم تحديث البيانات بنجاح!');
-      
-      // Clear message after 3 seconds
       setTimeout(() => setSaveMessage(''), 3000);
-    }, 1000);
+    } catch (err) {
+      console.error('Update profile failed:', err);
+      setSaveMessage('لا يمكن الاتصال بالخادم. تأكد من تشغيل الباك آند.');
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleDeleteAccount = async () => {
+    const confirmed = window.confirm('هل أنت متأكد من حذف الحساب نهائياً؟ لا يمكن التراجع عن هذه العملية.');
+    if (!confirmed) return;
+
+    setIsDeleting(true);
+    setDeleteMessage('');
+
+    try {
+      const response = await fetch('/api/users/me', {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        setDeleteMessage(result.message || 'حدث خطأ أثناء حذف الحساب');
+        return;
+      }
+
+      logout();
+      router.push('/signup');
+    } catch (err) {
+      console.error('Delete account failed:', err);
+      setDeleteMessage('لا يمكن الاتصال بالخادم. تأكد من تشغيل الباك آند.');
+    } finally {
+      setIsDeleting(false);
+    }
   };
 
   // Redirect if not authenticated (after loading)
@@ -158,9 +207,16 @@ export default function SettingsPage() {
                 منطقة الخطر
               </h3>
               <p className="text-red-600 mb-6 text-sm">بمجرد حذف حسابك، سيتم حذف جميع بياناتك وأعمالك الفنية المحفوظة بشكل نهائي ولا يمكن استعادتها.</p>
-              <button className="text-red-700 font-bold border-1 border-red-300 bg-white px-6 py-2.5 rounded-xl hover:bg-red-600 hover:text-white transition-all shadow-sm">
-                حذف الحساب نهائياً
+              <button
+                onClick={handleDeleteAccount}
+                disabled={isDeleting}
+                className="text-red-700 font-bold border-1 border-red-300 bg-white px-6 py-2.5 rounded-xl hover:bg-red-600 hover:text-white transition-all shadow-sm disabled:opacity-60 disabled:cursor-not-allowed"
+              >
+                {isDeleting ? 'جاري حذف الحساب...' : 'حذف الحساب نهائياً'}
               </button>
+              {deleteMessage && (
+                <p className="text-sm font-bold text-red-700 mt-4">{deleteMessage}</p>
+              )}
             </div>
           </div>
         </div>

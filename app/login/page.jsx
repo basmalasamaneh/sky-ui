@@ -103,28 +103,45 @@ export default function LoginPage() {
 
     if (Object.keys(checkErrors).length === 0) {
       setIsLoading(true);
-      
-      // Simulation of a login process
-      setTimeout(() => {
-        setIsLoading(false);
-        // For demonstration purposes, if password is "password123", we show an error
-        if (formData.password === 'password123') {
-          setLoginError('البريد الإلكتروني أو كلمة المرور غير صحيحة');
-        } else {
-          console.log('تم الدخول بنجاح:', formData);
-          
-          // محاكاة بيانات المستخدم (في الحقيقة تأتي من السيرفر)
-          const namePart = formData.email.split('@')[0] || 'مستخدم';
-          const mockUser = {
-            firstName: namePart,
-            lastName: '',
-            email: formData.email
-          };
-          
-          login(mockUser);
-          router.push('/');
+
+      try {
+        const response = await fetch('/api/auth/login', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            email: formData.email,
+            password: formData.password,
+          }),
+        });
+
+        const result = await response.json();
+
+        if (!response.ok) {
+          if (result.errors && Array.isArray(result.errors)) {
+            const fieldErrors = {};
+            result.errors.forEach((error) => {
+              fieldErrors[error.field] = error.message;
+            });
+            setErrors((prev) => ({ ...prev, ...fieldErrors }));
+          }
+
+          setLoginError(result.message || 'البريد الإلكتروني أو كلمة المرور غير صحيحة');
+          return;
         }
-      }, 1500);
+
+        if (result.data?.user) {
+          login(result.data.user, result.data?.token);
+        }
+
+        router.push('/');
+      } catch (err) {
+        console.error('Login Connection Failed:', err);
+        setLoginError('لا يمكن الاتصال بالخادم. تأكد من تشغيل الباك آند على المنفذ 3001.');
+      } finally {
+        setIsLoading(false);
+      }
     }
   };
 

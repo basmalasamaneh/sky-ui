@@ -15,6 +15,8 @@ export const Header = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [isSearchVisible, setIsSearchVisible] = useState(false);
+  const userFirstName = user?.firstName || user?.first_name || 'مستخدم';
+  const userInitial = userFirstName?.charAt(0).toUpperCase() || 'م';
 
   return (
     <header id="main-header" className="fixed top-0 z-50 w-full border-b bg-white/95 backdrop-blur-md shadow-sm" dir="ltr">
@@ -107,10 +109,10 @@ export const Header = () => {
                     className="flex items-center gap-3 bg-white px-3 py-1.5 rounded-full border-2 border-[#e8dcc4] shadow-sm hover:shadow-md hover:border-[#6b4c3b] transition-all duration-300 group"
                   >
                     <div className="w-8 h-8 bg-brown-gradient rounded-full flex items-center justify-center text-white font-bold shadow-sm border border-white/50 text-xs transition-transform group-hover:scale-110">
-                      {(user?.firstName || user?.first_name || 'م')?.charAt(0).toUpperCase()}
+                      {userInitial}
                     </div>
                     <span className="text-[#3b2012] font-bold font-art text-sm whitespace-nowrap">
-                      {user?.firstName || user?.first_name || 'مستخدم'}
+                      {userFirstName}
                     </span>
                     <i className={`fa-solid fa-chevron-down text-[10px] text-[#9c7b65] transition-transform duration-300 ${userMenuOpen ? 'rotate-180' : ''}`}></i>
                   </button>
@@ -189,9 +191,9 @@ export const Header = () => {
                     <div className="flex items-center justify-between bg-[#fdfaf7] p-5 rounded-2xl border border-[#e8dcc4]/50 shadow-sm">
                       <div className="flex items-center gap-4">
                         <div className="w-12 h-12 bg-brown-gradient rounded-full flex items-center justify-center text-white text-xl font-bold shadow-md border-2 border-white">
-                          {user?.firstName?.charAt(0).toUpperCase()}
+                          {userInitial}
                         </div>
-                        <span className="text-[#3b2012] font-bold font-art text-xl">{user?.firstName}</span>
+                        <span className="text-[#3b2012] font-bold font-art text-xl">{userFirstName}</span>
                       </div>
                       <Link href="/settings" className="text-[#9c7b65] hover:text-[#3b2012] transition-colors">
                         <i className="fa-solid fa-gear text-xl"></i>

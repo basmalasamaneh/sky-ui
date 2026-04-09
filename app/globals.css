@@ -64,4 +64,15 @@ body {
   animation: fadeIn 0.8s ease-out forwards;
 }
 
+/* Keep only custom password visibility toggle icon */
+input[type="password"]::-ms-reveal,
+input[type="password"]::-ms-clear {
+  display: none;
+}
+
+[dir="rtl"] input[type="password"]::-webkit-textfield-decoration-container,
+input[type="password"]::-webkit-textfield-decoration-container {
+  display: none;
+}
+
 [dir="rtl"] { text-align: right; }

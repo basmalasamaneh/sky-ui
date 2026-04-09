@@ -42,16 +42,18 @@ export async function POST(req) {
       }
 
       // Success - Map snake_case to camelCase for the frontend
+      const backendUser = result.data?.user || {};
+
       return Response.json({
         ...result,
         data: {
           ...result.data,
           user: {
-            id: result.data.user.id,
-            email: result.data.user.email,
-            role: result.data.user.role,
-            firstName: result.data.user.first_name,
-            lastName: result.data.user.last_name,
+            id: backendUser.id,
+            email: backendUser.email,
+            role: backendUser.role,
+            firstName: backendUser.first_name || backendUser.firstName || '',
+            lastName: backendUser.last_name || backendUser.lastName || '',
           }
         }
       }, { status: 201 });
@@ -61,7 +63,7 @@ export async function POST(req) {
       return Response.json(
         { 
           status: 'error', 
-          message: 'لا يمكن الاتصال بسيرفر الباك آند. تأكد من تشغيل المشروع في مجلد stargate-register على المنفذ 3001.' 
+          message: 'لا يمكن الاتصال بسيرفر الباك آند. تأكد من تشغيل المشروع في مجلد stargate-3 على المنفذ 3001.' 
         },
         { status: 503 }
       );

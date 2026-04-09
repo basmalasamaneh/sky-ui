@@ -4,11 +4,9 @@ import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
-import { useAuth } from '@/contexts/AuthContext';
 
 export default function SignupPage() {
   const router = useRouter();
-  const { login } = useAuth();
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
@@ -150,25 +148,8 @@ export default function SignupPage() {
         const result = await response.json();
 
         if (response.ok) {
-          console.log('بيانات الطلب المرسلة (Signup Payload):', payload);
-          console.log('استجابة نجاح إنشاء الحساب (Signup Success Response):', result);
-          
-          // Store token in localStorage if available
-          if (result.data?.token) {
-            localStorage.setItem('token', result.data.token);
-          }
-
-          // Update auth context with the data from the form to guarantee the name shows up
-          const userWithNames = {
-            ...result.data.user,
-            firstName: formData.firstName,
-            lastName: formData.lastName
-          };
-          
-          login(userWithNames);
-          
-          // Redirect to home
-          router.push('/');
+          // Account created — send to login page without auto-signing in
+          router.push('/login');
         } else {
           // Handle field-specific errors from backend validation
           if (result.errors && Array.isArray(result.errors)) {
