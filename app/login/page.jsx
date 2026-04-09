@@ -114,9 +114,10 @@ export default function LoginPage() {
           console.log('تم الدخول بنجاح:', formData);
           
           // محاكاة بيانات المستخدم (في الحقيقة تأتي من السيرفر)
+          const namePart = formData.email.split('@')[0] || 'مستخدم';
           const mockUser = {
-            firstName: 'بتول',
-            lastName: 'سويسه',
+            firstName: namePart,
+            lastName: '',
             email: formData.email
           };
           
@@ -162,35 +163,32 @@ export default function LoginPage() {
             />
 
             {/* كلمة المرور */}
-            <div className="relative">
-              <Input
-                name="password"
-                type={showPassword ? 'text' : 'password'}
-                label="كلمة المرور"
-                labelExtra={
-                  <Link href="/forgot-password" size="sm" className="text-sm text-[#6b4c3b] hover:font-bold hover:underline transition-all font-amiri">
-                    هل نسيت كلمة المرور؟
-                  </Link>
-                }
-                placeholder="••••••••"
-                dir="ltr"
-                value={formData.password}
-                onChange={handleChange}
-                onBlur={handleBlur}
-                error={errors.password}
-                icon={<i className="fa-solid fa-lock"></i>}
-                className="pl-12"
-              />
-              
-              <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="absolute left-4 top-[46px] text-[#9c7b65] hover:text-[#3b2012] transition-colors"
-                style={{ zIndex: 10 }}
-              >
-                {showPassword ? <i className="fa-regular fa-eye-slash"></i> : <i className="fa-regular fa-eye"></i>}
-              </button>
-            </div>
+            <Input
+              name="password"
+              type={showPassword ? 'text' : 'password'}
+              label="كلمة المرور"
+              labelExtra={
+                <Link href="/forgot-password" size="sm" className="text-sm text-[#6b4c3b] hover:font-bold hover:underline transition-all font-amiri">
+                  هل نسيت كلمة المرور؟
+                </Link>
+              }
+              placeholder="••••••••"
+              dir="ltr"
+              value={formData.password}
+              onChange={handleChange}
+              onBlur={handleBlur}
+              error={errors.password}
+              icon={<i className="fa-solid fa-lock"></i>}
+              leftIcon={
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="text-[#9c7b65] hover:text-[#3b2012] transition-colors"
+                >
+                  {showPassword ? <i className="fa-regular fa-eye-slash"></i> : <i className="fa-regular fa-eye"></i>}
+                </button>
+              }
+            />
 
             {/* رسالة الخطأ العامة */}
             {loginError && (
