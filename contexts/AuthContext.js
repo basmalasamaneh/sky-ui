@@ -38,8 +38,12 @@ const normalizeUser = (userData, authToken) => {
     id: normalizedUser.id || normalizedPayload.id,
     email: normalizedUser.email || normalizedPayload.email,
     role: normalizedUser.role || normalizedPayload.role || 'user',
-    firstName: normalizedPayload.firstName || normalizedUser.firstName,
-    lastName: normalizedPayload.lastName || normalizedUser.lastName,
+    firstName: normalizedUser.firstName || normalizedPayload.firstName,
+    lastName: normalizedUser.lastName || normalizedPayload.lastName,
+    bio: normalizedUser.bio || normalizedPayload.bio,
+    location: normalizedUser.location || normalizedPayload.location,
+    phone: normalizedUser.phone || normalizedPayload.phone,
+    socialMedia: normalizedUser.socialMedia || normalizedPayload.socialMedia,
   }
 }
 
