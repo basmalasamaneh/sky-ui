@@ -7,46 +7,96 @@ import { useAuth } from '../contexts/AuthContext';
 export const BecomeArtistModal = ({ isOpen, onClose, user }) => {
   const { login, token } = useAuth();
   const [formData, setFormData] = useState({
-    artistName: user?.firstName || '',
+    artistName: user?.artistName || user?.firstName || '',
     bio: '',
     location: '',
     phone: '',
-    socialMedia: ''
+    socialMedia: []
   });
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
-  const [errorMessage, setErrorMessage] = useState(null);
+  const [errors, setErrors] = useState({});
+  const [touched, setTouched] = useState({});
+  const [showPlatformPicker, setShowPlatformPicker] = useState(false);
+
+  // Close on Escape key
+  React.useEffect(() => {
+    const handleEsc = (e) => {
+      if (e.key === 'Escape') onClose();
+    };
+    window.addEventListener('keydown', handleEsc);
+    return () => window.removeEventListener('keydown', handleEsc);
+  }, [onClose]);
+
+  const validate = (name, value) => {
+    let error = '';
+    if (name === 'bio') {
+      if (!value.trim()) error = 'النبذة الشخصية مطلوبة';
+      else if (value.trim().length < 20) error = 'النبذة يجب أن تكون 20 حرفاً على الأقل';
+      else if (value.length > 1000) error = 'النبذة لا يجب أن تتجاوز 1000 حرف';
+    }
+    if (name === 'phone' && value && value.length < 10) {
+      error = 'رقم الهاتف يجب أن يكون 10 أرقام على الأقل';
+    }
+    return error;
+  };
+
+  const handleBlur = (e) => {
+    const { name, value } = e.target;
+    setTouched(prev => ({ ...prev, [name]: true }));
+    const error = validate(name, value);
+    setErrors(prev => ({ ...prev, [name]: error }));
+  };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     
+    let finalValue = value;
     // Validation for phone: only numbers
     if (name === 'phone') {
-      const numericValue = value.replace(/\D/g, '');
-      setFormData(prev => ({ ...prev, [name]: numericValue }));
+      finalValue = value.replace(/\D/g, '');
+    }
+
+    if (name.startsWith('socialMedia_')) {
+      const index = parseInt(name.split('_')[1]);
+      const newSocial = [...formData.socialMedia];
+      newSocial[index].url = value;
+      setFormData(prev => ({ ...prev, socialMedia: newSocial }));
       return;
     }
 
-    setFormData(prev => ({ ...prev, [name]: value }));
+    setFormData(prev => ({ ...prev, [name]: finalValue }));
+
+    // Re-validate on every change after first submit attempt or if already touched
+    if (touched[name]) {
+      const error = validate(name, finalValue);
+      setErrors(prev => ({ ...prev, [name]: error }));
+    }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setErrorMessage(null);
+    
+    // Mark all as touched
+    const newTouched = {};
+    Object.keys(formData).forEach(key => newTouched[key] = true);
+    setTouched(newTouched);
 
-    // Phone validation: min 10 digits
-    if (formData.phone.length < 10) {
-      setErrorMessage('رقم الهاتف يجب أن يتكون من 10 أرقام على الأقل.');
-      return;
-    }
+    // Validate all
+    const newErrors = {};
+    Object.keys(formData).forEach(key => {
+      const err = validate(key, formData[key]);
+      if (err) newErrors[key] = err;
+    });
+    setErrors(newErrors);
+
+    if (Object.keys(newErrors).length > 0) return;
 
     if (!token) {
-      setErrorMessage('يرجى تسجيل الدخول لإكمال هذه العملية.');
+      alert('يرجى تسجيل الدخول لإكمال هذه العملية.');
       return;
     }
-
-    setIsSubmitting(true);
 
     // Reverted to simulated submission
     setIsSubmitting(true);
@@ -58,7 +108,7 @@ export const BecomeArtistModal = ({ isOpen, onClose, user }) => {
         login({ 
           ...user, 
           role: 'artist', 
-          firstName: formData.artistName,
+          artistName: formData.artistName,
           bio: formData.bio,
           location: formData.location,
           phone: formData.phone,
@@ -72,11 +122,11 @@ export const BecomeArtistModal = ({ isOpen, onClose, user }) => {
         setIsSuccess(false);
         // Reset form to defaults
         setFormData({
-          artistName: user?.firstName || '',
+          artistName: user?.artistName || user?.firstName || '',
           bio: '',
           location: '',
           phone: '',
-          socialMedia: ''
+          socialMedia: []
         });
       }, 2000);
     } catch (error) {
@@ -105,7 +155,7 @@ export const BecomeArtistModal = ({ isOpen, onClose, user }) => {
           initial={{ scale: 0.9, opacity: 0, y: 20 }}
           animate={{ scale: 1, opacity: 1, y: 0 }}
           exit={{ scale: 0.9, opacity: 0, y: 20 }}
-          className="relative w-full max-w-xl bg-white rounded-[2.5rem] shadow-2xl overflow-y-auto no-scrollbar border border-white/20 max-h-[90vh]"
+          className="relative w-full max-w-xl bg-white md:rounded-[2.5rem] rounded-t-[2.5rem] shadow-2xl overflow-y-auto no-scrollbar border border-white/20 max-h-[90vh] md:h-auto h-[90vh] mt-auto md:mt-0"
           dir="rtl"
         >
           {/* Decorative Top Bar */}
@@ -136,19 +186,19 @@ export const BecomeArtistModal = ({ isOpen, onClose, user }) => {
                 <div className="w-20 h-20 bg-green-100 text-green-600 rounded-full flex items-center justify-center text-4xl mb-6">
                   <i className="fa-solid fa-check"></i>
                 </div>
-                <h3 className="text-2xl font-bold text-[#3b2012] font-art mb-2">تم إرسال طلبك بنجاح!</h3>
-                <p className="text-[#9c7b65] font-amiri text-center">سنقوم بمراجعة بياناتك والرد عليك في أقرب وقت.</p>
+                <h3 className="text-2xl font-bold text-[#3b2012] font-art mb-2 flex items-center gap-3">
+                  أصبحت فناناً الآن!
+                  <i className="fa-solid fa-palette text-amber-500"></i>
+                </h3>
+                <p className="text-[#9c7b65] font-amiri text-center">تم تحديث حسابك بنجاح، يمكنك الآن البدء بإضافة أعمالك.</p>
               </motion.div>
             ) : (
-              <form onSubmit={handleSubmit} className="space-y-5">
-                {errorMessage && (
-                  <div className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-red-700 text-sm">
-                    {errorMessage}
-                  </div>
-                )}
+              <form onSubmit={handleSubmit} className="space-y-4">
+                <p className="text-center text-sm text-[#9c7b65] font-amiri mb-4">قم بتعبئة بياناتك للبدء في رحلتك الفنية</p>
+                
                 {/* Artist Name */}
                 <div className="relative">
-                  <label className="block text-[#3b2012] font-bold mb-2 mr-2 text-sm">اسم الفنان</label>
+                  <label className="block text-[#3b2012] font-bold mb-1 mr-2 text-sm">اسم الفنان</label>
                   <div className="relative group">
                     <i className="fa-solid fa-user absolute right-4 top-1/2 -translate-y-1/2 text-[#9c7b65] group-focus-within:text-[#5c4436]"></i>
                     <input 
@@ -156,51 +206,78 @@ export const BecomeArtistModal = ({ isOpen, onClose, user }) => {
                       name="artistName"
                       value={formData.artistName}
                       onChange={handleChange}
+                      onBlur={handleBlur}
                       required
                       placeholder="ماذا تحب أن نطلق عليك؟"
-                      className="w-full h-12 bg-[#fdfaf7] border border-[#e8dcc4] rounded-2xl pr-12 pl-4 focus:ring-2 focus:ring-[#5c4436]/20 focus:border-[#5c4436] outline-none transition-all placeholder:text-gray-400"
+                      className={`w-full h-11 bg-[#fdfaf7] border ${errors.artistName ? 'border-red-400' : 'border-[#e8dcc4]'} rounded-2xl pr-12 pl-4 focus:ring-2 focus:ring-[#5c4436]/20 focus:border-[#5c4436] outline-none transition-all placeholder:text-gray-400`}
                     />
                   </div>
+                  {errors.artistName && <p className="text-red-500 text-xs mt-1 mr-2">{errors.artistName}</p>}
                 </div>
 
                 {/* Bio */}
                 <div className="relative">
-                  <label className="block text-[#3b2012] font-bold mb-2 mr-2 text-sm">النبذة الشخصية</label>
+                  <div className="flex justify-between items-center mb-1 mr-2">
+                    <label className="block text-[#3b2012] font-bold text-sm">النبذة الشخصية</label>
+                    <span className={`text-[10px] ${formData.bio.length < 20 || formData.bio.length > 1000 ? 'text-red-500' : 'text-gray-400'}`}>
+                      {formData.bio.length} / 1000
+                    </span>
+                  </div>
                   <div className="relative group">
                     <i className="fa-solid fa-feather-pointed absolute right-4 top-4 text-[#9c7b65] group-focus-within:text-[#5c4436]"></i>
                     <textarea 
                       name="bio"
                       value={formData.bio}
                       onChange={handleChange}
+                      onBlur={handleBlur}
                       required
                       rows="3"
                       placeholder="أخبرنا قليلاً عن شغفك وأسلوبك الفني..."
-                      className="w-full bg-[#fdfaf7] border border-[#e8dcc4] rounded-2xl pr-12 pl-4 py-3 focus:ring-2 focus:ring-[#5c4436]/20 focus:border-[#5c4436] outline-none transition-all placeholder:text-gray-400 resize-none font-amiri"
+                      className={`w-full bg-[#fdfaf7] border ${errors.bio ? 'border-red-400' : 'border-[#e8dcc4]'} rounded-2xl pr-12 pl-4 py-3 focus:ring-2 focus:ring-[#5c4436]/20 focus:border-[#5c4436] outline-none transition-all placeholder:text-gray-400 resize-none font-amiri`}
                     />
                   </div>
+                  {errors.bio && <p className="text-red-500 text-xs mt-1 mr-2">{errors.bio}</p>}
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {/* Location */}
                   <div className="relative">
-                    <label className="block text-[#3b2012] font-bold mb-2 mr-2 text-sm">الموقع / المدينة</label>
+                    <label className="block text-[#3b2012] font-bold mb-1 mr-2 text-sm">الموقع / المدينة</label>
                     <div className="relative group">
                       <i className="fa-solid fa-location-dot absolute right-4 top-1/2 -translate-y-1/2 text-[#9c7b65] group-focus-within:text-[#5c4436]"></i>
-                      <input 
-                        type="text"
+                      <select 
                         name="location"
                         value={formData.location}
                         onChange={handleChange}
+                        onBlur={handleBlur}
                         required
-                        placeholder="مثل: نابلس، فلسطين"
-                        className="w-full h-12 bg-[#fdfaf7] border border-[#e8dcc4] rounded-2xl pr-12 pl-4 focus:ring-2 focus:ring-[#5c4436]/20 focus:border-[#5c4436] outline-none transition-all placeholder:text-gray-400"
-                      />
+                        className={`w-full h-11 bg-[#fdfaf7] border ${errors.location ? 'border-red-400' : 'border-[#e8dcc4]'} rounded-2xl pr-12 pl-4 focus:ring-2 focus:ring-[#5c4436]/20 focus:border-[#5c4436] outline-none transition-all text-sm font-art text-[#3b2012] appearance-none`}
+                      >
+                        <option value="">اختر المدينة</option>
+                        <option value="القدس">القدس</option>
+                        <option value="نابلس">نابلس</option>
+                        <option value="الخليل">الخليل</option>
+                        <option value="رام الله">رام الله</option>
+                        <option value="بيت لحم">بيت لحم</option>
+                        <option value="جنين">جنين</option>
+                        <option value="طولكرم">طولكرم</option>
+                        <option value="قلقيلية">قلقيلية</option>
+                        <option value="سلفيت">سلفيت</option>
+                        <option value="أريحا">أريحا</option>
+                        <option value="طوباس">طوباس</option>
+                        <option value="غزة">غزة</option>
+                        <option value="خان يونس">خان يونس</option>
+                        <option value="رفح">رفح</option>
+                        <option value="دير البلح">دير البلح</option>
+                      </select>
+                      <i className="fa-solid fa-chevron-down absolute left-4 top-1/2 -translate-y-1/2 text-[10px] text-[#9c7b65] pointer-events-none"></i>
                     </div>
+                    {errors.location && <p className="text-red-500 text-xs mt-1 mr-2">{errors.location}</p>}
                   </div>
 
                   {/* Phone */}
                   <div className="relative">
-                    <label className="block text-[#3b2012] font-bold mb-2 mr-2 text-sm">رقم الهاتف</label>
+                    <label className="block text-[#3b2012] font-bold mb-1 mr-2 text-sm">رقم الهاتف</label>
                     <div className="relative group" dir="ltr">
                       <i className="fa-solid fa-phone absolute right-4 top-1/2 -translate-y-1/2 text-[#9c7b65] group-focus-within:text-[#5c4436]"></i>
                       <input 
@@ -208,40 +285,112 @@ export const BecomeArtistModal = ({ isOpen, onClose, user }) => {
                         name="phone"
                         value={formData.phone}
                         onChange={handleChange}
-                        required
+                        onBlur={handleBlur}
                         placeholder="059XXXXXXX"
-                        className="w-full h-12 bg-[#fdfaf7] border border-[#e8dcc4] rounded-2xl pr-12 pl-4 focus:ring-2 focus:ring-[#5c4436]/20 focus:border-[#5c4436] outline-none transition-all placeholder:text-gray-400 text-right"
+                        className={`w-full h-11 bg-[#fdfaf7] border ${errors.phone ? 'border-red-400' : 'border-[#e8dcc4]'} rounded-2xl pr-12 pl-4 focus:ring-2 focus:ring-[#5c4436]/20 focus:border-[#5c4436] outline-none transition-all placeholder:text-gray-400 text-right`}
                       />
                     </div>
+                    {errors.phone && <p className="text-red-500 text-xs mt-1 mr-2">{errors.phone}</p>}
                   </div>
                 </div>
 
-                {/* Social Media */}
-                <div className="relative">
-                  <label className="block text-[#3b2012] font-bold mb-2 mr-2 text-sm">رابط موقع التواصل</label>
-                  <div className="relative group" dir="ltr">
-                    <i className="fa-solid fa-share-nodes absolute right-4 top-1/2 -translate-y-1/2 text-[#9c7b65] group-focus-within:text-[#5c4436] text-lg"></i>
-                    <input 
-                      type="url"
-                      name="socialMedia"
-                      value={formData.socialMedia}
-                      onChange={handleChange}
-                      placeholder="https://instagram.com/yourhandle"
-                      className="w-full h-12 bg-[#fdfaf7] border border-[#e8dcc4] rounded-2xl pr-12 pl-4 focus:ring-2 focus:ring-[#5c4436]/20 focus:border-[#5c4436] outline-none transition-all placeholder:text-gray-400 text-right"
-                    />
+                {/* Social Media Selection via + Button */}
+                <div className="space-y-4">
+                  <div className="flex flex-col gap-2">
+                    <div className="flex items-center justify-between mr-2">
+                      <label className="block text-[#3b2012] font-bold text-sm">روابط التواصل</label>
+                      <button 
+                        type="button"
+                        onClick={() => setShowPlatformPicker(!showPlatformPicker)}
+                        className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-bold transition-all duration-300 ${showPlatformPicker ? 'bg-[#5c4436] text-white' : 'bg-[#f0ece6] text-[#5c4436] hover:bg-[#e8dcc4]'}`}
+                      >
+                        <i className={`fa-solid ${showPlatformPicker ? 'fa-xmark' : 'fa-plus'} transition-transform duration-300`}></i>
+                        <span>إضافة رابط</span>
+                      </button>
+                    </div>
+
+                    <AnimatePresence>
+                      {showPlatformPicker && (
+                        <motion.div 
+                          initial={{ opacity: 0, y: -10, scale: 0.95 }}
+                          animate={{ opacity: 1, y: 0, scale: 1 }}
+                          exit={{ opacity: 0, y: -10, scale: 0.95 }}
+                          className="flex items-center justify-around bg-[#fdfaf7] p-3 rounded-2xl border border-[#e8dcc4]/40 shadow-sm"
+                        >
+                          {[
+                            { id: 'instagram', icon: 'fa-instagram', color: 'text-pink-600', name: 'إنستغرام' },
+                            { id: 'facebook', icon: 'fa-facebook', color: 'text-blue-600', name: 'فيسبوك' },
+                            { id: 'x', icon: 'fa-x-twitter', color: 'text-gray-900', name: 'X' },
+                            { id: 'linkedin', icon: 'fa-linkedin', color: 'text-blue-800', name: 'لينكد إن' },
+                            { id: 'pinterest', icon: 'fa-pinterest', color: 'text-red-600', name: 'بينترست' },
+                          ].map((p) => {
+                            const isAdded = formData.socialMedia.some(s => s.platform === p.id);
+                            return (
+                              <button
+                                key={p.id}
+                                type="button"
+                                disabled={isAdded}
+                                onClick={() => {
+                                  setFormData(prev => ({ ...prev, socialMedia: [...prev.socialMedia, { platform: p.id, url: '' }] }));
+                                  setShowPlatformPicker(false);
+                                }}
+                                className={`flex flex-col items-center gap-1.5 transition-all duration-300 ${isAdded ? 'opacity-30 grayscale cursor-not-allowed' : 'hover:scale-110'}`}
+                                title={p.name}
+                              >
+                                <div className="w-10 h-10 bg-white rounded-xl shadow-sm flex items-center justify-center border border-[#e8dcc4]/20">
+                                  <i className={`fa-brands ${p.icon} text-lg ${p.color}`}></i>
+                                </div>
+                                <span className="text-[10px] font-bold text-[#9c7b65]">{p.name}</span>
+                              </button>
+                            );
+                          })}
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
                   </div>
+
+                  <AnimatePresence>
+                    {formData.socialMedia.map((social, index) => (
+                      <motion.div 
+                        key={social.platform}
+                        initial={{ opacity: 0, height: 0, scale: 0.95 }}
+                        animate={{ opacity: 1, height: 'auto', scale: 1 }}
+                        exit={{ opacity: 0, height: 0, scale: 0.95 }}
+                        className="relative group pt-1"
+                      >
+                        <div className="relative" dir="ltr">
+                          <i className={`fa-brands fa-${social.platform === 'x' ? 'x-twitter' : social.platform} absolute right-4 top-1/2 -translate-y-1/2 text-[#9c7b65] group-focus-within:text-[#5c4436] text-lg`}></i>
+                          <input 
+                            type="text" 
+                            name={`socialMedia_${index}_url`}
+                            value={social.url}
+                            onChange={handleChange}
+                            placeholder={`${social.platform === 'linkedin' ? 'in/username' : '@username'}`}
+                            className="w-full h-11 bg-[#fdfaf7] border border-[#e8dcc4] rounded-2xl pr-11 pl-12 focus:ring-2 focus:ring-[#5c4436]/20 focus:border-[#5c4436] outline-none transition-all placeholder:text-gray-400 text-right text-sm"
+                          />
+                          <button 
+                            type="button"
+                            onClick={() => setFormData(prev => ({ ...prev, socialMedia: prev.socialMedia.filter((_, i) => i !== index) }))}
+                            className="absolute left-2 top-1/2 -translate-y-1/2 w-9 h-9 flex items-center justify-center text-red-200 hover:text-red-500 hover:bg-red-50 rounded-xl transition-all"
+                          >
+                            <i className="fa-solid fa-trash-can text-sm"></i>
+                          </button>
+                        </div>
+                      </motion.div>
+                    ))}
+                  </AnimatePresence>
                 </div>
 
                 <button 
                   type="submit"
-                  disabled={isSubmitting}
-                  className="w-full bg-brown-gradient text-white h-14 rounded-2xl font-bold font-art text-lg shadow-lg hover:opacity-90 transition-all active:scale-95 flex items-center justify-center mt-4 disabled:opacity-50"
+                  disabled={isSubmitting || formData.bio.trim().length < 20 || Object.keys(errors).some(k => errors[k])}
+                  className="w-full bg-brown-gradient text-white h-12 rounded-2xl font-bold font-art text-lg shadow-lg hover:opacity-90 transition-all active:scale-95 flex items-center justify-center mt-2 disabled:opacity-50 disabled:grayscale"
                 >
                   {isSubmitting ? (
-                    <div className="w-6 h-6 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                    <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
                   ) : (
                     <>
-                      <span>إرسال الطلب</span>
+                      <span>تقديم الطلب</span>
                       <i className="fa-solid fa-paper-plane mr-3 text-sm"></i>
                     </>
                   )}

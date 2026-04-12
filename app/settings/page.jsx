@@ -15,13 +15,14 @@ export default function SettingsPage() {
   const [updateMessage, setUpdateMessage] = useState({ type: '', text: '' });
 
   const [formData, setFormData] = useState({
-    firstName: '',
-    lastName: '',
+    artistName: '',
     bio: '',
     location: '',
     phone: '',
-    socialMedia: ''
+    socialMedia: []
   });
+
+  const [showPlatformPicker, setShowPlatformPicker] = useState(false);
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
@@ -29,12 +30,11 @@ export default function SettingsPage() {
     }
     if (user) {
       setFormData({
-        firstName: user.firstName || '',
-        lastName: user.lastName || '',
+        artistName: user.artistName || user.firstName || '',
         bio: user.bio || '',
         location: user.location || '',
         phone: user.phone || '',
-        socialMedia: user.socialMedia || ''
+        socialMedia: Array.isArray(user.socialMedia) ? user.socialMedia : []
       });
     }
   }, [isAuthenticated, isLoading, router, user]);
@@ -46,6 +46,14 @@ export default function SettingsPage() {
     if (name === 'phone') {
       const numericValue = value.replace(/\D/g, '');
       setFormData(prev => ({ ...prev, [name]: numericValue }));
+      return;
+    }
+
+    if (name.startsWith('socialMedia_')) {
+      const index = parseInt(name.split('_')[1]);
+      const newSocial = [...formData.socialMedia];
+      newSocial[index].url = value;
+      setFormData(prev => ({ ...prev, socialMedia: newSocial }));
       return;
     }
 
@@ -191,17 +199,48 @@ export default function SettingsPage() {
                 
                 {/* Conditional Name Fields (Only for Artists) */}
                 {isArtist && (
-                  <div>
-                    <label className="block text-sm font-bold text-[#3b2012] mb-2 pr-2">اسم الفنان</label>
-                    <div className="relative group">
-                      <input 
-                        type="text" 
-                        name="firstName"
-                        readOnly
-                        value={formData.firstName}
-                        className="w-full h-14 bg-[#faf7f2] border border-[#e8dcc4] rounded-2xl px-5 text-[#3b2012] outline-none opacity-80 cursor-not-allowed font-bold"
-                      />
-                      <i className="fa-solid fa-lock absolute left-5 top-1/2 -translate-y-1/2 text-gray-300"></i>
+                  <div className="space-y-6">
+                    <div>
+                      <label className="block text-sm font-bold text-[#3b2012] mb-2 pr-2 flex items-center gap-2">
+                        <i className="fa-solid fa-user text-[#9c7b65]"></i>
+                        اسم الفنان
+                      </label>
+                      <div className="relative group">
+                        <input 
+                          type="text" 
+                          name="artistName"
+                          value={formData.artistName}
+                          onChange={handleInputChange}
+                          className="w-full h-14 bg-[#fdfaf7] border border-[#e8dcc4] rounded-2xl px-5 text-[#3b2012] outline-none focus:ring-2 focus:ring-[#5c4436]/20 focus:border-[#5c4436] transition-all font-bold"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 bg-[#fdfaf7]/50 p-6 rounded-[2rem] border border-[#e8dcc4]/20">
+                      <div>
+                        <label className="block text-xs font-bold text-[#9c7b65] mb-2 pr-2 uppercase tracking-wider">الاسم الأول (الأصلي)</label>
+                        <div className="relative group">
+                          <input 
+                            type="text" 
+                            readOnly
+                            value={user?.firstName || ''}
+                            className="w-full h-12 bg-white/50 border border-[#e8dcc4]/50 rounded-xl px-4 text-[#3b2012] outline-none cursor-not-allowed text-sm"
+                          />
+                          <i className="fa-solid fa-lock absolute left-4 top-1/2 -translate-y-1/2 text-gray-200 text-xs"></i>
+                        </div>
+                      </div>
+                      <div>
+                        <label className="block text-xs font-bold text-[#9c7b65] mb-2 pr-2 uppercase tracking-wider">اسم العائلة (الأصلي)</label>
+                        <div className="relative group">
+                          <input 
+                            type="text" 
+                            readOnly
+                            value={user?.lastName || ''}
+                            className="w-full h-12 bg-white/50 border border-[#e8dcc4]/50 rounded-xl px-4 text-[#3b2012] outline-none cursor-not-allowed text-sm"
+                          />
+                          <i className="fa-solid fa-lock absolute left-4 top-1/2 -translate-y-1/2 text-gray-200 text-xs"></i>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 )}
@@ -243,13 +282,32 @@ export default function SettingsPage() {
                           <i className="fa-solid fa-location-dot text-[#9c7b65]"></i>
                           الموقع / المدينة
                         </label>
-                        <input 
-                          type="text" 
-                          name="location"
-                          value={formData.location}
-                          onChange={handleInputChange}
-                          className="w-full h-14 bg-[#fdfaf7] border border-[#e8dcc4] rounded-2xl px-5 text-[#3b2012] outline-none focus:ring-2 focus:ring-[#5c4436]/20 focus:border-[#5c4436] transition-all"
-                        />
+                        <div className="relative group">
+                          <select 
+                            name="location"
+                            value={formData.location}
+                            onChange={handleInputChange}
+                            className="w-full h-14 bg-[#fdfaf7] border border-[#e8dcc4] rounded-2xl px-5 text-[#3b2012] outline-none focus:ring-2 focus:ring-[#5c4436]/20 focus:border-[#5c4436] transition-all appearance-none"
+                          >
+                            <option value="">اختر المدينة</option>
+                            <option value="القدس">القدس</option>
+                            <option value="نابلس">نابلس</option>
+                            <option value="الخليل">الخليل</option>
+                            <option value="رام الله">رام الله</option>
+                            <option value="بيت لحم">بيت لحم</option>
+                            <option value="جنين">جنين</option>
+                            <option value="طولكرم">طولكرم</option>
+                            <option value="قلقيلية">قلقيلية</option>
+                            <option value="سلفيت">سلفيت</option>
+                            <option value="أريحا">أريحا</option>
+                            <option value="طوباس">طوباس</option>
+                            <option value="غزة">غزة</option>
+                            <option value="خان يونس">خان يونس</option>
+                            <option value="رفح">رفح</option>
+                            <option value="دير البلح">دير البلح</option>
+                          </select>
+                          <i className="fa-solid fa-chevron-down absolute left-5 top-1/2 -translate-y-1/2 text-[10px] text-[#9c7b65] pointer-events-none"></i>
+                        </div>
                       </div>
                       <div>
                         <label className="block text-sm font-bold text-[#3b2012] mb-2 pr-2 flex items-center gap-2">
@@ -267,20 +325,90 @@ export default function SettingsPage() {
                       </div>
                     </div>
 
-                    <div>
-                      <label className="block text-sm font-bold text-[#3b2012] mb-2 pr-2 flex items-center gap-2">
-                        <i className="fa-solid fa-share-nodes text-[#9c7b65]"></i>
-                        رابط موقع التواصل
-                      </label>
-                      <input 
-                        type="url" 
-                        name="socialMedia"
-                        dir="ltr"
-                        value={formData.socialMedia}
-                        onChange={handleInputChange}
-                        placeholder="https://..."
-                        className="w-full h-14 bg-[#fdfaf7] border border-[#e8dcc4] rounded-2xl px-5 text-right text-[#3b2012] outline-none focus:ring-2 focus:ring-[#5c4436]/20 focus:border-[#5c4436] transition-all"
-                      />
+                    {/* Social Media Selection via + Button */}
+                    <div className="space-y-4 pt-4 border-t border-gray-100">
+                      <div className="flex flex-col gap-4">
+                        <div className="flex items-center justify-between pr-2">
+                          <label className="block text-sm font-bold text-[#3b2012] flex items-center gap-2">
+                            <i className="fa-solid fa-share-nodes text-[#9c7b65]"></i>
+                            روابط التواصل الاجتماعي
+                          </label>
+                          <button 
+                            type="button"
+                            onClick={() => setShowPlatformPicker(!showPlatformPicker)}
+                            className={`flex items-center gap-2 px-4 py-2 rounded-full text-xs font-bold transition-all duration-300 ${showPlatformPicker ? 'bg-[#5c4436] text-white' : 'bg-[#f0ece6] text-[#5c4436] hover:bg-[#e8dcc4]'}`}
+                          >
+                            <i className={`fa-solid ${showPlatformPicker ? 'fa-xmark' : 'fa-plus'} transition-transform duration-300`}></i>
+                            <span>إضافة رابط جديد</span>
+                          </button>
+                        </div>
+
+                        {showPlatformPicker && (
+                          <motion.div 
+                            initial={{ opacity: 0, y: -10, scale: 0.95 }}
+                            animate={{ opacity: 1, y: 0, scale: 1 }}
+                            exit={{ opacity: 0, y: -10, scale: 0.95 }}
+                            className="flex items-center justify-around bg-[#fcf9f5] p-4 rounded-3xl border border-[#e8dcc4]/40 shadow-inner"
+                          >
+                            {[
+                              { id: 'instagram', icon: 'fa-instagram', color: 'text-pink-600', name: 'إنستغرام' },
+                              { id: 'facebook', icon: 'fa-facebook', color: 'text-blue-600', name: 'فيسبوك' },
+                              { id: 'x', icon: 'fa-x-twitter', color: 'text-gray-900', name: 'X' },
+                              { id: 'linkedin', icon: 'fa-linkedin', color: 'text-blue-800', name: 'لينكد إن' },
+                              { id: 'pinterest', icon: 'fa-pinterest', color: 'text-red-600', name: 'بينترست' },
+                            ].map((p) => {
+                              const isAdded = formData.socialMedia.some(s => s.platform === p.id);
+                              return (
+                                <button
+                                  key={p.id}
+                                  type="button"
+                                  disabled={isAdded}
+                                  onClick={() => {
+                                    setFormData(prev => ({ ...prev, socialMedia: [...prev.socialMedia, { platform: p.id, url: '' }] }));
+                                    setShowPlatformPicker(false);
+                                  }}
+                                  className={`flex flex-col items-center gap-2 transition-all duration-300 ${isAdded ? 'opacity-20 grayscale' : 'hover:scale-110'}`}
+                                >
+                                  <div className="w-12 h-12 bg-white rounded-2xl shadow-sm flex items-center justify-center border border-gray-100">
+                                    <i className={`fa-brands ${p.icon} text-xl ${p.color}`}></i>
+                                  </div>
+                                  <span className="text-[10px] font-bold text-[#9c7b65]">{p.name}</span>
+                                </button>
+                              );
+                            })}
+                          </motion.div>
+                        )}
+                      </div>
+
+                      <div className="grid grid-cols-1 gap-4">
+                        {formData.socialMedia.map((social, index) => (
+                          <motion.div 
+                            key={social.platform}
+                            initial={{ opacity: 0, x: -10 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            className="relative group"
+                          >
+                            <div className="relative" dir="ltr">
+                              <i className={`fa-brands fa-${social.platform === 'x' ? 'x-twitter' : social.platform} absolute right-4 top-1/2 -translate-y-1/2 text-[#9c7b65] group-focus-within:text-[#5c4436] text-xl`}></i>
+                              <input 
+                                type="text" 
+                                name={`socialMedia_${index}_url`}
+                                value={social.url}
+                                onChange={handleInputChange}
+                                placeholder={`${social.platform === 'linkedin' ? 'in/username' : '@username'}`}
+                                className="w-full h-14 bg-[#fdfaf7] border border-[#e8dcc4] rounded-2xl pr-12 pl-14 focus:ring-2 focus:ring-[#5c4436]/20 focus:border-[#5c4436] outline-none transition-all placeholder:text-gray-400 text-right font-bold"
+                              />
+                              <button 
+                                type="button"
+                                onClick={() => setFormData(prev => ({ ...prev, socialMedia: prev.socialMedia.filter((_, i) => i !== index) }))}
+                                className="absolute left-3 top-1/2 -translate-y-1/2 w-10 h-10 flex items-center justify-center text-red-200 hover:text-red-500 hover:bg-red-50 rounded-xl transition-all"
+                              >
+                                <i className="fa-solid fa-trash-can text-sm"></i>
+                              </button>
+                            </div>
+                          </motion.div>
+                        ))}
+                      </div>
                     </div>
                   </div>
                 )}
