@@ -50,7 +50,7 @@ export default function SettingsPage() {
     setUpdateMessage({ type: '', text: '' });
 
     try {
-      // Simulate API call
+      // Reverted to simulated API call
       await new Promise(resolve => setTimeout(resolve, 1000));
       
       // Update local state

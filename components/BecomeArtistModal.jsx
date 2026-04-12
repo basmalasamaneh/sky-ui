@@ -16,6 +16,7 @@ export const BecomeArtistModal = ({ isOpen, onClose, user }) => {
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
+  const [errorMessage, setErrorMessage] = useState(null);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -24,12 +25,17 @@ export const BecomeArtistModal = ({ isOpen, onClose, user }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setErrorMessage(null);
+    if (!token) {
+      setErrorMessage('يرجى تسجيل الدخول لإكمال هذه العملية.');
+      return;
+    }
+
     setIsSubmitting(true);
-    
-    // Simulate API call
+
+    // Reverted to simulated submission
+    setIsSubmitting(true);
     try {
-      // In a real scenario, we would call an API here
-      // const response = await fetch('/api/users/become-artist', { ... })
       await new Promise(resolve => setTimeout(resolve, 1500));
       
       // Update user role, name and artist details locally
@@ -84,7 +90,7 @@ export const BecomeArtistModal = ({ isOpen, onClose, user }) => {
           initial={{ scale: 0.9, opacity: 0, y: 20 }}
           animate={{ scale: 1, opacity: 1, y: 0 }}
           exit={{ scale: 0.9, opacity: 0, y: 20 }}
-          className="relative w-full max-w-xl bg-white rounded-[2.5rem] shadow-2xl overflow-hidden border border-white/20"
+          className="relative w-full max-w-xl bg-white rounded-[2.5rem] shadow-2xl overflow-y-auto no-scrollbar border border-white/20 max-h-[90vh]"
           dir="rtl"
         >
           {/* Decorative Top Bar */}
@@ -120,6 +126,11 @@ export const BecomeArtistModal = ({ isOpen, onClose, user }) => {
               </motion.div>
             ) : (
               <form onSubmit={handleSubmit} className="space-y-5">
+                {errorMessage && (
+                  <div className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-red-700 text-sm">
+                    {errorMessage}
+                  </div>
+                )}
                 {/* Artist Name */}
                 <div className="relative">
                   <label className="block text-[#3b2012] font-bold mb-2 mr-2 text-sm">اسم الفنان</label>
