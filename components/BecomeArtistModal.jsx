@@ -98,29 +98,38 @@ export const BecomeArtistModal = ({ isOpen, onClose, user }) => {
       return;
     }
 
-    // Reverted to simulated submission
     setIsSubmitting(true);
     try {
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
-      // Update user role, name and artist details locally
-      if (user && login) {
-        login({ 
-          ...user, 
-          role: 'artist', 
+      const res = await fetch('/api/users/become-artist', {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify({
           artistName: formData.artistName,
           bio: formData.bio,
           location: formData.location,
           phone: formData.phone,
-          socialMedia: formData.socialMedia
-        }, token);
+          socialMedia: formData.socialMedia,
+        }),
+      });
+
+      const result = await res.json();
+
+      if (!res.ok) {
+        setErrors(prev => ({ ...prev, submit: result?.message || 'حدث خطأ. حاول مرة أخرى.' }));
+        return;
+      }
+
+      if (login && result?.data?.user) {
+        login({ ...user, ...result.data.user }, token);
       }
 
       setIsSuccess(true);
       setTimeout(() => {
         onClose();
         setIsSuccess(false);
-        // Reset form to defaults
         setFormData({
           artistName: user?.artistName || user?.firstName || '',
           bio: '',
@@ -130,7 +139,8 @@ export const BecomeArtistModal = ({ isOpen, onClose, user }) => {
         });
       }, 2000);
     } catch (error) {
-      console.error(error);
+      console.error('Become artist error:', error);
+      setErrors(prev => ({ ...prev, submit: 'تعذر الاتصال بالخادم. حاول مرة أخرى لاحقاً.' }));
     } finally {
       setIsSubmitting(false);
     }
@@ -395,6 +405,9 @@ export const BecomeArtistModal = ({ isOpen, onClose, user }) => {
                     </>
                   )}
                 </button>
+                {errors.submit && (
+                  <p className="text-red-500 text-sm text-center mt-2">{errors.submit}</p>
+                )}
               </form>
             )}
           </div>

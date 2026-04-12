@@ -40,6 +40,7 @@ const normalizeUser = (userData, authToken) => {
     role: normalizedUser.role || normalizedPayload.role || 'user',
     firstName: normalizedUser.firstName || normalizedPayload.firstName,
     lastName: normalizedUser.lastName || normalizedPayload.lastName,
+    artistName: normalizedUser.artistName || normalizedPayload.artistName,
     bio: normalizedUser.bio || normalizedPayload.bio,
     location: normalizedUser.location || normalizedPayload.location,
     phone: normalizedUser.phone || normalizedPayload.phone,

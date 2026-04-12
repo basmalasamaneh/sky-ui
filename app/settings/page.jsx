@@ -13,6 +13,7 @@ export default function SettingsPage() {
   const [deleteMessage, setDeleteMessage] = useState('');
   const [isUpdating, setIsUpdating] = useState(false);
   const [updateMessage, setUpdateMessage] = useState({ type: '', text: '' });
+  const [isFetchingProfile, setIsFetchingProfile] = useState(false);
 
   const [formData, setFormData] = useState({
     artistName: '',
@@ -38,6 +39,30 @@ export default function SettingsPage() {
       });
     }
   }, [isAuthenticated, isLoading, router, user]);
+
+  // Fetch fresh profile data from backend on mount
+  useEffect(() => {
+    if (!token || !isAuthenticated) return;
+
+    const fetchProfile = async () => {
+      setIsFetchingProfile(true);
+      try {
+        const res = await fetch('/api/users/profile', {
+          headers: { 'Authorization': `Bearer ${token}` },
+        });
+        const result = await res.json();
+        if (res.ok && result.data?.user) {
+          login({ ...user, ...result.data.user }, token);
+        }
+      } catch (err) {
+        console.error('Failed to fetch profile:', err);
+      } finally {
+        setIsFetchingProfile(false);
+      }
+    };
+
+    fetchProfile();
+  }, [token, isAuthenticated]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -73,11 +98,25 @@ export default function SettingsPage() {
     }
 
     try {
-      // Reverted to simulated API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      // Update local state
-      login({ ...user, ...formData }, token);
+      const res = await fetch('/api/users/profile', {
+        method: 'PATCH',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
+      });
+
+      const result = await res.json();
+
+      if (!res.ok) {
+        setUpdateMessage({ type: 'error', text: result.message || 'حدث خطأ أثناء تحديث البيانات.' });
+        return;
+      }
+
+      if (result.data?.user) {
+        login({ ...user, ...result.data.user }, token);
+      }
       
       setUpdateMessage({ type: 'success', text: 'تم تحديث بياناتك بنجاح!' });
       setTimeout(() => setUpdateMessage({ type: '', text: '' }), 3000);
@@ -97,7 +136,7 @@ export default function SettingsPage() {
     setDeleteMessage('');
 
     try {
-      const response = await fetch('/api/users/me', {
+      const response = await fetch('/api/users/delete-account', {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -203,7 +242,7 @@ export default function SettingsPage() {
                     <div>
                       <label className="block text-sm font-bold text-[#3b2012] mb-2 pr-2 flex items-center gap-2">
                         <i className="fa-solid fa-user text-[#9c7b65]"></i>
-                        اسم الفنان
+                        اسم الشهرة
                       </label>
                       <div className="relative group">
                         <input 

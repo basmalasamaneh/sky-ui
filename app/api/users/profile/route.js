@@ -1,4 +1,52 @@
 import { buildBackendApiUrl } from '@/lib/backend-api';
+import { normalizeUserData } from '@/lib/normalize-user';
+
+export async function GET(req) {
+  try {
+    const authHeader = req.headers.get('authorization');
+
+    if (!authHeader?.startsWith('Bearer ')) {
+      return Response.json(
+        { status: 'error', message: 'غير مصرح. يرجى تسجيل الدخول مجدداً.' },
+        { status: 401 }
+      );
+    }
+
+    try {
+      const backendResponse = await fetch(buildBackendApiUrl('/api/users/profile'), {
+        method: 'GET',
+        headers: { 'Authorization': authHeader },
+      });
+
+      const result = await backendResponse.json();
+
+      if (!backendResponse.ok) {
+        return Response.json(
+          { status: 'error', message: result.message || 'فشل جلب الملف الشخصي' },
+          { status: backendResponse.status }
+        );
+      }
+
+      return Response.json(
+        { status: 'success', data: { user: normalizeUserData(result.data?.user) } },
+        { status: 200 }
+      );
+    } catch (fetchError) {
+      console.error('Backend Connection Error:', fetchError);
+      return Response.json(
+        { status: 'error', message: 'تعذر الاتصال بالخادم حالياً. حاول مرة أخرى لاحقاً.' },
+        { status: 503 }
+      );
+    }
+  } catch (error) {
+    console.error('Get Profile Route Error:', error);
+    return Response.json(
+      { status: 'error', message: 'حدث خطأ غير متوقع في الخادم' },
+      { status: 500 }
+    );
+  }
+}
+
 
 export async function PATCH(req) {
   try {

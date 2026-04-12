@@ -17,11 +17,10 @@ export const Header = () => {
   const [isSearchVisible, setIsSearchVisible] = useState(false);
   const [isBecomeArtistModalOpen, setIsBecomeArtistModalOpen] = useState(false);
   
-  const userFirstName = user?.firstName || user?.first_name || 'مستخدم';
-  const userInitial = userFirstName?.charAt(0).toUpperCase() || 'م';
-
-  // Check if user is already an artist to conditionally show the button
   const isArtist = user?.role === 'artist';
+  const userFirstName = user?.firstName || user?.first_name || 'مستخدم';
+  const displayName = isArtist ? (user?.artistName || user?.artist_name || userFirstName) : userFirstName;
+  const userInitial = displayName?.charAt(0).toUpperCase() || 'م';
 
   return (
     <>
@@ -129,7 +128,7 @@ export const Header = () => {
                           {userInitial}
                         </div>
                         <span className="text-[#3b2012] font-bold font-art text-sm whitespace-nowrap flex items-center gap-1.5">
-                          {userFirstName}
+                          {displayName}
                           {isArtist && (
                             <i className="fa-solid fa-circle-check text-[#1d9bf0] text-[10px]" title="فنان موثق"></i>
                           )}
@@ -228,7 +227,7 @@ export const Header = () => {
                             {userInitial}
                           </div>
                           <span className="text-[#3b2012] font-bold font-art text-xl flex items-center gap-2">
-                            {userFirstName}
+                            {displayName}
                             {isArtist && (
                               <i className="fa-solid fa-circle-check text-[#1d9bf0] text-sm"></i>
                             )}
