@@ -20,12 +20,27 @@ export const BecomeArtistModal = ({ isOpen, onClose, user }) => {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
+    
+    // Validation for phone: only numbers
+    if (name === 'phone') {
+      const numericValue = value.replace(/\D/g, '');
+      setFormData(prev => ({ ...prev, [name]: numericValue }));
+      return;
+    }
+
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setErrorMessage(null);
+
+    // Phone validation: min 10 digits
+    if (formData.phone.length < 10) {
+      setErrorMessage('رقم الهاتف يجب أن يتكون من 10 أرقام على الأقل.');
+      return;
+    }
+
     if (!token) {
       setErrorMessage('يرجى تسجيل الدخول لإكمال هذه العملية.');
       return;

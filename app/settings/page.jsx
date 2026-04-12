@@ -41,6 +41,14 @@ export default function SettingsPage() {
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
+    
+    // Validation for phone: only numbers
+    if (name === 'phone') {
+      const numericValue = value.replace(/\D/g, '');
+      setFormData(prev => ({ ...prev, [name]: numericValue }));
+      return;
+    }
+
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
@@ -48,6 +56,13 @@ export default function SettingsPage() {
     e.preventDefault();
     setIsUpdating(true);
     setUpdateMessage({ type: '', text: '' });
+
+    // Phone validation: min 10 digits
+    if (formData.phone && formData.phone.length < 10) {
+      setUpdateMessage({ type: 'error', text: 'رقم الهاتف يجب أن يكون 10 أرقام على الأقل.' });
+      setIsUpdating(false);
+      return;
+    }
 
     try {
       // Reverted to simulated API call
