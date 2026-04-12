@@ -1,60 +1,22 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 
 export default function SettingsPage() {
-  const { user, isAuthenticated, isLoading, token, login, logout } = useAuth();
+  const { user, isAuthenticated, isLoading, token, logout } = useAuth();
   const router = useRouter();
 
-  const [formData, setFormData] = useState({
-    firstName: user?.firstName || '',
-    lastName: user?.lastName || '',
-    email: user?.email || '',
-  });
-
-  const [isSaving, setIsSaving] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
-  const [saveMessage, setSaveMessage] = useState('');
   const [deleteMessage, setDeleteMessage] = useState('');
 
-  const handleSave = async () => {
-    setIsSaving(true);
-    setSaveMessage('');
-
-    try {
-      const response = await fetch('/api/users/me', {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          firstName: formData.firstName,
-          lastName: formData.lastName,
-        }),
-      });
-
-      const result = await response.json();
-
-      if (!response.ok) {
-        setSaveMessage(result.message || 'حدث خطأ أثناء التحديث');
-        return;
-      }
-
-      // Refresh auth context with new token + updated user from DB
-      login(result.data?.user, result.data?.token);
-      setSaveMessage('تم تحديث البيانات بنجاح!');
-      setTimeout(() => setSaveMessage(''), 3000);
-    } catch (err) {
-      console.error('Update profile failed:', err);
-      setSaveMessage('لا يمكن الاتصال بالخادم. تأكد من تشغيل الباك آند.');
-    } finally {
-      setIsSaving(false);
+  useEffect(() => {
+    if (!isLoading && !isAuthenticated) {
+      router.push('/login');
     }
-  };
+  }, [isAuthenticated, isLoading, router]);
 
   const handleDeleteAccount = async () => {
     const confirmed = window.confirm('هل أنت متأكد من حذف الحساب نهائياً؟ لا يمكن التراجع عن هذه العملية.');
@@ -82,15 +44,13 @@ export default function SettingsPage() {
       router.push('/signup');
     } catch (err) {
       console.error('Delete account failed:', err);
-      setDeleteMessage('لا يمكن الاتصال بالخادم. تأكد من تشغيل الباك آند.');
+      setDeleteMessage('تعذر حذف الحساب حالياً. حاول مرة أخرى لاحقاً.');
     } finally {
       setIsDeleting(false);
     }
   };
 
-  // Redirect if not authenticated (after loading)
   if (!isLoading && !isAuthenticated) {
-    router.push('/login');
     return null;
   }
 
@@ -145,31 +105,6 @@ export default function SettingsPage() {
               </h3>
 
               <div className="space-y-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div>
-                    <label className="block text-sm font-bold text-[#3b2012] mb-2 pr-2">الاسم الأول</label>
-                    <div className="relative">
-                      <input 
-                        type="text" 
-                        value={formData.firstName}
-                        onChange={(e) => setFormData({...formData, firstName: e.target.value})}
-                        className="w-full h-12 bg-white border border-[#e8dcc4] rounded-xl px-4 text-[#3b2012] outline-none focus:border-[#6b4c3b] transition-all"
-                      />
-                    </div>
-                  </div>
-                  <div>
-                    <label className="block text-sm font-bold text-[#3b2012] mb-2 pr-2">اسم العائلة</label>
-                    <div className="relative">
-                      <input 
-                        type="text" 
-                        value={formData.lastName}
-                        onChange={(e) => setFormData({...formData, lastName: e.target.value})}
-                        className="w-full h-12 bg-white border border-[#e8dcc4] rounded-xl px-4 text-[#3b2012] outline-none focus:border-[#6b4c3b] transition-all"
-                      />
-                    </div>
-                  </div>
-                </div>
-
                 <div>
                   <label className="block text-sm font-bold text-[#3b2012] mb-2 pr-2">البريد الإلكتروني</label>
                   <div className="relative">
@@ -177,25 +112,12 @@ export default function SettingsPage() {
                       type="email" 
                       readOnly
                       dir="ltr"
-                      value={formData.email}
+                      value={user?.email || ''}
                       className="w-full h-12 bg-[#faf7f2] border border-[#e8dcc4] rounded-xl px-4 text-left text-[#3b2012] outline-none opacity-80 cursor-not-allowed"
                     />
                     <i className="fa-solid fa-lock absolute right-4 top-1/2 -translate-y-1/2 text-gray-300"></i>
                   </div>
                   <p className="text-xs text-[#9c7b65] mt-2 pr-2 italic">* لا يمكن تعديل البريد الإلكتروني حالياً لدواعي الأمان.</p>
-                </div>
-
-                <div className="pt-8 flex items-center gap-4">
-                  <button 
-                    onClick={handleSave}
-                    disabled={isSaving}
-                    className="bg-[#3b2012] text-white px-10 py-3.5 rounded-xl font-bold hover:bg-[#5c3d2e] transition-all shadow-lg active:scale-95 disabled:bg-gray-400"
-                  >
-                    {isSaving ? 'جاري الحفظ...' : 'حفظ التغييرات'}
-                  </button>
-                  {saveMessage && (
-                    <span className="text-green-600 font-bold animate-fade-in">{saveMessage}</span>
-                  )}
                 </div>
               </div>
             </motion.div>

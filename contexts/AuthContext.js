@@ -1,5 +1,6 @@
 'use client'
 import React, { createContext, useContext, useState, useEffect } from 'react'
+import { normalizeUserData } from '@/lib/normalize-user'
 
 const AuthContext = createContext()
 
@@ -30,23 +31,15 @@ const isTokenExpired = (token) => {
 
 const normalizeUser = (userData, authToken) => {
   const payload = authToken ? parseJwtPayload(authToken) : null
+  const normalizedUser = normalizeUserData(userData)
+  const normalizedPayload = normalizeUserData(payload)
 
   return {
-    id: userData?.id || payload?.userId || '',
-    email: userData?.email || payload?.email || '',
-    role: userData?.role || payload?.role || 'user',
-    firstName:
-      payload?.firstName ||
-      payload?.first_name ||
-      userData?.firstName ||
-      userData?.first_name ||
-      '',
-    lastName:
-      payload?.lastName ||
-      payload?.last_name ||
-      userData?.lastName ||
-      userData?.last_name ||
-      '',
+    id: normalizedUser.id || normalizedPayload.id,
+    email: normalizedUser.email || normalizedPayload.email,
+    role: normalizedUser.role || normalizedPayload.role || 'user',
+    firstName: normalizedPayload.firstName || normalizedUser.firstName,
+    lastName: normalizedPayload.lastName || normalizedUser.lastName,
   }
 }
 

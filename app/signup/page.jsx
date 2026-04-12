@@ -55,7 +55,7 @@ export default function SignupPage() {
         } else if (value.length < 8) {
           error = 'يجب أن تتكون كلمة المرور من 8 أحرف على الأقل';
         } else if (!/(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/.test(value)) {
-          error = 'يجب أن تحتوي على: حرف كبير، حرف صغير، ورقم على الأقل';
+          error = 'يجب أن تحتوي كلمة المرور على حرف كبير وحرف صغير ورقم واحد على الأقل';
         }
         break;
       case 'confirmPassword':
@@ -136,7 +136,6 @@ export default function SignupPage() {
       };
 
       try {
-        console.log('جاري إرسال طلب إنشاء الحساب... (Sending signup request...)');
         const response = await fetch('/api/auth/signup', {
           method: 'POST',
           headers: {
@@ -160,12 +159,12 @@ export default function SignupPage() {
             setErrors(fieldErrors);
           }
           
-          setServerError(result.message || 'حدث خطأ أثناء إنشاء الحساب');
-          console.error('خطأ في الساين اب (Signup Error):', result);
+          setServerError(result.message || 'تعذر إنشاء الحساب. يرجى التحقق من البيانات والمحاولة مرة أخرى.');
+          console.error('Signup failed:', result);
         }
       } catch (err) {
-        setServerError('لا يمكن الاتصال بالخادم. تأكد من تشغيل الباك آند على المنفذ 3001.');
-        console.error('فشل الاتصال (Connection Failed):', err);
+        setServerError('تعذر إنشاء الحساب حالياً. حاول مرة أخرى لاحقاً.');
+        console.error('Signup request error:', err);
       } finally {
         setIsLoading(false);
       }

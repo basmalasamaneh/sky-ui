@@ -1,3 +1,6 @@
+import { buildBackendApiUrl } from '@/lib/backend-api';
+import { normalizeUserData } from '@/lib/normalize-user';
+
 export async function POST(req) {
   try {
     const body = await req.json();
@@ -11,7 +14,7 @@ export async function POST(req) {
     }
 
     try {
-      const backendResponse = await fetch('http://localhost:3001/api/auth/login', {
+      const backendResponse = await fetch(buildBackendApiUrl('/api/auth/login'), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -32,20 +35,14 @@ export async function POST(req) {
         );
       }
 
-      const backendUser = result.data?.user || {};
+      const responseUser = normalizeUserData(result.data?.user);
 
       return Response.json(
         {
           ...result,
           data: {
             ...result.data,
-            user: {
-              id: backendUser.id,
-              email: backendUser.email,
-              role: backendUser.role,
-              firstName: backendUser.first_name || backendUser.firstName || '',
-              lastName: backendUser.last_name || backendUser.lastName || '',
-            },
+            user: responseUser,
           },
         },
         { status: 200 }
@@ -55,7 +52,7 @@ export async function POST(req) {
       return Response.json(
         {
           status: 'error',
-          message: 'لا يمكن الاتصال بسيرفر الباك آند. تأكد من تشغيل المشروع في مجلد stargate-3 على المنفذ 3001.',
+          message: 'تعذر تسجيل الدخول حالياً. حاول مرة أخرى لاحقاً.',
         },
         { status: 503 }
       );

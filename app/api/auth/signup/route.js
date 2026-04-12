@@ -1,3 +1,6 @@
+import { buildBackendApiUrl } from '@/lib/backend-api';
+import { normalizeUserData } from '@/lib/normalize-user';
+
 export async function POST(req) {
   try {
     const body = await req.json();
@@ -11,9 +14,8 @@ export async function POST(req) {
       );
     }
 
-    // 2. Forward request to the actual backend server (Port 3001)
     try {
-      const backendResponse = await fetch('http://localhost:3001/api/auth/signup', {
+      const backendResponse = await fetch(buildBackendApiUrl('/api/auth/signup'), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -42,19 +44,13 @@ export async function POST(req) {
       }
 
       // Success - Map snake_case to camelCase for the frontend
-      const backendUser = result.data?.user || {};
+      const responseUser = normalizeUserData(result.data?.user);
 
       return Response.json({
         ...result,
         data: {
           ...result.data,
-          user: {
-            id: backendUser.id,
-            email: backendUser.email,
-            role: backendUser.role,
-            firstName: backendUser.first_name || backendUser.firstName || '',
-            lastName: backendUser.last_name || backendUser.lastName || '',
-          }
+          user: responseUser
         }
       }, { status: 201 });
 
@@ -63,7 +59,7 @@ export async function POST(req) {
       return Response.json(
         { 
           status: 'error', 
-          message: 'لا يمكن الاتصال بسيرفر الباك آند. تأكد من تشغيل المشروع في مجلد stargate-3 على المنفذ 3001.' 
+          message: 'تعذر إنشاء الحساب حالياً. حاول مرة أخرى لاحقاً.' 
         },
         { status: 503 }
       );

@@ -138,7 +138,7 @@ export default function LoginPage() {
         router.push('/');
       } catch (err) {
         console.error('Login Connection Failed:', err);
-        setLoginError('لا يمكن الاتصال بالخادم. تأكد من تشغيل الباك آند على المنفذ 3001.');
+        setLoginError('تعذر تسجيل الدخول حالياً. حاول مرة أخرى لاحقاً.');
       } finally {
         setIsLoading(false);
       }
