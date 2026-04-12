@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../contexts/AuthContext';
 
@@ -16,50 +16,66 @@ export const BecomeArtistModal = ({ isOpen, onClose, user }) => {
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
+  const [submitError, setSubmitError] = useState('');
+
+  useEffect(() => {
+    if (isOpen) {
+      setSubmitError('');
+      setIsSuccess(false);
+      setFormData({
+        artistName: user?.artistName || user?.firstName || '',
+        bio: user?.bio || '',
+        location: user?.location || '',
+        phone: user?.phone || '',
+        socialMedia: user?.socialMedia || ''
+      });
+    }
+  }, [isOpen, user]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
+    if (submitError) setSubmitError('');
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
+    setSubmitError('');
     
-    // Simulate API call
     try {
-      // In a real scenario, we would call an API here
-      // const response = await fetch('/api/users/become-artist', { ... })
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      const response = await fetch('/api/users/become-artist', {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify(formData),
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        if (result.errors && Array.isArray(result.errors) && result.errors.length > 0) {
+          setSubmitError(result.errors[0]?.message || 'تحقق من البيانات المدخلة ثم حاول مرة أخرى.');
+        } else {
+          setSubmitError(result.message || 'تعذر إرسال الطلب حالياً. حاول مرة أخرى لاحقاً.');
+        }
+        return;
+      }
       
-      // Update user role, name and artist details locally
       if (user && login) {
-        login({ 
-          ...user, 
-          role: 'artist', 
-          firstName: formData.artistName,
-          bio: formData.bio,
-          location: formData.location,
-          phone: formData.phone,
-          socialMedia: formData.socialMedia
-        }, token);
+        login({ ...user, ...(result.data?.user || {}) }, token);
       }
 
       setIsSuccess(true);
       setTimeout(() => {
         onClose();
         setIsSuccess(false);
-        // Reset form to defaults
-        setFormData({
-          artistName: user?.firstName || '',
-          bio: '',
-          location: '',
-          phone: '',
-          socialMedia: ''
-        });
       }, 2000);
     } catch (error) {
-      console.error(error);
+      console.error('Become artist request failed:', error);
+      setSubmitError('تعذر إرسال الطلب حالياً. حاول مرة أخرى لاحقاً.');
     } finally {
       setIsSubmitting(false);
     }
@@ -220,6 +236,13 @@ export const BecomeArtistModal = ({ isOpen, onClose, user }) => {
                     </>
                   )}
                 </button>
+
+                {submitError && (
+                  <p className="text-sm font-bold text-red-600 bg-red-50 border border-red-200 rounded-xl px-4 py-3">
+                    <i className="fa-solid fa-circle-exclamation ml-2"></i>
+                    {submitError}
+                  </p>
+                )}
               </form>
             )}
           </div>
