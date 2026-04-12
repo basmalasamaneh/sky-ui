@@ -174,31 +174,8 @@ export default function SettingsPage() {
 
               <form onSubmit={handleUpdateProfile} className="space-y-8">
                 
-                {/* Conditional Name Fields */}
-                {!isArtist ? (
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                      <label className="block text-sm font-bold text-[#3b2012] mb-2 pr-2">الاسم الأول</label>
-                      <input 
-                        type="text" 
-                        name="firstName"
-                        value={formData.firstName}
-                        onChange={handleInputChange}
-                        className="w-full h-14 bg-[#fdfaf7] border border-[#e8dcc4] rounded-2xl px-5 text-[#3b2012] outline-none focus:ring-2 focus:ring-[#5c4436]/20 focus:border-[#5c4436] transition-all"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-bold text-[#3b2012] mb-2 pr-2">الاسم الأخير</label>
-                      <input 
-                        type="text" 
-                        name="lastName"
-                        value={formData.lastName}
-                        onChange={handleInputChange}
-                        className="w-full h-14 bg-[#fdfaf7] border border-[#e8dcc4] rounded-2xl px-5 text-[#3b2012] outline-none focus:ring-2 focus:ring-[#5c4436]/20 focus:border-[#5c4436] transition-all"
-                      />
-                    </div>
-                  </div>
-                ) : (
+                {/* Conditional Name Fields (Only for Artists) */}
+                {isArtist && (
                   <div>
                     <label className="block text-sm font-bold text-[#3b2012] mb-2 pr-2">اسم الفنان</label>
                     <div className="relative group">
