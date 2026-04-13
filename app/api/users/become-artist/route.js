@@ -14,7 +14,7 @@ export async function PATCH(req) {
     const body = await req.json();
 
     try {
-      const backendResponse = await fetch(buildBackendApiUrl('/api/users/become-artist'), {
+      const backendResponse = await fetch(buildBackendApiUrl('/api/users/profile'), {
         method: 'PATCH',
         headers: {
           'Authorization': authHeader,
