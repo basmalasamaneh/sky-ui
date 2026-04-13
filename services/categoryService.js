@@ -1,8 +1,8 @@
 export const categoryService = {
   getAll: async () => [
-    { id: 1, name: 'عود ملكي', slug: 'oud' },
-    { id: 2, name: 'عطور شرقية', slug: 'perfumes' },
-    { id: 3, name: 'بخور نقي', slug: 'bakhoor' },
-    { id: 4, name: 'أطقم هدايا', slug: 'gifts' },
+    { id: 1, name: 'لوحات فنية', slug: 'paintings' },
+    { id: 2, name: 'منحوتات', slug: 'sculptures' },
+    { id: 3, name: 'تصوير فوتوغرافي', slug: 'photography' },
+    { id: 4, name: 'رسم رقمي', slug: 'digital-art' },
   ]
 }

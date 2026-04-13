@@ -4,11 +4,9 @@ import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
-import { useAuth } from '@/contexts/AuthContext';
 
 export default function SignupPage() {
   const router = useRouter();
-  const { login } = useAuth();
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
@@ -57,7 +55,7 @@ export default function SignupPage() {
         } else if (value.length < 8) {
           error = 'يجب أن تتكون كلمة المرور من 8 أحرف على الأقل';
         } else if (!/(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/.test(value)) {
-          error = 'يجب أن تحتوي على: حرف كبير، حرف صغير، ورقم على الأقل';
+          error = 'يجب أن تحتوي كلمة المرور على حرف كبير وحرف صغير ورقم واحد على الأقل';
         }
         break;
       case 'confirmPassword':
@@ -138,7 +136,6 @@ export default function SignupPage() {
       };
 
       try {
-        console.log('جاري إرسال طلب إنشاء الحساب... (Sending signup request...)');
         const response = await fetch('/api/auth/signup', {
           method: 'POST',
           headers: {
@@ -150,25 +147,8 @@ export default function SignupPage() {
         const result = await response.json();
 
         if (response.ok) {
-          console.log('بيانات الطلب المرسلة (Signup Payload):', payload);
-          console.log('استجابة نجاح إنشاء الحساب (Signup Success Response):', result);
-          
-          // Store token in localStorage if available
-          if (result.data?.token) {
-            localStorage.setItem('token', result.data.token);
-          }
-
-          // Update auth context with the data from the form to guarantee the name shows up
-          const userWithNames = {
-            ...result.data.user,
-            firstName: formData.firstName,
-            lastName: formData.lastName
-          };
-          
-          login(userWithNames);
-          
-          // Redirect to home
-          router.push('/');
+          // Account created — send to login page without auto-signing in
+          router.push('/login');
         } else {
           // Handle field-specific errors from backend validation
           if (result.errors && Array.isArray(result.errors)) {
@@ -179,12 +159,12 @@ export default function SignupPage() {
             setErrors(fieldErrors);
           }
           
-          setServerError(result.message || 'حدث خطأ أثناء إنشاء الحساب');
-          console.error('خطأ في الساين اب (Signup Error):', result);
+          setServerError(result.message || 'تعذر إنشاء الحساب. يرجى التحقق من البيانات والمحاولة مرة أخرى.');
+          console.error('Signup failed:', result);
         }
       } catch (err) {
-        setServerError('لا يمكن الاتصال بالخادم. تأكد من تشغيل الباك آند على المنفذ 3001.');
-        console.error('فشل الاتصال (Connection Failed):', err);
+        setServerError('تعذر إنشاء الحساب حالياً. حاول مرة أخرى لاحقاً.');
+        console.error('Signup request error:', err);
       } finally {
         setIsLoading(false);
       }

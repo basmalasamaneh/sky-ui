@@ -103,27 +103,45 @@ export default function LoginPage() {
 
     if (Object.keys(checkErrors).length === 0) {
       setIsLoading(true);
-      
-      // Simulation of a login process
-      setTimeout(() => {
-        setIsLoading(false);
-        // For demonstration purposes, if password is "password123", we show an error
-        if (formData.password === 'password123') {
-          setLoginError('البريد الإلكتروني أو كلمة المرور غير صحيحة');
-        } else {
-          console.log('تم الدخول بنجاح:', formData);
-          
-          // محاكاة بيانات المستخدم (في الحقيقة تأتي من السيرفر)
-          const mockUser = {
-            firstName: 'بتول',
-            lastName: 'سويسه',
-            email: formData.email
-          };
-          
-          login(mockUser);
-          router.push('/');
+
+      try {
+        const response = await fetch('/api/auth/login', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            email: formData.email,
+            password: formData.password,
+          }),
+        });
+
+        const result = await response.json();
+
+        if (!response.ok) {
+          if (result.errors && Array.isArray(result.errors)) {
+            const fieldErrors = {};
+            result.errors.forEach((error) => {
+              fieldErrors[error.field] = error.message;
+            });
+            setErrors((prev) => ({ ...prev, ...fieldErrors }));
+          }
+
+          setLoginError(result.message || 'البريد الإلكتروني أو كلمة المرور غير صحيحة');
+          return;
         }
-      }, 1500);
+
+        if (result.data?.user) {
+          login(result.data.user, result.data?.token);
+        }
+
+        router.push('/');
+      } catch (err) {
+        console.error('Login Connection Failed:', err);
+        setLoginError('تعذر تسجيل الدخول حالياً. حاول مرة أخرى لاحقاً.');
+      } finally {
+        setIsLoading(false);
+      }
     }
   };
 
@@ -162,35 +180,32 @@ export default function LoginPage() {
             />
 
             {/* كلمة المرور */}
-            <div className="relative">
-              <Input
-                name="password"
-                type={showPassword ? 'text' : 'password'}
-                label="كلمة المرور"
-                labelExtra={
-                  <Link href="/forgot-password" size="sm" className="text-sm text-[#6b4c3b] hover:font-bold hover:underline transition-all font-amiri">
-                    هل نسيت كلمة المرور؟
-                  </Link>
-                }
-                placeholder="••••••••"
-                dir="ltr"
-                value={formData.password}
-                onChange={handleChange}
-                onBlur={handleBlur}
-                error={errors.password}
-                icon={<i className="fa-solid fa-lock"></i>}
-                className="pl-12"
-              />
-              
-              <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="absolute left-4 top-[46px] text-[#9c7b65] hover:text-[#3b2012] transition-colors"
-                style={{ zIndex: 10 }}
-              >
-                {showPassword ? <i className="fa-regular fa-eye-slash"></i> : <i className="fa-regular fa-eye"></i>}
-              </button>
-            </div>
+            <Input
+              name="password"
+              type={showPassword ? 'text' : 'password'}
+              label="كلمة المرور"
+              labelExtra={
+                <Link href="/forgot-password" size="sm" className="text-sm text-[#6b4c3b] hover:font-bold hover:underline transition-all font-amiri">
+                  هل نسيت كلمة المرور؟
+                </Link>
+              }
+              placeholder="••••••••"
+              dir="ltr"
+              value={formData.password}
+              onChange={handleChange}
+              onBlur={handleBlur}
+              error={errors.password}
+              icon={<i className="fa-solid fa-lock"></i>}
+              leftIcon={
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="text-[#9c7b65] hover:text-[#3b2012] transition-colors"
+                >
+                  {showPassword ? <i className="fa-regular fa-eye-slash"></i> : <i className="fa-regular fa-eye"></i>}
+                </button>
+              }
+            />
 
             {/* رسالة الخطأ العامة */}
             {loginError && (

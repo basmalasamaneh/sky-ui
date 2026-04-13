@@ -80,13 +80,16 @@ export default function Hero() {
           {/* بطاقة 2 - تفاصيل المنتج */}
           <div className="bg-white rounded-2xl shadow-xl p-4 w-72 border border-gray-100 transform transition-all duration-300 hover:-translate-x-2">
             <div className="flex items-center gap-3 mb-3">
-              <div className="w-11 h-11 rounded-xl bg-amber-100 flex items-center justify-center text-2xl">
-                🖼️
+              <div className="w-11 h-11 rounded-xl bg-amber-100 flex items-center justify-center text-xl text-amber-700">
+                <i className="fa-solid fa-image"></i>
               </div>
               <div className="text-right flex-1">
                 <p className="text-sm font-black text-gray-900">لوحة شجرة فنية مميزة</p>
                 <div className="flex items-center justify-end gap-2 mt-0.5">
-                  <span className="text-xs font-bold text-amber-500">★ ٥.٠</span>
+                  <span className="text-xs font-bold text-amber-500 flex items-center gap-1">
+                    <i className="fa-solid fa-star text-[10px]"></i>
+                    ٥.٠
+                  </span>
                   <span className="text-xs text-gray-300">·</span>
                   <span className="text-xs font-black text-primary">١٤٩ ر.س</span>
                 </div>
