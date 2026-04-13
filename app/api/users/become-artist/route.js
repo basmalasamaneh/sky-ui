@@ -1,5 +1,13 @@
 import { buildBackendApiUrl } from '@/lib/backend-api';
 
+const mapBackendErrorMessageToArabic = (message) => {
+  if (!message) return 'فشل الانضمام كفنان';
+  if (String(message).toLowerCase().includes('artist name is already in use')) {
+    return 'اسم الفنان مستخدم بالفعل. اختر اسماً فنياً آخر.';
+  }
+  return message;
+};
+
 export async function PATCH(req) {
   try {
     const authHeader = req.headers.get('authorization');
@@ -34,7 +42,7 @@ export async function PATCH(req) {
 
       if (!backendResponse.ok) {
         return Response.json(
-          { status: 'error', message: result?.message || 'فشل الانضمام كفنان' },
+          { status: 'error', message: mapBackendErrorMessageToArabic(result?.message) },
           { status: backendResponse.status }
         );
       }

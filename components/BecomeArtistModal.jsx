@@ -6,6 +6,17 @@ import { useAuth } from '../contexts/AuthContext';
 
 export const BecomeArtistModal = ({ isOpen, onClose, user }) => {
   const { login, token } = useAuth();
+  const DUPLICATE_ARTIST_NAME_MESSAGE = 'اسم الفنان مستخدم بالفعل. اختر اسماً فنياً آخر.';
+
+  const mapServerErrorMessage = (message) => {
+    if (!message) return 'حدث خطأ. حاول مرة أخرى.';
+    const normalized = String(message).toLowerCase();
+    if (normalized.includes('artist name is already in use')) {
+      return DUPLICATE_ARTIST_NAME_MESSAGE;
+    }
+    return message;
+  };
+
   const [formData, setFormData] = useState({
     artistName: user?.artistName || user?.firstName || '',
     bio: '',
@@ -68,6 +79,19 @@ export const BecomeArtistModal = ({ isOpen, onClose, user }) => {
 
     setFormData(prev => ({ ...prev, [name]: finalValue }));
 
+    if (name === 'artistName') {
+      setErrors(prev => {
+        const next = { ...prev };
+        if (prev.artistName === DUPLICATE_ARTIST_NAME_MESSAGE) {
+          next.artistName = '';
+        }
+        if (prev.submit === DUPLICATE_ARTIST_NAME_MESSAGE) {
+          next.submit = '';
+        }
+        return next;
+      });
+    }
+
     // Re-validate on every change after first submit attempt or if already touched
     if (touched[name]) {
       const error = validate(name, finalValue);
@@ -118,7 +142,12 @@ export const BecomeArtistModal = ({ isOpen, onClose, user }) => {
       const result = await res.json();
 
       if (!res.ok) {
-        setErrors(prev => ({ ...prev, submit: result?.message || 'حدث خطأ. حاول مرة أخرى.' }));
+        const backendMessage = mapServerErrorMessage(result?.message);
+        if (res.status === 409) {
+          setErrors(prev => ({ ...prev, artistName: backendMessage, submit: '' }));
+        } else {
+          setErrors(prev => ({ ...prev, submit: backendMessage }));
+        }
         return;
       }
 
