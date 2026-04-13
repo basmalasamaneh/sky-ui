@@ -3,20 +3,51 @@
 import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Image from 'next/image';
+import Link from 'next/link';
 import { Header } from '@/components/Header';
 import { useAuth } from '@/contexts/AuthContext';
+import { buildBackendApiUrl } from '@/lib/backend-api';
 
 export default function ProductsPage() {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, user, token } = useAuth();
   const [works, setWorks] = useState([]);
   const [isFetching, setIsFetching] = useState(true);
   
   // Slider states
   const [activeSliderWork, setActiveSliderWork] = useState(null);
   const [currentSlideIndex, setCurrentSlideIndex] = useState(0);
+  const [isLoadingArtworkDetails, setIsLoadingArtworkDetails] = useState(false);
 
   // Filters
   const [activeCategory, setActiveCategory] = useState('الكل');
+
+  const toImageSrc = (src) => {
+    if (typeof src !== 'string' || !src.trim()) return null;
+    if (src.startsWith('http://') || src.startsWith('https://')) return src;
+    if (src.startsWith('/')) return buildBackendApiUrl(src);
+    return buildBackendApiUrl(`/images/${encodeURIComponent(src)}`);
+  };
+
+  const normalizeWork = (work) => {
+    const artworkImages = Array.isArray(work?.artwork_images) ? work.artwork_images : [];
+    const artistProfile = Array.isArray(work?.users) ? work.users[0] : work?.users;
+    const sortedImages = artworkImages.sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0));
+    const mappedImages = sortedImages
+      .map((image) => image.filename)
+      .map((src) => toImageSrc(src))
+      .filter(Boolean);
+    const featuredIndex = sortedImages.findIndex((image) => image.is_featured);
+
+    return {
+      ...work,
+      images: mappedImages,
+      mainImageIndex: featuredIndex >= 0 ? featuredIndex : 0,
+      artistName: artistProfile?.artist_name || [artistProfile?.first_name, artistProfile?.last_name].filter(Boolean).join(' '),
+      artistLocation: artistProfile?.location || null,
+      artistPhone: artistProfile?.phone || null,
+      createdAt: work?.created_at || work?.createdAt || null,
+    };
+  };
 
   // Close slider on escape
   useEffect(() => {
@@ -27,13 +58,37 @@ export default function ProductsPage() {
     return () => window.removeEventListener('keydown', handleEsc);
   }, []);
 
-  const openSlider = (work) => {
+  const openSlider = async (work) => {
     setActiveSliderWork(work);
     setCurrentSlideIndex(0);
+    setIsLoadingArtworkDetails(true);
+
+    try {
+      const res = await fetch(`/api/artworks/${work.id}`, {
+        headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+      });
+
+      const contentType = res.headers.get('content-type') || '';
+      const result = contentType.includes('application/json')
+        ? await res.json().catch(() => ({}))
+        : {};
+
+      if (!res.ok || !result?.data?.artwork) {
+        return;
+      }
+
+      setActiveSliderWork(normalizeWork(result.data.artwork));
+      setCurrentSlideIndex(0);
+    } catch (error) {
+      console.error('Failed to fetch artwork details:', error);
+    } finally {
+      setIsLoadingArtworkDetails(false);
+    }
   };
 
   const closeSlider = () => {
     setActiveSliderWork(null);
+    setIsLoadingArtworkDetails(false);
   };
 
   const nextSlide = () => {
@@ -53,131 +108,26 @@ export default function ProductsPage() {
   useEffect(() => {
     const fetchAllWorks = async () => {
       setIsFetching(true);
-      
-      let fetchedWorks = [];
+
       try {
-        const res = await fetch('/api/works');
-        const result = await res.json();
-        if (res.ok && result.data && result.data.length > 0) {
-          fetchedWorks = result.data;
+        const res = await fetch('/api/artworks');
+        const contentType = res.headers.get('content-type') || '';
+        const result = contentType.includes('application/json')
+          ? await res.json().catch(() => ({}))
+          : {};
+        if (!res.ok) {
+          console.error('Failed to fetch works:', res.status, result?.message);
+          setWorks([]);
+          return;
         }
+        const rawWorks = Array.isArray(result?.data?.artworks) ? result.data.artworks : [];
+        setWorks(rawWorks.map(normalizeWork));
       } catch (e) {
-        console.warn('Backend route missing or network error. Using mock data for public gallery.');
+        console.error('Failed to fetch works:', e);
+        setWorks([]);
+      } finally {
+        setIsFetching(false);
       }
-
-      if (fetchedWorks.length === 0) {
-        // Dummy placeholder data for global gallery
-        fetchedWorks = [
-          {
-            id: '1',
-            title: 'تجريد الألوان',
-            description: 'لوحة زيتية تجريدية تعبر عن تداخل المشاعر والألوان في مشهد فني فريد.',
-            category: 'لوحات فنية',
-            artistName: 'خالد التميمي',
-            artistAvatar: 'خ',
-            artistPhone: '0599123456',
-            location: 'القدس',
-            price: '١٢٠',
-            images: [
-              'https://images.unsplash.com/photo-1541963463532-d68292c34b19?auto=format&fit=crop&q=80&w=800',
-              'https://images.unsplash.com/photo-1579783902614-a3fb3927b6a5?auto=format&fit=crop&q=80&w=800',
-              'https://images.unsplash.com/photo-1501472312651-726afe119ff1?auto=format&fit=crop&q=80&w=800'
-            ],
-            mainImageIndex: 0,
-            createdAt: new Date().toISOString()
-          },
-          {
-            id: '2',
-            title: 'صمت الحجر',
-            description: 'منحوتة يدوية من الرخام الصافي تجسد الهدوء والتأمل.',
-            category: 'نحت ومجسمات',
-            artistName: 'منى عبدالكريم',
-            artistAvatar: 'م',
-            artistPhone: '0598765432',
-            location: 'نابلس',
-            price: '٤٥٠',
-            images: [
-              'https://images.unsplash.com/photo-1549490349-8643362247b5?auto=format&fit=crop&q=80&w=800',
-              'https://images.unsplash.com/photo-1561070791-2526d30994b5?auto=format&fit=crop&q=80&w=800'
-            ],
-            mainImageIndex: 1,
-            createdAt: new Date().toISOString()
-          },
-          {
-            id: '3',
-            title: 'خطوط عربية ذهبية',
-            description: 'مخطوطة كلاسيكية بخط الثلث مطعمة بماء الذهب الصافي.',
-            category: 'خط عربي',
-            artistName: 'سعيد القحطاني',
-            artistAvatar: 'س',
-            artistPhone: '0567111222',
-            location: 'رام الله',
-            price: '٣٠٠',
-            images: [
-              'https://images.unsplash.com/photo-1580211110825-f09fd7ad0487?auto=format&fit=crop&q=80&w=800'
-            ],
-            mainImageIndex: 0,
-            createdAt: new Date().toISOString()
-          },
-          {
-            id: '4',
-            title: 'مزهرية طينية تراثية',
-            description: 'مزهرية مصنوعة يدوياً من طين المنطقة الوسطى بنقوش نجدية.',
-            category: 'خزف وفخار',
-            artistName: 'نورة العتيبي',
-            artistAvatar: 'ن',
-            artistPhone: '0592333444',
-            location: 'الخليل',
-            price: '٨٥',
-            images: [
-              'https://images.unsplash.com/photo-1610701596007-11502861dcfa?auto=format&fit=crop&q=80&w=800'
-            ],
-            mainImageIndex: 0,
-            createdAt: new Date().toISOString()
-          },
-          {
-            id: '5',
-            title: 'المشهد الفلسطيني',
-            description: 'لوحة فنية تنبض بالجمال تجسد الريف الفلسطيني بأشجار الزيتون والعمارة التقليدية. هذه القطعة تجسد جوهر التراث الفلسطيني والجمال الطبيعي للبلاد.',
-            category: 'لوحات فنية',
-            artistName: 'فادي القدومي',
-            artistAvatar: 'ف',
-            artistPhone: '0595123456',
-            location: 'نابلس',
-            price: '250',
-            images: [
-              'https://images.unsplash.com/photo-1551817958-c19601d4ad7d?auto=format&fit=crop&q=80&w=800',
-              'https://images.unsplash.com/photo-1618331835717-801e976710b2?auto=format&fit=crop&q=80&w=800'
-            ],
-            mainImageIndex: 0,
-            createdAt: new Date().toISOString()
-          }
-        ];
-      }
-
-      // Merge with local mock data to see local additions directly
-      try {
-        const localMockStr = localStorage.getItem('mockWorks');
-        if (localMockStr) {
-          const localMock = JSON.parse(localMockStr);
-          // Add default artist properties to local mock works
-          const decoratedLocalMock = localMock.map(work => ({
-            ...work,
-            artistName: work.artistName || 'أنت',
-            artistAvatar: work.artistName ? work.artistName.charAt(0) : 'أ',
-            price: work.price || 'غير محدد',
-            artistLocation: work.artistLocation || 'غير محدد',
-            category: work.category || 'متنوع'
-          }));
-          
-          fetchedWorks = [...decoratedLocalMock, ...fetchedWorks];
-        }
-      } catch (e) {
-        console.error('Failed to load local works', e);
-      }
-
-      setWorks(fetchedWorks);
-      setIsFetching(false);
     };
 
     fetchAllWorks();
@@ -197,6 +147,7 @@ export default function ProductsPage() {
     : works.filter(w => (categoryMapping[w.category] || w.category) === activeCategory);
 
   const categories = ['الكل', 'لوحات فنية', 'تطريز فلسطيني', 'خزف وفخار', 'خط عربي', 'تصوير فوتوغرافي', 'نحت ومجسمات'];
+  const isOwnerArtwork = (work) => Boolean(user?.id && work?.artist_id && user.id === work.artist_id);
 
   return (
     <div className="min-h-screen bg-[#fdfaf7] font-amiri" dir="rtl">
@@ -251,8 +202,8 @@ export default function ProductsPage() {
                   initial={{ opacity: 0, scale: 0.9 }}
                   animate={{ opacity: 1, scale: 1 }}
                   transition={{ delay: (index % 10) * 0.05 }}
-                  onClick={() => isAuthenticated && openSlider(work)}
-                  className={`group bg-white rounded-3xl overflow-hidden border border-[#e8dcc4] shadow-[0_4px_20px_-10px_rgba(0,0,0,0.1)] hover:shadow-xl transition-all duration-500 flex flex-col ${isAuthenticated ? 'cursor-pointer' : 'cursor-default'}`}
+                  onClick={() => openSlider(work)}
+                  className="group bg-white rounded-3xl overflow-hidden border border-[#e8dcc4] shadow-[0_4px_20px_-10px_rgba(0,0,0,0.1)] hover:shadow-xl transition-all duration-500 flex flex-col cursor-pointer"
                 >
                   <div 
                     className="relative h-64 overflow-hidden m-2 rounded-2xl"
@@ -261,7 +212,7 @@ export default function ProductsPage() {
                       src={work.images?.[work.mainImageIndex || 0] || 'https://images.unsplash.com/photo-1541963463532-d68292c34b19?auto=format&fit=crop&q=80&w=800'}
                       alt={work.title}
                       fill
-                      className={`object-cover transition-transform duration-700 ${isAuthenticated ? 'group-hover:scale-110' : ''}`}
+                      className="object-cover transition-transform duration-700 group-hover:scale-110"
                     />
                     
                     {work.images?.length > 1 && (
@@ -271,13 +222,11 @@ export default function ProductsPage() {
                       </div>
                     )}
 
-                    {isAuthenticated && (
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-4">
-                         <div className="self-end bg-white/20 backdrop-blur-md border border-white/30 text-white w-10 h-10 rounded-full flex items-center justify-center hover:bg-white hover:text-[#3b2012] transition-colors mb-2">
-                           <i className="fa-solid fa-expand text-sm"></i>
-                         </div>
-                      </div>
-                    )}
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-4">
+                       <div className="self-end bg-white/20 backdrop-blur-md border border-white/30 text-white w-10 h-10 rounded-full flex items-center justify-center hover:bg-white hover:text-[#3b2012] transition-colors mb-2">
+                         <i className="fa-solid fa-expand text-sm"></i>
+                       </div>
+                    </div>
                   </div>
 
                   <div className="p-5 flex flex-col flex-1">
@@ -287,9 +236,18 @@ export default function ProductsPage() {
                       <span className="font-bold text-lg text-[#3b2012]">
                         {work.price ? `${work.price} ₪` : 'متاح للعرض'}
                       </span>
-                      <button className="bg-[#f0ece6] text-[#5c4436] hover:bg-[#5c4436] hover:text-white px-4 py-2 rounded-xl text-xs font-bold transition-colors">
-                        إضافة للسلة
-                      </button>
+                      {isOwnerArtwork(work) ? (
+                        <Link
+                          href={`/works/edit/${work.id}`}
+                          className="bg-[#f0ece6] text-[#5c4436] hover:bg-[#5c4436] hover:text-white px-4 py-2 rounded-xl text-xs font-bold transition-colors"
+                        >
+                          تعديل العمل
+                        </Link>
+                      ) : (
+                        <button className="bg-[#f0ece6] text-[#5c4436] hover:bg-[#5c4436] hover:text-white px-4 py-2 rounded-xl text-xs font-bold transition-colors">
+                          إضافة للسلة
+                        </button>
+                      )}
                     </div>
                   </div>
                 </motion.div>
@@ -317,7 +275,7 @@ export default function ProductsPage() {
                 initial={{ scale: 0.9, opacity: 0, y: 20 }}
                 animate={{ scale: 1, opacity: 1, y: 0 }}
                 exit={{ scale: 0.9, opacity: 0, y: 20 }}
-                className="bg-white w-full max-w-5xl max-h-[90vh] overflow-hidden rounded-[2.5rem] shadow-2xl flex flex-col md:flex-row relative"
+                className="bg-white w-full max-w-5xl h-[92vh] md:max-h-[90vh] md:h-auto overflow-hidden rounded-[2rem] md:rounded-[2.5rem] shadow-2xl flex flex-col md:flex-row relative"
               >
                 {/* Close Button */}
                 <button 
@@ -328,7 +286,7 @@ export default function ProductsPage() {
                 </button>
 
                 {/* Left Side: Image Gallery */}
-                <div className="md:w-1/2 bg-[#fdfaf7] relative h-[40vh] md:h-auto border-l border-[#e8dcc4]/50">
+                <div className="md:w-1/2 bg-[#fdfaf7] relative h-[32vh] md:h-auto shrink-0 border-l border-[#e8dcc4]/50">
                   <div className="relative w-full h-full p-4 flex items-center justify-center">
                     <AnimatePresence mode="wait">
                       <motion.div 
@@ -382,37 +340,202 @@ export default function ProductsPage() {
                 </div>
 
                 {/* Right Side: Details / Protected Content */}
-                <div className="md:w-1/2 p-8 md:p-12 overflow-y-auto bg-white flex flex-col h-full overflow-y-auto no-scrollbar">
-                  {!isAuthenticated ? (
-                    <div className="flex flex-col items-center justify-center h-full text-center space-y-8 animate-fade-in">
-                      <div className="w-24 h-24 bg-amber-50 rounded-full flex items-center justify-center text-amber-600 shadow-inner">
-                        <i className="fa-solid fa-user-lock text-4xl"></i>
+                <div className="md:w-1/2 flex-1 min-h-0 p-5 md:p-10 overflow-y-auto bg-white flex flex-col no-scrollbar">
+                  {isLoadingArtworkDetails ? (
+                    <div className="flex flex-col items-center justify-center h-full text-center gap-6 animate-pulse">
+                      <div className="w-16 h-16 border-4 border-[#3b2012] border-t-transparent rounded-full animate-spin"></div>
+                      <p className="text-[#9c7b65] font-bold">جاري تحميل تفاصيل العمل الفني...</p>
+                    </div>
+                  ) : !isAuthenticated ? (
+                    <div className="space-y-5 md:space-y-8 animate-fade-in">
+                      <div className="space-y-2">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <span className="text-[10px] bg-amber-50 text-amber-700 px-3 py-1 rounded-full font-bold uppercase tracking-widest flex items-center gap-1.5">
+                            <i className="fa-solid fa-tag text-[8px]"></i>
+                            <span>الفئة: {categoryMapping[activeSliderWork.category] || activeSliderWork.category || 'متنوع'}</span>
+                          </span>
+                          <span className="text-[10px] bg-[#f0ece6] text-[#6b4c3b] px-3 py-1 rounded-full font-bold uppercase tracking-widest">
+                            عرض للزوار
+                          </span>
+                        </div>
+                        <h2 className="text-2xl md:text-4xl font-bold text-[#3b2012] font-art leading-tight">
+                          {activeSliderWork.title}
+                        </h2>
                       </div>
+
+                      <div className="p-6 bg-[#fdfaf7] rounded-[2rem] border border-[#e8dcc4]/50 space-y-6">
+                        <div className="flex items-center gap-4">
+                          <div className="w-14 h-14 bg-brown-gradient rounded-full flex items-center justify-center text-white text-xl font-bold shadow-md">
+                            {(activeSliderWork.artistName || 'ف').charAt(0)}
+                          </div>
+                          <div className="flex-1">
+                             <p className="text-xs text-[#9c7b65] mb-0.5">الفنان المبدع</p>
+                             <p className="text-lg font-bold text-[#3b2012]">{activeSliderWork.artistName || 'غير متوفر'}</p>
+                          </div>
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-4">
+                          <Link href="/login" className="relative overflow-hidden bg-white p-4 rounded-2xl border border-[#e8dcc4]/30 shadow-sm flex items-center gap-3 group">
+                             <div className="w-10 h-10 bg-amber-50 rounded-xl flex items-center justify-center text-amber-600 shrink-0">
+                               <i className="fa-solid fa-location-dot"></i>
+                             </div>
+                             <div className="flex-1 min-w-0">
+                                <p className="text-[10px] text-gray-400">الموقع</p>
+                                <div className="relative mt-1">
+                                  <p className="text-sm font-bold text-[#3b2012] blur-sm select-none">معلومات الموقع مخفية للزوار</p>
+                                  <div className="absolute inset-0 flex items-center justify-end">
+                                    <span className="inline-flex items-center gap-1 bg-white/90 text-[#6b4c3b] text-[10px] font-bold px-2 py-1 rounded-full border border-[#e8dcc4]">
+                                      <i className="fa-solid fa-lock text-[9px]"></i>
+                                       سجل الدخول أولا
+                                    </span>
+                                  </div>
+                                </div>
+                             </div>
+                          </Link>
+                          <Link href="/login" className="relative overflow-hidden bg-white p-4 rounded-2xl border border-[#e8dcc4]/30 shadow-sm flex items-center gap-3 group">
+                             <div className="w-10 h-10 bg-green-50 rounded-xl flex items-center justify-center text-green-600 shrink-0">
+                               <i className="fa-solid fa-phone"></i>
+                             </div>
+                             <div className="flex-1 min-w-0">
+                                <p className="text-[10px] text-gray-400">رقم التواصل</p>
+                                <div className="relative mt-1">
+                                  <p className="text-sm font-bold text-[#3b2012] font-mono tracking-wider blur-sm select-none" dir="ltr">0000000000</p>
+                                  <div className="absolute inset-0 flex items-center justify-end">
+                                    <span className="inline-flex items-center gap-1 bg-white/90 text-[#6b4c3b] text-[10px] font-bold px-2 py-1 rounded-full border border-[#e8dcc4]">
+                                      <i className="fa-solid fa-lock text-[9px]"></i>
+                                        سجل الدخول أولا  
+                                    </span>
+                                  </div>
+                                </div>
+                             </div>
+                          </Link>
+                        </div>
+
+                        <Link href="/login" className="bg-white/80 border border-[#e8dcc4] hover:border-[#6b4c3b] hover:bg-[#fdfaf7] rounded-2xl p-4 flex items-start gap-3 transition-colors cursor-pointer">
+                          <div className="w-11 h-11 shrink-0 rounded-xl bg-[#f0ece6] text-[#6b4c3b] flex items-center justify-center">
+                            <i className="fa-solid fa-user-lock"></i>
+                          </div>
+                          <div className="flex-1">
+                            <p className="text-sm font-bold text-[#3b2012]">أنشئ حساباً للوصول إلى معلومات التواصل</p>
+                            <p className="text-xs text-[#9c7b65] mt-1 leading-relaxed">سجّل الدخول أو أنشئ حساباً جديداً لرؤية موقع الفنان ورقم التواصل والتفاعل الكامل مع الأعمال الفنية.</p>
+                          </div>
+                        </Link>
+                      </div>
+
                       <div className="space-y-4">
-                        <h2 className="text-3xl font-bold text-[#3b2012] font-art">محتوى للأعضاء فقط</h2>
-                        <p className="text-[#9c7b65] text-lg leading-relaxed font-amiri max-w-sm mx-auto">
-                          لرؤية كامل تفاصيل العمل الفني، اسم الفنان، موقعه، ورقم التواصل، يرجى إنشاء حساب أو تسجيل الدخول.
+                        <h4 className="text-lg font-bold text-[#3b2012] flex items-center gap-2">
+                           <i className="fa-solid fa-align-right text-amber-600 text-sm"></i>
+                           عن العمل الفني
+                        </h4>
+                        <p className="text-[#9c7b65] text-lg leading-relaxed font-amiri">
+                          {activeSliderWork.description}
+                        </p>
+                        <p className="text-[10px] text-gray-400 font-bold bg-gray-50 inline-block px-3 py-1 rounded-md">
+                           تاريخ النشر: {activeSliderWork.createdAt ? new Date(activeSliderWork.createdAt).toLocaleDateString('ar-EG', { year: 'numeric', month: 'long', day: 'numeric' }) : 'غير متوفر'}
                         </p>
                       </div>
-                      <div className="flex flex-col w-full gap-4 pt-4">
-                        <Link 
-                          href="/signup" 
-                          className="w-full h-14 bg-brown-gradient rounded-2xl flex items-center justify-center text-white font-bold text-lg shadow-lg hover:opacity-90 active:scale-95 transition-all"
-                        >
-                          إنشاء حساب جديد
-                        </Link>
-                        <Link 
-                          href="/login" 
-                          className="w-full text-[#6b4c3b] font-bold hover:underline"
-                        >
-                          لديك حساب؟ سجل دخولك
-                        </Link>
+
+                      <div className="pt-8 border-t border-gray-100 flex items-center justify-between gap-4 flex-wrap">
+                         <div className="space-y-1">
+                            <p className="text-xs text-gray-400 font-bold">السعر المطلوب</p>
+                            <p className="text-3xl font-black text-[#3b2012]">
+                              {activeSliderWork.price ? `${activeSliderWork.price} ₪` : 'حسب الطلب'}
+                            </p>
+                         </div>
+                         <div className="flex gap-3 flex-wrap">
+                           <Link 
+                             href="/signup" 
+                             className="h-14 px-6 bg-brown-gradient rounded-2xl flex items-center justify-center text-white font-bold shadow-lg hover:opacity-90 active:scale-95 transition-all"
+                           >
+                             إنشاء حساب
+                           </Link>
+                           <Link 
+                             href="/login" 
+                             className="h-14 px-6 bg-[#f0ece6] text-[#6b4c3b] rounded-2xl font-bold flex items-center justify-center hover:bg-[#e8dcc4] transition-all"
+                           >
+                             تسجيل الدخول
+                           </Link>
+                         </div>
                       </div>
-                      <div className="pt-8 border-t border-gray-100 w-full">
-                         <div className="flex items-center justify-center gap-6 opacity-30">
-                            <i className="fa-solid fa-palette text-2xl"></i>
-                            <i className="fa-solid fa-brush text-2xl"></i>
-                            <i className="fa-solid fa-gem text-2xl"></i>
+                    </div>
+                  ) : isOwnerArtwork(activeSliderWork) ? (
+                    <div className="space-y-8 animate-fade-in">
+                      <div className="space-y-2">
+                        <div className="flex items-center gap-2">
+                          <span className="text-[10px] bg-amber-50 text-amber-700 px-3 py-1 rounded-full font-bold uppercase tracking-widest flex items-center gap-1.5">
+                            <i className="fa-solid fa-tag text-[8px]"></i>
+                            <span>الفئة: {categoryMapping[activeSliderWork.category] || activeSliderWork.category || 'متنوع'}</span>
+                          </span>
+                          <span className="text-[10px] bg-green-50 text-green-700 px-3 py-1 rounded-full font-bold uppercase tracking-widest">
+                             عملي الخاص
+                          </span>
+                        </div>
+                        <h2 className="text-4xl font-bold text-[#3b2012] font-art leading-tight">
+                          {activeSliderWork.title}
+                        </h2>
+                      </div>
+
+                      <div className="p-6 bg-[#fdfaf7] rounded-[2rem] border border-[#e8dcc4]/50 space-y-6">
+                        <div className="flex items-center gap-4">
+                          <div className="w-14 h-14 bg-brown-gradient rounded-full flex items-center justify-center text-white text-xl font-bold shadow-md">
+                            {user?.artistAvatar || user?.firstName?.charAt(0) || 'أ'}
+                          </div>
+                          <div className="flex-1">
+                             <p className="text-xs text-[#9c7b65] mb-0.5">الفنان (أنت)</p>
+                             <p className="text-lg font-bold text-[#3b2012]">{user?.artistName || `${user?.firstName || ''} ${user?.lastName || ''}`.trim()}</p>
+                          </div>
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-4">
+                          <div className="bg-white p-4 rounded-2xl border border-[#e8dcc4]/30 shadow-sm flex items-center gap-3">
+                             <div className="w-10 h-10 bg-amber-50 rounded-xl flex items-center justify-center text-amber-600">
+                               <i className="fa-solid fa-location-dot"></i>
+                             </div>
+                             <div>
+                                <p className="text-[10px] text-gray-400">الموقع</p>
+                                <p className="text-sm font-bold text-[#3b2012]">{user?.location || activeSliderWork.artistLocation || 'نابلس، فلسطين'}</p>
+                             </div>
+                          </div>
+                          <div className="bg-white p-4 rounded-2xl border border-[#e8dcc4]/30 shadow-sm flex items-center gap-3">
+                             <div className="w-10 h-10 bg-green-50 rounded-xl flex items-center justify-center text-green-600">
+                               <i className="fa-solid fa-phone"></i>
+                             </div>
+                             <div>
+                                <p className="text-[10px] text-gray-400">رقم التواصل</p>
+                                <p className="text-sm font-bold text-[#3b2012] font-mono tracking-wider" dir="ltr">{user?.phone || activeSliderWork.artistPhone || '059xxxxxxx'}</p>
+                             </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="space-y-4">
+                        <h4 className="text-lg font-bold text-[#3b2012] flex items-center gap-2">
+                           <i className="fa-solid fa-align-right text-amber-600 text-sm"></i>
+                           عن العمل الفني
+                        </h4>
+                        <p className="text-[#9c7b65] text-lg leading-relaxed font-amiri">
+                          {activeSliderWork.description}
+                        </p>
+                        <p className="text-[10px] text-gray-400 font-bold bg-gray-50 inline-block px-3 py-1 rounded-md">
+                           تاريخ النشر: {activeSliderWork.created_at ? new Date(activeSliderWork.created_at).toLocaleDateString('ar-EG', { year: 'numeric', month: 'long', day: 'numeric' }) : 'غير متوفر'}
+                        </p>
+                      </div>
+
+                      <div className="pt-8 border-t border-gray-100 flex items-center justify-between mt-auto">
+                         <div className="space-y-1">
+                            <p className="text-xs text-gray-400 font-bold">السعر</p>
+                            <p className="text-3xl font-black text-[#3b2012]">
+                              {activeSliderWork.price ? `${activeSliderWork.price} ₪` : 'حسب الطلب'}
+                            </p>
+                         </div>
+                         <div className="flex gap-2">
+                            <Link 
+                              href={`/works/edit/${activeSliderWork.id}`}
+                              className="h-14 px-6 bg-[#f0ece6] text-[#3b2012] rounded-2xl font-bold flex items-center justify-center gap-2 hover:bg-[#e8dcc4] transition-all"
+                            >
+                               <i className="fa-solid fa-pen-to-square"></i>
+                               <span>تعديل</span>
+                            </Link>
                          </div>
                       </div>
                     </div>
@@ -481,10 +604,20 @@ export default function ProductsPage() {
                               {activeSliderWork.price ? `${activeSliderWork.price} ₪` : 'حسب الطلب'}
                             </p>
                          </div>
-                         <button className="h-14 px-10 bg-[#3b2012] text-white rounded-2xl font-bold flex items-center justify-center gap-3 shadow-xl hover:bg-[#5c3d2e] transition-all active:scale-95 group">
-                            <span>إضافة للسلة</span>
-                            <i className="fa-solid fa-bag-shopping transition-transform group-hover:-translate-y-1"></i>
-                         </button>
+                         {isOwnerArtwork(activeSliderWork) ? (
+                           <Link
+                             href={`/works/edit/${activeSliderWork.id}`}
+                             className="h-14 px-10 bg-[#3b2012] text-white rounded-2xl font-bold flex items-center justify-center gap-3 shadow-xl hover:bg-[#5c3d2e] transition-all active:scale-95"
+                           >
+                             <span>تعديل العمل</span>
+                             <i className="fa-solid fa-pen-to-square"></i>
+                           </Link>
+                         ) : (
+                           <button className="h-14 px-10 bg-[#3b2012] text-white rounded-2xl font-bold flex items-center justify-center gap-3 shadow-xl hover:bg-[#5c3d2e] transition-all active:scale-95 group">
+                              <span>إضافة للسلة</span>
+                              <i className="fa-solid fa-bag-shopping transition-transform group-hover:-translate-y-1"></i>
+                           </button>
+                         )}
                       </div>
                     </div>
                   )}

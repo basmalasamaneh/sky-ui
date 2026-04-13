@@ -74,75 +74,40 @@ export default function AddWorkPage() {
     setSubmitMessage({ type: '', text: '' });
 
     try {
-      // Create FormData to handle image files
+      if (!images.length) {
+        setSubmitMessage({ type: 'error', text: 'مطلوب صورة واحدة على الأقل.' });
+        return;
+      }
+
       const data = new FormData();
       data.append('title', formData.title);
       data.append('description', formData.description);
       data.append('category', formData.category);
       data.append('price', formData.price);
       data.append('quantity', formData.quantity);
-      data.append('mainImageIndex', mainImageIndex);
-      
-      // Append all images
-      images.forEach((img, idx) => {
-        data.append('images', img.file);
+      data.append('mainImageIndex', String(mainImageIndex));
+      images.forEach((img) => {
+        if (img.file) data.append('images', img.file);
       });
 
-      const res = await fetch('/api/works', {
+      const res = await fetch('/api/artworks', {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${token}`
+          'Authorization': `Bearer ${token}`,
         },
         body: data,
       });
 
-      let result = {};
-      try {
-        result = await res.json();
-      } catch (parseError) {
-        if (!res.ok) {
-           console.warn('Backend is missing the route or returned non-JSON. Simulating success for presentation.');
-           result = { success: true };
-        }
-      }
+      const contentType = res.headers.get('content-type') || '';
+      const result = contentType.includes('application/json')
+        ? await res.json().catch(() => ({}))
+        : {};
 
-      if (!res.ok && res.status !== 404) {
-        setSubmitMessage({ type: 'error', text: result.message || 'حدث خطأ أثناء إضافة العمل الفني.' });
+      if (!res.ok) {
+        const validationMsg = Array.isArray(result?.errors) ? result.errors[0]?.message : undefined;
+        const msg = validationMsg || result.message || `خطأ ${res.status}: تعذر إضافة العمل الفني. تأكد من أن الخادم يدعم هذه العملية.`;
+        setSubmitMessage({ type: 'error', text: msg });
         return;
-      }
-
-      // -------------------------------------------------------------
-      // MOCK SAVE for Demo Purposes: So the user can see their added work
-      // -------------------------------------------------------------
-      try {
-        // Convert files to base64 for local storage display
-        const localImages = await Promise.all(images.map(img => {
-          return new Promise((resolve) => {
-             const reader = new FileReader();
-             reader.onload = () => resolve(reader.result);
-             reader.readAsDataURL(img.file);
-          });
-        }));
-
-        const newWork = {
-          id: Date.now().toString(),
-          title: formData.title,
-          description: formData.description,
-          category: formData.category,
-          price: formData.price,
-          quantity: formData.quantity,
-          mainImageIndex: mainImageIndex,
-          images: localImages,
-          artistName: user?.artistName || user?.firstName,
-          artistPhone: user?.phone || 'غير مسجل',
-          artistLocation: user?.location || 'غير محدد',
-          createdAt: new Date().toISOString()
-        };
-
-        const existingWorks = JSON.parse(localStorage.getItem('mockWorks') || '[]');
-        localStorage.setItem('mockWorks', JSON.stringify([newWork, ...existingWorks]));
-      } catch (e) {
-        console.error('Failed to save mock work locally', e);
       }
 
       setSubmitMessage({ type: 'success', text: 'تم إضافة العمل الفني بنجاح!' });
@@ -272,7 +237,7 @@ export default function AddWorkPage() {
                     value={formData.price}
                     onChange={handleInputChange}
                     placeholder="مثال: 150"
-                    className="w-full h-14 bg-[#fdfaf7] border border-[#e8dcc4] rounded-2xl px-5 text-[#3b2012] outline-none focus:ring-2 focus:ring-[#5c4436]/20 focus:border-[#5c4436] transition-all font-bold"
+                    className="price-input-with-ils w-full h-14 bg-[#fdfaf7] border border-[#e8dcc4] rounded-2xl px-5 pl-14 text-[#3b2012] outline-none focus:ring-2 focus:ring-[#5c4436]/20 focus:border-[#5c4436] transition-all font-bold"
                   />
                   <span className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-500 font-bold">₪</span>
                 </div>

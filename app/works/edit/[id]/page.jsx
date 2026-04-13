@@ -6,6 +6,7 @@ import { useRouter, useParams } from 'next/navigation';
 import { motion } from 'framer-motion';
 import Image from 'next/image';
 import Link from 'next/link';
+import { buildBackendApiUrl } from '@/lib/backend-api';
 
 export default function EditWorkPage() {
   const { user, isAuthenticated, isLoading, token } = useAuth();
@@ -23,66 +24,49 @@ export default function EditWorkPage() {
 
   const [images, setImages] = useState([]);
   const [mainImageIndex, setMainImageIndex] = useState(0);
+  const [draggedFromIndex, setDraggedFromIndex] = useState(null);
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitMessage, setSubmitMessage] = useState({ type: '', text: '' });
   const [isPageLoading, setIsPageLoading] = useState(true);
 
+  const toImageSrc = (src) => {
+    if (typeof src !== 'string' || !src.trim()) return '';
+    if (src.startsWith('http://') || src.startsWith('https://')) return src;
+    if (src.startsWith('/')) return buildBackendApiUrl(src);
+    return buildBackendApiUrl(`/images/${encodeURIComponent(src)}`);
+  };
+
   // Load existing work data
   useEffect(() => {
     if (!workId) return;
 
-    // Simulate fetching the work to edit
     const fetchWorkData = async () => {
-      // First try local storage (for locally added mock works)
-      const localMockStr = localStorage.getItem('mockWorks');
       let foundWork = null;
-      if (localMockStr) {
-        const localMock = JSON.parse(localMockStr);
-        foundWork = localMock.find(w => w.id === workId);
-      }
 
-      // If not in local storage, check dummy data logic
-      if (!foundWork) {
-         // Fake hardcoded elements
-         if (workId === '1') {
-           foundWork = {
-              id: '1',
-              title: 'تجريد الألوان',
-              description: 'لوحة زيتية تجريدية تعبر عن تداخل المشاعر والألوان في مشهد فني فريد.',
-              images: [
-                'https://images.unsplash.com/photo-1541963463532-d68292c34b19?auto=format&fit=crop&q=80&w=800',
-                'https://images.unsplash.com/photo-1579783902614-a3fb3927b6a5?auto=format&fit=crop&q=80&w=800',
-                'https://images.unsplash.com/photo-1501472312651-726afe119ff1?auto=format&fit=crop&q=80&w=800'
-              ],
-              mainImageIndex: 0
-           };
-         } else if (workId === '2') {
-           foundWork = {
-              id: '2',
-              title: 'صمت الحجر',
-              description: 'منحوتة يدوية من الرخام الصافي تجسد الهدوء والتأمل.',
-              images: [
-                'https://images.unsplash.com/photo-1549490349-8643362247b5?auto=format&fit=crop&q=80&w=800',
-                'https://images.unsplash.com/photo-1561070791-2526d30994b5?auto=format&fit=crop&q=80&w=800'
-              ],
-              mainImageIndex: 1
-           };
-         } else {
-             // Fallback API try
-            try {
-              const res = await fetch(`/api/works/${workId}`, {
-                 headers: { 'Authorization': `Bearer ${token}` }
-              });
-              const data = await res.json();
-              if (res.ok && data.data) foundWork = data.data;
-            } catch (e) {
-               console.warn("Could not fetch from backend");
-            }
-         }
+      try {
+        const res = await fetch(`/api/artworks/${workId}`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const contentType = res.headers.get('content-type') || '';
+        const data = contentType.includes('application/json')
+          ? await res.json().catch(() => ({}))
+          : {};
+        if (res.ok && data?.data?.artwork) {
+          foundWork = data.data.artwork;
+        } else if (!res.ok) {
+          const msg = data?.message || `خطأ ${res.status}: تعذر جلب بيانات العمل.`;
+          setSubmitMessage({ type: 'error', text: msg });
+        }
+      } catch (e) {
+        console.error('Could not fetch work from backend', e);
+        setSubmitMessage({ type: 'error', text: 'تعذر الاتصال بالخادم.' });
       }
 
       if (foundWork) {
+        const artworkImages = Array.isArray(foundWork.artwork_images) ? foundWork.artwork_images : [];
+        const featuredIndex = artworkImages.findIndex((img) => img.is_featured);
+
         setFormData({ 
           title: foundWork.title, 
           description: foundWork.description, 
@@ -90,13 +74,14 @@ export default function EditWorkPage() {
           price: foundWork.price || '',
           quantity: foundWork.quantity || ''
         });
-        setMainImageIndex(foundWork.mainImageIndex || 0);
+        setMainImageIndex(featuredIndex >= 0 ? featuredIndex : 0);
 
         // For existing URLs, we fake a "file" object so the preview works similarly
-        if (foundWork.images && foundWork.images.length > 0) {
-            setImages(foundWork.images.map(img => ({
+        if (artworkImages.length > 0) {
+            setImages(artworkImages.map(img => ({
                 isExisting: true, // flag to indicate it's not a local file
-                preview: img,
+            storedFilename: img.filename,
+            preview: toImageSrc(img.filename),
                 file: null
             })));
         }
@@ -150,6 +135,43 @@ export default function EditWorkPage() {
     }
   };
 
+  const handleDragStart = (e, index) => {
+    setDraggedFromIndex(index);
+    e.dataTransfer.effectAllowed = 'move';
+  };
+
+  const handleDragOver = (e) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+  };
+
+  const handleDrop = (e, targetIndex) => {
+    e.preventDefault();
+    if (draggedFromIndex === null || draggedFromIndex === targetIndex) {
+      setDraggedFromIndex(null);
+      return;
+    }
+
+    setImages(prev => {
+      const newImages = [...prev];
+      const draggedImage = newImages[draggedFromIndex];
+      newImages.splice(draggedFromIndex, 1);
+      newImages.splice(targetIndex, 0, draggedImage);
+      return newImages;
+    });
+
+    // Update mainImageIndex if the featured image was moved
+    if (mainImageIndex === draggedFromIndex) {
+      setMainImageIndex(targetIndex);
+    } else if (draggedFromIndex < mainImageIndex && targetIndex >= mainImageIndex) {
+      setMainImageIndex(prev => prev - 1);
+    } else if (draggedFromIndex > mainImageIndex && targetIndex <= mainImageIndex) {
+      setMainImageIndex(prev => prev + 1);
+    }
+
+    setDraggedFromIndex(null);
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
@@ -162,70 +184,40 @@ export default function EditWorkPage() {
       data.append('category', formData.category);
       data.append('price', formData.price);
       data.append('quantity', formData.quantity);
-      data.append('mainImageIndex', mainImageIndex);
-      
-      // We would append files and existing URLs properly to real backend
+      data.append('mainImageIndex', String(mainImageIndex));
+
+      let newImageIndex = 0;
       images.forEach((img) => {
-        if (img.file) data.append('images', img.file);
-        else data.append('existingImages', img.preview);
+        if (img.file) {
+          data.append('images', img.file);
+          data.append('imageOrder', `new:${newImageIndex}`);
+          newImageIndex += 1;
+        } else {
+          const storedFilename = img.storedFilename || img.preview;
+          data.append('existingImages', storedFilename);
+          data.append('imageOrder', `existing:${storedFilename}`);
+        }
       });
 
-      const res = await fetch(`/api/works/${workId}`, {
-        method: 'PUT',
-        headers: { 'Authorization': `Bearer ${token}` },
+      const res = await fetch(`/api/artworks/${workId}`, {
+        method: 'PATCH',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
         body: data,
       });
 
-      let result = {};
-      try { result = await res.json(); } catch (e) {
-          // Backend missing handling
-          if (!res.ok) result = { success: true };
-      }
+      const contentType = res.headers.get('content-type') || '';
+      const result = contentType.includes('application/json')
+        ? await res.json().catch(() => ({}))
+        : {};
 
-      if (!res.ok && res.status !== 404) {
-        setSubmitMessage({ type: 'error', text: result.message || 'حدث خطأ أثناء تعديل العمل הפني.' });
+      if (!res.ok) {
+        setSubmitMessage({ type: 'error', text: result.message || `خطأ ${res.status}: تعذر تعديل العمل الفني.` });
         return;
       }
 
-      // --- MOCK SAVE for Edit Demo ---
-      try {
-        const processedImages = await Promise.all(images.map(img => {
-          if (img.isExisting) return img.preview;
-          
-          return new Promise((resolve) => {
-             const reader = new FileReader();
-             reader.onload = () => resolve(reader.result);
-             reader.readAsDataURL(img.file);
-          });
-        }));
-
-        const updatedWork = {
-          id: workId,
-          title: formData.title,
-          description: formData.description,
-          category: formData.category,
-          price: formData.price,
-          quantity: formData.quantity,
-          mainImageIndex: mainImageIndex,
-          images: processedImages,
-          updatedAt: new Date().toISOString()
-        };
-
-        const existingStr = localStorage.getItem('mockWorks') || '[]';
-        let existingWorks = JSON.parse(existingStr);
-        
-        const workIndex = existingWorks.findIndex(w => w.id === workId);
-        if (workIndex >= 0) {
-            existingWorks[workIndex] = { ...existingWorks[workIndex], ...updatedWork };
-        } else {
-            // It might have been a hardcoded one we're duplicating to "override"
-            existingWorks = [updatedWork, ...existingWorks];
-        }
-
-        localStorage.setItem('mockWorks', JSON.stringify(existingWorks));
-      } catch (err) { console.error('Local mock save failed', err); }
-
-      setSubmitMessage({ type: 'success', text: 'تم تعديل العمل הפني بنجاح!' });
+      setSubmitMessage({ type: 'success', text: 'تم تعديل العمل الفني بنجاح!' });
       setTimeout(() => router.push('/works/my'), 2000);
     } catch (err) {
       console.error('Update work failed:', err);
@@ -334,7 +326,7 @@ export default function EditWorkPage() {
                     value={formData.price}
                     onChange={handleInputChange}
                     placeholder="مثال: 150"
-                    className="w-full h-14 bg-[#fdfaf7] border border-[#e8dcc4] rounded-2xl px-5 text-[#3b2012] outline-none focus:ring-2 focus:ring-[#5c4436]/20 focus:border-[#5c4436] transition-all font-bold"
+                    className="price-input-with-ils w-full h-14 bg-[#fdfaf7] border border-[#e8dcc4] rounded-2xl px-5 pl-14 text-[#3b2012] outline-none focus:ring-2 focus:ring-[#5c4436]/20 focus:border-[#5c4436] transition-all font-bold"
                   />
                   <span className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-500 font-bold">₪</span>
                 </div>
@@ -377,8 +369,17 @@ export default function EditWorkPage() {
                     <div className="flex gap-3 overflow-x-auto pb-2 no-scrollbar">
                       {images.map((img, idx) => (
                         <div 
-                          key={idx} onClick={() => setMainImageIndex(idx)}
-                          className={`relative w-24 h-24 rounded-xl overflow-hidden shrink-0 cursor-pointer border-4 transition-all ${mainImageIndex === idx ? 'border-amber-500 shadow-md scale-105' : 'border-transparent hover:border-[#e8dcc4]'}`}
+                          key={idx}
+                          draggable
+                          onDragStart={(e) => handleDragStart(e, idx)}
+                          onDragOver={handleDragOver}
+                          onDrop={(e) => handleDrop(e, idx)}
+                          onClick={() => setMainImageIndex(idx)}
+                          className={`relative w-24 h-24 rounded-xl overflow-hidden shrink-0 cursor-grab active:cursor-grabbing border-4 transition-all ${
+                            draggedFromIndex === idx ? 'opacity-50' : ''
+                          } ${
+                            mainImageIndex === idx ? 'border-amber-500 shadow-md scale-105' : 'border-transparent hover:border-[#e8dcc4]'
+                          }`}
                         >
                           <Image src={img.preview} alt={`Thumb ${idx}`} fill className="object-cover" />
                           <button 

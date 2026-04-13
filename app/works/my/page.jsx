@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import Image from 'next/image';
 import Link from 'next/link';
+import { buildBackendApiUrl } from '@/lib/backend-api';
 
 export default function MyWorksPage() {
   const { user, isAuthenticated, isLoading, token } = useAuth();
@@ -13,8 +14,33 @@ export default function MyWorksPage() {
 
   const [works, setWorks] = useState([]);
   const [isFetching, setIsFetching] = useState(true);
+  const [fetchError, setFetchError] = useState('');
   const [activeSliderWork, setActiveSliderWork] = useState(null);
   const [currentSlideIndex, setCurrentSlideIndex] = useState(0);
+
+  const toImageSrc = (src) => {
+    if (typeof src !== 'string' || !src.trim()) return null;
+    if (src.startsWith('http://') || src.startsWith('https://')) return src;
+    if (src.startsWith('/')) return buildBackendApiUrl(src);
+    return buildBackendApiUrl(`/images/${encodeURIComponent(src)}`);
+  };
+
+  const normalizeWork = (work) => {
+    const artworkImages = Array.isArray(work?.artwork_images) ? work.artwork_images : [];
+    const sortedImages = artworkImages.sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0));
+    const mappedImages = sortedImages
+      .map((image) => image.filename)
+      .map((src) => toImageSrc(src))
+      .filter(Boolean);
+    const featuredIndex = sortedImages.findIndex((image) => image.is_featured);
+
+    return {
+      ...work,
+      images: mappedImages,
+      mainImageIndex: featuredIndex >= 0 ? featuredIndex : 0,
+      createdAt: work?.created_at || work?.createdAt,
+    };
+  };
 
   // Close slider on escape
   useEffect(() => {
@@ -54,26 +80,22 @@ export default function MyWorksPage() {
     e.stopPropagation();
     if (!window.confirm('هل أنت متأكد من رغبتك في حذف هذا العمل؟ لا يمكن التراجع عن هذه الخطوة.')) return;
 
-    // Filter from state
-    setWorks(prev => prev.filter(w => w.id !== id));
-
-    // Remove from local storage
-    try {
-      const localMockStr = localStorage.getItem('mockWorks');
-      if (localMockStr) {
-        let localMock = JSON.parse(localMockStr);
-        localMock = localMock.filter(w => w.id !== id);
-        localStorage.setItem('mockWorks', JSON.stringify(localMock));
-      }
-    } catch (err) {
-      console.error('Failed to update local storage', err);
-    }
-
-    // Attempt API call (mocking gracefully if backend isn't ready)
-    fetch(`/api/works/${id}`, {
+    fetch(`/api/artworks/${id}`, {
       method: 'DELETE',
       headers: { 'Authorization': `Bearer ${token}` },
-    }).catch(() => console.warn('Backend missing, simulated delete locally'));
+    })
+      .then(async (res) => {
+        if (!res.ok) {
+          const result = await res.json().catch(() => ({}));
+          throw new Error(result.message || 'فشل حذف العمل الفني.');
+        }
+
+        setWorks(prev => prev.filter(w => w.id !== id));
+      })
+      .catch((err) => {
+        console.error('Delete work failed:', err);
+        alert(err.message || 'تعذر حذف العمل الفني حالياً. حاول مرة أخرى لاحقاً.');
+      });
   };
 
   // حماية الصفحة: تظهر فقط للمستخدمين المسجلين كفنانين
@@ -102,65 +124,30 @@ export default function MyWorksPage() {
 
     const fetchMyWorks = async () => {
       setIsFetching(true);
+      setFetchError('');
       try {
-          let fetchedWorks = [];
-          
-          try {
-            const res = await fetch('/api/works/my', {
-              headers: { 'Authorization': `Bearer ${token}` },
-            });
-            const result = await res.json();
-            
-            if (res.ok && result.data && result.data.length > 0) {
-              fetchedWorks = result.data;
-            }
-          } catch (e) {
-             console.warn('Backend route missing or network error. Using mock data.');
-          }
+        const res = await fetch('/api/artworks/my-artworks', {
+          headers: { 'Authorization': `Bearer ${token}` },
+        });
 
-          if (fetchedWorks.length === 0) {
-            // بيانات تجريبية لعرض الواجهة إذا لم تكن هناك أعمال بعد أو فشل الـ API
-            fetchedWorks = [
-              {
-                id: '1',
-                title: 'تجريد الألوان',
-                description: 'لوحة زيتية تجريدية تعبر عن تداخل المشاعر والألوان في مشهد فني فريد.',
-                images: [
-                  'https://images.unsplash.com/photo-1541963463532-d68292c34b19?auto=format&fit=crop&q=80&w=800',
-                  'https://images.unsplash.com/photo-1579783902614-a3fb3927b6a5?auto=format&fit=crop&q=80&w=800',
-                  'https://images.unsplash.com/photo-1501472312651-726afe119ff1?auto=format&fit=crop&q=80&w=800'
-                ],
-                mainImageIndex: 0,
-                createdAt: new Date().toISOString()
-              },
-              {
-                id: '2',
-                title: 'صمت الحجر',
-                description: 'منحوتة يدوية من الرخام الصافي تجسد الهدوء والتأمل.',
-                images: [
-                  'https://images.unsplash.com/photo-1549490349-8643362247b5?auto=format&fit=crop&q=80&w=800',
-                  'https://images.unsplash.com/photo-1561070791-2526d30994b5?auto=format&fit=crop&q=80&w=800'
-                ],
-                mainImageIndex: 1,
-                createdAt: new Date().toISOString()
-              }
-            ];
-          }
+        const contentType = res.headers.get('content-type') || '';
+        const result = contentType.includes('application/json')
+          ? await res.json().catch(() => ({}))
+          : {};
 
-          // Merge with local mock data
-          try {
-            const localMockStr = localStorage.getItem('mockWorks');
-            if (localMockStr) {
-              const localMock = JSON.parse(localMockStr);
-              fetchedWorks = [...localMock, ...fetchedWorks];
-            }
-          } catch (e) {
-            console.error('Failed to load local works', e);
-          }
+        if (!res.ok) {
+          const msg = result?.message || `خطأ ${res.status}: تعذر جلب الأعمال الفنية من الخادم.`;
+          console.error('Failed to fetch my works:', res.status, msg);
+          setFetchError(msg);
+          setWorks([]);
+          return;
+        }
 
-          setWorks(fetchedWorks);
+        const rawWorks = Array.isArray(result?.data?.artworks) ? result.data.artworks : [];
+        setWorks(rawWorks.map(normalizeWork));
       } catch (err) {
-        console.error('Unexpected error in fetch logic:', err);
+        console.error('Failed to fetch my works:', err);
+        setFetchError('تعذر الاتصال بالخادم. تأكد من تشغيل الباك إند.');
         setWorks([]);
       } finally {
         setIsFetching(false);
@@ -321,6 +308,12 @@ export default function MyWorksPage() {
             animate={{ opacity: 1, y: 0 }}
             className="flex flex-col items-center justify-center py-24 px-6 bg-white rounded-[3rem] border border-[#e8dcc4] text-center shadow-lg"
           >
+            {fetchError && (
+              <div className="w-full mb-8 bg-red-50 border border-red-200 text-red-700 px-5 py-4 rounded-2xl flex items-center gap-3 text-sm font-bold font-amiri">
+                <i className="fa-solid fa-circle-exclamation text-red-500"></i>
+                {fetchError}
+              </div>
+            )}
             <div className="w-32 h-32 bg-[#fdfaf7] rounded-full flex items-center justify-center mb-8 relative border-4 border-white shadow-inner">
                <i className="fa-solid fa-paintbrush text-5xl text-[#ceb29f]"></i>
                <div className="absolute -top-2 -right-2 w-10 h-10 bg-brown-gradient rounded-full flex items-center justify-center text-white shadow-lg border-2 border-white">

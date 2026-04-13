@@ -87,3 +87,9 @@ input[type="password"]::-webkit-textfield-decoration-container {
   -ms-overflow-style: none;  /* IE and Edge */
   scrollbar-width: none;  /* Firefox */
 }
+
+/* Keep spinner enabled and place it away from the left-side ILS sign */
+.price-input-with-ils {
+  direction: rtl;
+  text-align: right;
+}

@@ -1,6 +1,6 @@
 import { buildBackendApiUrl } from '@/lib/backend-api';
 
-export async function DELETE(req) {
+export async function GET(req) {
   try {
     const authHeader = req.headers.get('authorization');
 
@@ -12,8 +12,8 @@ export async function DELETE(req) {
     }
 
     try {
-      const backendResponse = await fetch(buildBackendApiUrl('/api/users/me'), {
-        method: 'DELETE',
+      const backendResponse = await fetch(buildBackendApiUrl('/api/users/profile'), {
+        method: 'GET',
         headers: {
           'Authorization': authHeader,
         },
@@ -23,7 +23,7 @@ export async function DELETE(req) {
 
       if (!backendResponse.ok) {
         return Response.json(
-          { status: 'error', message: result.message || 'فشل حذف الحساب' },
+          { status: 'error', message: result.message || 'فشل جلب بيانات المستخدم' },
           { status: backendResponse.status }
         );
       }
@@ -32,12 +32,12 @@ export async function DELETE(req) {
     } catch (fetchError) {
       console.error('Backend Connection Error:', fetchError);
       return Response.json(
-        { status: 'error', message: 'تعذر حذف الحساب حالياً. حاول مرة أخرى لاحقاً.' },
+        { status: 'error', message: 'تعذر جلب بيانات المستخدم حالياً. حاول مرة أخرى لاحقاً.' },
         { status: 503 }
       );
     }
   } catch (error) {
-    console.error('Delete Account Route Error:', error);
+    console.error('Get Me Route Error:', error);
     return Response.json(
       { status: 'error', message: 'حدث خطأ غير متوقع في الخادم' },
       { status: 500 }
