@@ -18,6 +18,12 @@ export default function MyWorksPage() {
   const [activeSliderWork, setActiveSliderWork] = useState(null);
   const [currentSlideIndex, setCurrentSlideIndex] = useState(0);
 
+  // Pagination states
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalCount, setTotalCount] = useState(0);
+  const limit = 9; // Works per page
+  const totalPages = Math.ceil(totalCount / limit);
+
   const toImageSrc = (src) => {
     if (typeof src !== 'string' || !src.trim()) return null;
     if (src.startsWith('http://') || src.startsWith('https://')) return src;
@@ -126,7 +132,11 @@ export default function MyWorksPage() {
       setIsFetching(true);
       setFetchError('');
       try {
-        const res = await fetch('/api/artworks/my-artworks', {
+        const queryParams = new URLSearchParams();
+        queryParams.append('page', currentPage.toString());
+        queryParams.append('limit', limit.toString());
+
+        const res = await fetch(`/api/artworks/my-artworks?${queryParams.toString()}`, {
           headers: { 'Authorization': `Bearer ${token}` },
         });
 
@@ -140,22 +150,32 @@ export default function MyWorksPage() {
           console.error('Failed to fetch my works:', res.status, msg);
           setFetchError(msg);
           setWorks([]);
+          setTotalCount(0);
           return;
         }
 
         const rawWorks = Array.isArray(result?.data?.artworks) ? result.data.artworks : [];
         setWorks(rawWorks.map(normalizeWork));
+        setTotalCount(result?.data?.totalCount || 0);
       } catch (err) {
         console.error('Failed to fetch my works:', err);
         setFetchError('تعذر الاتصال بالخادم. تأكد من تشغيل الباك إند.');
         setWorks([]);
+        setTotalCount(0);
       } finally {
         setIsFetching(false);
       }
     };
 
     fetchMyWorks();
-  }, [token, isAuthenticated, user]);
+  }, [token, isAuthenticated, user, currentPage]);
+
+  const handlePageChange = (newPage) => {
+    if (newPage >= 1 && newPage <= totalPages) {
+      setCurrentPage(newPage);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  };
 
   // منع عرض أي مكونات إذا لم يكن مصرحاً له
   if (isLoading || !isAuthenticated || user?.role !== 'artist') {
@@ -216,91 +236,145 @@ export default function MyWorksPage() {
             ))}
           </div>
         ) : works.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
-            <AnimatePresence mode="popLayout">
-              {works.map((work, index) => (
-                <motion.div
-                  key={work.id}
-                  layout
-                  initial={{ opacity: 0, y: 30 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: index * 0.1 }}
-                  onClick={() => openSlider(work)}
-                  className="group bg-white rounded-[2.5rem] overflow-hidden border border-[#e8dcc4] shadow-sm hover:shadow-2xl transition-all duration-500 relative flex flex-col h-full cursor-pointer"
-                >
-                  {/* حاوية الصورة (Image Container) */}
-                  <div 
-                    className="relative h-72 overflow-hidden m-3 rounded-[2rem]"
+          <>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
+              <AnimatePresence mode="popLayout">
+                {works.map((work, index) => (
+                  <motion.div
+                    key={work.id}
+                    layout
+                    initial={{ opacity: 0, y: 30 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: (index % limit) * 0.1 }}
+                    onClick={() => openSlider(work)}
+                    className="group bg-white rounded-[2.5rem] overflow-hidden border border-[#e8dcc4] shadow-sm hover:shadow-2xl transition-all duration-500 relative flex flex-col h-full cursor-pointer"
                   >
-                    <Image
-                      src={work.images?.[work.mainImageIndex || 0] || 'https://images.unsplash.com/photo-1541963463532-d68292c34b19?auto=format&fit=crop&q=80&w=800'}
-                      alt={work.title}
-                      fill
-                      className="object-cover transition-transform duration-700 group-hover:scale-110"
-                    />
-                    
-                    {/* طبقة التحكم السريعة (Hover Actions) */}
-                    <div className="absolute inset-0 bg-gradient-to-t from-[#3b2012]/90 via-[#3b2012]/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center p-6">
-                       <div className="bg-white/20 backdrop-blur-md border border-white/30 text-white p-4 rounded-full font-bold hover:bg-white hover:text-[#3b2012] transition-colors flex items-center justify-center shadow-xl hover:scale-110 transform">
-                         <i className="fa-solid fa-expand text-2xl"></i>
-                       </div>
-                    </div>
-                    
-                    {/* Badge for multiple images */}
-                    {work.images?.length > 1 && (
-                      <div className="absolute top-4 right-4 bg-black/60 backdrop-blur-sm text-white px-3 py-1.5 rounded-full text-[10px] font-bold flex items-center gap-1.5">
-                        <i className="fa-solid fa-layer-group"></i>
-                        <span>{work.images.length} صور</span>
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Actions Bar (Edit/Delete) */}
-                  <div className="flex px-4 pt-2 gap-2 relative z-10" onClick={(e) => e.stopPropagation()}>
-                     <Link 
-                       href={`/works/edit/${work.id}`}
-                       className="flex-1 bg-[#fdfaf7] text-[#9c7b65] border border-[#e8dcc4] py-2 rounded-xl font-bold hover:bg-[#e8dcc4] hover:text-[#3b2012] transition-colors flex items-center justify-center gap-2 text-xs"
-                     >
-                       <i className="fa-solid fa-pen-to-square"></i>
-                       تعديل
-                     </Link>
-                     <button 
-                       onClick={(e) => handleDeleteWork(e, work.id)}
-                       className="flex-1 bg-red-50 text-red-500 border border-red-100 py-2 rounded-xl font-bold hover:bg-red-500 hover:text-white transition-colors flex items-center justify-center gap-2 text-xs"
-                     >
-                       <i className="fa-solid fa-trash-can"></i>
-                       حذف
-                     </button>
-                  </div>
-
-                  {/* حاوية المحتوى (Content) */}
-                  <div className="p-6 pt-2 flex flex-col flex-1">
-                    <div className="flex items-center justify-between mb-4">
-                      <span className="text-[11px] font-bold text-amber-700 uppercase tracking-widest bg-amber-50 px-3 py-1.5 rounded-full flex items-center gap-1.5">
-                        <i className="fa-regular fa-calendar text-[10px]"></i>
-                        تاريخ العرض: {new Date(work.createdAt).toLocaleDateString('ar-EG', { year: 'numeric', month: 'long', day: 'numeric' })}
-                      </span>
-                    </div>
-                    <h3 
-                      className="text-2xl font-bold text-[#3b2012] mb-3 group-hover:text-[#6f370f] transition-colors line-clamp-1 cursor-pointer"
-                      onClick={() => openSlider(work)}
+                    {/* حاوية الصورة (Image Container) */}
+                    <div 
+                      className="relative h-72 overflow-hidden m-3 rounded-[2rem]"
                     >
-                      {work.title}
-                    </h3>
-                    <p className="text-[#9c7b65] text-sm leading-relaxed line-clamp-2">
-                      {work.description}
-                    </p>
-                    
-                    <div className="mt-6 pt-4 border-t border-[#f0ece6] flex items-center justify-between">
-                       <span className="text-xl font-black text-[#3b2012]">
-                         {work.price ? `${work.price} ₪` : 'السعر غير محدد'}
-                       </span>
+                      <Image
+                        src={work.images?.[work.mainImageIndex || 0] || 'https://images.unsplash.com/photo-1541963463532-d68292c34b19?auto=format&fit=crop&q=80&w=800'}
+                        alt={work.title}
+                        fill
+                        className="object-cover transition-transform duration-700 group-hover:scale-110"
+                      />
+                      
+                      {/* طبقة التحكم السريعة (Hover Actions) */}
+                      <div className="absolute inset-0 bg-gradient-to-t from-[#3b2012]/90 via-[#3b2012]/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center p-6">
+                        <div className="bg-white/20 backdrop-blur-md border border-white/30 text-white p-4 rounded-full font-bold hover:bg-white hover:text-[#3b2012] transition-colors flex items-center justify-center shadow-xl hover:scale-110 transform">
+                          <i className="fa-solid fa-expand text-2xl"></i>
+                        </div>
+                      </div>
+                      
+                      {/* Badge for multiple images */}
+                      {work.images?.length > 1 && (
+                        <div className="absolute top-4 right-4 bg-black/60 backdrop-blur-sm text-white px-3 py-1.5 rounded-full text-[10px] font-bold flex items-center gap-1.5">
+                          <i className="fa-solid fa-layer-group"></i>
+                          <span>{work.images.length} صور</span>
+                        </div>
+                      )}
                     </div>
-                  </div>
-                </motion.div>
-              ))}
-            </AnimatePresence>
-          </div>
+
+                    {/* Actions Bar (Edit/Delete) */}
+                    <div className="flex px-4 pt-2 gap-2 relative z-10" onClick={(e) => e.stopPropagation()}>
+                      <Link 
+                        href={`/works/edit/${work.id}`}
+                        className="flex-1 bg-[#fdfaf7] text-[#9c7b65] border border-[#e8dcc4] py-2 rounded-xl font-bold hover:bg-[#e8dcc4] hover:text-[#3b2012] transition-colors flex items-center justify-center gap-2 text-xs"
+                      >
+                        <i className="fa-solid fa-pen-to-square"></i>
+                        تعديل
+                      </Link>
+                      <button 
+                        onClick={(e) => handleDeleteWork(e, work.id)}
+                        className="flex-1 bg-red-50 text-red-500 border border-red-100 py-2 rounded-xl font-bold hover:bg-red-500 hover:text-white transition-colors flex items-center justify-center gap-2 text-xs"
+                      >
+                        <i className="fa-solid fa-trash-can"></i>
+                        حذف
+                      </button>
+                    </div>
+
+                    {/* حاوية المحتوى (Content) */}
+                    <div className="p-6 pt-2 flex flex-col flex-1">
+                      <div className="flex items-center justify-between mb-4">
+                        <span className="text-[11px] font-bold text-amber-700 uppercase tracking-widest bg-amber-50 px-3 py-1.5 rounded-full flex items-center gap-1.5">
+                          <i className="fa-regular fa-calendar text-[10px]"></i>
+                          تاريخ العرض: {new Date(work.createdAt).toLocaleDateString('ar-EG', { year: 'numeric', month: 'long', day: 'numeric' })}
+                        </span>
+                      </div>
+                      <h3 
+                        className="text-2xl font-bold text-[#3b2012] mb-3 group-hover:text-[#6f370f] transition-colors line-clamp-1 cursor-pointer"
+                        onClick={() => openSlider(work)}
+                      >
+                        {work.title}
+                      </h3>
+                      <p className="text-[#9c7b65] text-sm leading-relaxed line-clamp-2">
+                        {work.description}
+                      </p>
+                      
+                      <div className="mt-6 pt-4 border-t border-[#f0ece6] flex items-center justify-between">
+                        <span className="text-xl font-black text-[#3b2012]">
+                          {work.price ? `${work.price} ₪` : 'السعر غير محدد'}
+                        </span>
+                      </div>
+                    </div>
+                  </motion.div>
+                ))}
+              </AnimatePresence>
+            </div>
+
+            {/* Pagination Controls */}
+            {totalPages > 1 && (
+              <div className="mt-16 flex items-center justify-center gap-2">
+                <button
+                  onClick={() => handlePageChange(currentPage - 1)}
+                  disabled={currentPage === 1}
+                  className="w-12 h-12 rounded-2xl border border-[#e8dcc4] bg-white text-[#9c7b65] flex items-center justify-center disabled:opacity-30 disabled:cursor-not-allowed hover:border-[#6b4c3b] hover:text-[#3b2012] transition-all shadow-sm"
+                >
+                  <i className="fa-solid fa-chevron-right"></i>
+                </button>
+                
+                <div className="flex items-center gap-2">
+                  {[...Array(totalPages)].map((_, i) => {
+                    const pageNum = i + 1;
+                    if (
+                      pageNum === 1 || 
+                      pageNum === totalPages || 
+                      (pageNum >= currentPage - 1 && pageNum <= currentPage + 1)
+                    ) {
+                      return (
+                        <button
+                          key={pageNum}
+                          onClick={() => handlePageChange(pageNum)}
+                          className={`w-12 h-12 rounded-2xl font-bold transition-all ${
+                            currentPage === pageNum
+                              ? 'bg-brown-gradient text-white shadow-lg scale-110'
+                              : 'bg-white border border-[#e8dcc4] text-[#9c7b65] hover:border-[#6b4c3b] hover:text-[#3b2012]'
+                          }`}
+                        >
+                          {pageNum}
+                        </button>
+                      );
+                    } else if (
+                      (pageNum === 2 && currentPage > 3) ||
+                      (pageNum === totalPages - 1 && currentPage < totalPages - 2)
+                    ) {
+                      return <span key={pageNum} className="text-[#ceb29f]">...</span>;
+                    }
+                    return null;
+                  })}
+                </div>
+
+                <button
+                  onClick={() => handlePageChange(currentPage + 1)}
+                  disabled={currentPage === totalPages}
+                  className="w-12 h-12 rounded-2xl border border-[#e8dcc4] bg-white text-[#9c7b65] flex items-center justify-center disabled:opacity-30 disabled:cursor-not-allowed hover:border-[#6b4c3b] hover:text-[#3b2012] transition-all shadow-sm"
+                >
+                  <i className="fa-solid fa-chevron-left"></i>
+                </button>
+              </div>
+            )}
+          </>
         ) : (
           /* حالة عدم وجود أعمال (Empty State) */
           <motion.div 
