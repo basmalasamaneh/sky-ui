@@ -6,10 +6,12 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { Header } from '@/components/Header';
 import { useAuth } from '@/contexts/AuthContext';
+import { useSearch } from '@/contexts/SearchContext';
 import { categories, categoryMapping, normalizeWork } from '@/lib/artwork-utils';
 
 export default function ProductsPage() {
   const { isAuthenticated, user, token } = useAuth();
+  const { globalSearchQuery } = useSearch();
   const [works, setWorks] = useState([]);
   const [isFetching, setIsFetching] = useState(true);
   
@@ -18,7 +20,7 @@ export default function ProductsPage() {
   const [currentSlideIndex, setCurrentSlideIndex] = useState(0);
   const [isLoadingArtworkDetails, setIsLoadingArtworkDetails] = useState(false);
 
-  // Local filters — independent from the global header search
+  // Local products search is independent and artwork-only.
   const [productSearch, setProductSearch] = useState('');
   const [activeCategory, setActiveCategory] = useState('الكل');
   
@@ -99,9 +101,13 @@ export default function ProductsPage() {
       setIsFetching(true);
 
       try {
+        const effectiveSearch = debouncedSearch || globalSearchQuery;
+        const searchBy = debouncedSearch ? 'artwork' : (globalSearchQuery ? 'global' : 'artwork');
+
         const queryParams = new URLSearchParams();
         if (activeCategory !== 'الكل') queryParams.append('category', activeCategory);
-        if (debouncedSearch) queryParams.append('search', debouncedSearch);
+        if (effectiveSearch) queryParams.append('search', effectiveSearch);
+        if (effectiveSearch) queryParams.append('searchBy', searchBy);
         queryParams.append('page', currentPage.toString());
         queryParams.append('limit', limit.toString());
 
@@ -120,7 +126,7 @@ export default function ProductsPage() {
 
         const rawWorks = Array.isArray(result?.data?.artworks) ? result.data.artworks : [];
         setWorks(rawWorks.map(normalizeWork));
-        setTotalCount(result?.data?.totalCount || 0);
+        setTotalCount(Number(result?.data?.totalCount ?? rawWorks.length) || 0);
       } catch (e) {
         console.error('Failed to fetch works:', e);
         setWorks([]);
@@ -131,12 +137,12 @@ export default function ProductsPage() {
     };
 
     fetchWorks();
-  }, [activeCategory, debouncedSearch, currentPage]);
+  }, [activeCategory, debouncedSearch, globalSearchQuery, currentPage]);
 
   // Reset to first page when search changes
   useEffect(() => {
     setCurrentPage(1);
-  }, [debouncedSearch, activeCategory]);
+  }, [debouncedSearch, globalSearchQuery, activeCategory]);
 
   const handlePageChange = (newPage) => {
     if (newPage >= 1 && newPage <= totalPages) {
@@ -181,6 +187,15 @@ export default function ProductsPage() {
             )}
           </div>
         </div>
+
+        {globalSearchQuery.trim() && !debouncedSearch && (
+          <div className="mb-6 text-center">
+            <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-amber-50 text-amber-700 text-xs font-bold border border-amber-200">
+              <i className="fa-solid fa-globe"></i>
+              نتائج البحث العام: "{globalSearchQuery.trim()}"
+            </span>
+          </div>
+        )}
 
         {/* Categories Filter */}
         <div className="flex flex-wrap items-center justify-center gap-3 mb-12">

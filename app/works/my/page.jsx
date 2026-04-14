@@ -156,7 +156,7 @@ export default function MyWorksPage() {
 
         const rawWorks = Array.isArray(result?.data?.artworks) ? result.data.artworks : [];
         setWorks(rawWorks.map(normalizeWork));
-        setTotalCount(result?.data?.totalCount || 0);
+        setTotalCount(Number(result?.data?.totalCount ?? rawWorks.length) || 0);
       } catch (err) {
         console.error('Failed to fetch my works:', err);
         setFetchError('تعذر الاتصال بالخادم. تأكد من تشغيل الباك إند.');

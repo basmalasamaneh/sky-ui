@@ -14,6 +14,7 @@ export const ArtworkGrid = ({ limit = null, showCategories = true, title = null 
   const [works, setWorks] = useState([]);
   const [isFetching, setIsFetching] = useState(true);
   const [activeCategory, setActiveCategory] = useState('الكل');
+  const [debouncedGlobalSearch, setDebouncedGlobalSearch] = useState(globalSearchQuery || '');
   
   // Slider states
   const [activeSliderWork, setActiveSliderWork] = useState(null);
@@ -21,10 +22,27 @@ export const ArtworkGrid = ({ limit = null, showCategories = true, title = null 
   const [isLoadingArtworkDetails, setIsLoadingArtworkDetails] = useState(false);
 
   useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedGlobalSearch(globalSearchQuery || '');
+    }, 400);
+
+    return () => clearTimeout(timer);
+  }, [globalSearchQuery]);
+
+  useEffect(() => {
     const fetchAllWorks = async () => {
       setIsFetching(true);
       try {
-        const res = await fetch('/api/artworks');
+        const queryParams = new URLSearchParams();
+        if (activeCategory !== 'الكل') queryParams.append('category', activeCategory);
+        if (debouncedGlobalSearch.trim()) {
+          queryParams.append('search', debouncedGlobalSearch.trim());
+          queryParams.append('searchBy', 'global');
+        }
+        if (limit) queryParams.append('limit', String(limit));
+
+        const query = queryParams.toString();
+        const res = await fetch(`/api/artworks${query ? `?${query}` : ''}`);
         const contentType = res.headers.get('content-type') || '';
         const result = contentType.includes('application/json')
           ? await res.json().catch(() => ({}))
@@ -44,7 +62,7 @@ export const ArtworkGrid = ({ limit = null, showCategories = true, title = null 
     };
 
     fetchAllWorks();
-  }, []);
+  }, [activeCategory, debouncedGlobalSearch, limit]);
 
   const openSlider = async (work) => {
     setActiveSliderWork(work);
@@ -71,20 +89,11 @@ export const ArtworkGrid = ({ limit = null, showCategories = true, title = null 
     }
   };
 
-  const filteredWorks = works.filter(w => {
-    const matchesCategory = activeCategory === 'الكل' || (categoryMapping[w.category] || w.category) === activeCategory;
-    const matchesSearch = !globalSearchQuery ||
-      w.title?.toLowerCase().includes(globalSearchQuery.toLowerCase()) ||
-      w.description?.toLowerCase().includes(globalSearchQuery.toLowerCase()) ||
-      w.artistName?.toLowerCase().includes(globalSearchQuery.toLowerCase());
-    return matchesCategory && matchesSearch;
-  });
-
-  const displayedWorks = limit ? filteredWorks.slice(0, limit) : filteredWorks;
+  const displayedWorks = works;
 
   const isOwnerArtwork = (work) => Boolean(user?.id && work?.artist_id && user.id === work.artist_id);
 
-  if (!isFetching && displayedWorks.length === 0 && !globalSearchQuery && activeCategory === 'الكل') {
+  if (!isFetching && displayedWorks.length === 0 && !debouncedGlobalSearch.trim() && activeCategory === 'الكل') {
     return null;
   }
 

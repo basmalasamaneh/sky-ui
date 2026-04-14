@@ -1,22 +1,15 @@
 "use client";
 
 import React, { createContext, useContext, useState } from 'react';
-import { useRouter, usePathname } from 'next/navigation';
 
 const SearchContext = createContext();
 
 export const SearchProvider = ({ children }) => {
-  // Global search from the header (navigates to products page)
+  // Global search shared across the app without forcing navigation.
   const [globalSearchQuery, setGlobalSearchQuery] = useState('');
-  const router = useRouter();
-  const pathname = usePathname();
 
   const handleGlobalSearch = (query) => {
     setGlobalSearchQuery(query);
-    // Redirect to products page if not already there
-    if (pathname !== '/products' && query.trim() !== '') {
-      router.push('/products');
-    }
   };
 
   return (
