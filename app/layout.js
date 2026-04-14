@@ -3,6 +3,7 @@ import { Header } from "../components/Header"
 import Footer from '../components/Footer'
 import { AuthProvider } from '../contexts/AuthContext'
 import { CartProvider } from '../contexts/CartContext'
+import { SearchProvider } from '../contexts/SearchContext'
 
 export const metadata = {
   title: 'متجر أثر | فنانو فلسطين',
@@ -25,11 +26,13 @@ export default function RootLayout({ children }) {
       <body className="antialiased selection:bg-gold selection:text-white bg-white">
         <AuthProvider>
           <CartProvider>
-            <Header />
-            <main className="min-h-screen pt-20">
-              {children}
-            </main>
-            <Footer />
+            <SearchProvider>
+              <Header />
+              <main className="min-h-screen pt-20">
+                {children}
+              </main>
+              <Footer />
+            </SearchProvider>
           </CartProvider>
         </AuthProvider>
       </body>

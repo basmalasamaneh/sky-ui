@@ -6,7 +6,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { Header } from '@/components/Header';
 import { useAuth } from '@/contexts/AuthContext';
-import { buildBackendApiUrl } from '@/lib/backend-api';
+import { categories, categoryMapping, normalizeWork } from '@/lib/artwork-utils';
 
 export default function ProductsPage() {
   const { isAuthenticated, user, token } = useAuth();
@@ -18,36 +18,9 @@ export default function ProductsPage() {
   const [currentSlideIndex, setCurrentSlideIndex] = useState(0);
   const [isLoadingArtworkDetails, setIsLoadingArtworkDetails] = useState(false);
 
-  // Filters
+  // Local filters — independent from the global header search
+  const [productSearch, setProductSearch] = useState('');
   const [activeCategory, setActiveCategory] = useState('الكل');
-
-  const toImageSrc = (src) => {
-    if (typeof src !== 'string' || !src.trim()) return null;
-    if (src.startsWith('http://') || src.startsWith('https://')) return src;
-    if (src.startsWith('/')) return buildBackendApiUrl(src);
-    return buildBackendApiUrl(`/images/${encodeURIComponent(src)}`);
-  };
-
-  const normalizeWork = (work) => {
-    const artworkImages = Array.isArray(work?.artwork_images) ? work.artwork_images : [];
-    const artistProfile = Array.isArray(work?.users) ? work.users[0] : work?.users;
-    const sortedImages = artworkImages.sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0));
-    const mappedImages = sortedImages
-      .map((image) => image.filename)
-      .map((src) => toImageSrc(src))
-      .filter(Boolean);
-    const featuredIndex = sortedImages.findIndex((image) => image.is_featured);
-
-    return {
-      ...work,
-      images: mappedImages,
-      mainImageIndex: featuredIndex >= 0 ? featuredIndex : 0,
-      artistName: artistProfile?.artist_name || [artistProfile?.first_name, artistProfile?.last_name].filter(Boolean).join(' '),
-      artistLocation: artistProfile?.location || null,
-      artistPhone: artistProfile?.phone || null,
-      createdAt: work?.created_at || work?.createdAt || null,
-    };
-  };
 
   // Close slider on escape
   useEffect(() => {
@@ -133,20 +106,15 @@ export default function ProductsPage() {
     fetchAllWorks();
   }, []);
 
-  const categoryMapping = {
-    'لوحات فنية': 'لوحات فنية',
-    'تطريز فلسطيني': 'تطريز فلسطيني',
-    'خزف وفخار': 'خزف وفخار',
-    'خط عربي': 'خط عربي',
-    'تصوير فوتوغرافي': 'تصوير فوتوغرافي',
-    'نحت ومجسمات': 'نحت ومجسمات'
-  };
+  const filteredWorks = works.filter(w => {
+    const matchesCategory = activeCategory === 'الكل' || (categoryMapping[w.category] || w.category) === activeCategory;
+    const matchesSearch = !productSearch ||
+      w.title?.toLowerCase().includes(productSearch.toLowerCase()) ||
+      w.description?.toLowerCase().includes(productSearch.toLowerCase()) ||
+      w.artistName?.toLowerCase().includes(productSearch.toLowerCase());
+    return matchesCategory && matchesSearch;
+  });
 
-  const filteredWorks = activeCategory === 'الكل' 
-    ? works 
-    : works.filter(w => (categoryMapping[w.category] || w.category) === activeCategory);
-
-  const categories = ['الكل', 'لوحات فنية', 'تطريز فلسطيني', 'خزف وفخار', 'خط عربي', 'تصوير فوتوغرافي', 'نحت ومجسمات'];
   const isOwnerArtwork = (work) => Boolean(user?.id && work?.artist_id && user.id === work.artist_id);
 
   return (
@@ -159,6 +127,29 @@ export default function ProductsPage() {
           <p className="text-[#9c7b65] text-lg md:text-xl max-w-2xl mx-auto">
             اكتشف أروع الإبداعات الفنية من مجتمع الفنانين في أثر. تصفح، وتأمل، واقتنِ ما يلامس روحك.
           </p>
+        </div>
+
+        {/* Search Bar */}
+        <div className="mb-8 max-w-2xl mx-auto">
+          <div className="flex items-center gap-3 bg-white border border-[#e8dcc4] rounded-2xl px-5 py-3.5 shadow-sm focus-within:border-[#9c7b65] focus-within:shadow-md transition-all">
+            <i className="fa-solid fa-magnifying-glass text-[#9c7b65]"></i>
+            <input
+              type="text"
+              value={productSearch}
+              onChange={(e) => setProductSearch(e.target.value)}
+              placeholder="ابحث باسم العمل، الفنان، أو الوصف..."
+              className="flex-1 bg-transparent border-none text-[#4a3728] text-sm md:text-base focus:outline-none font-art placeholder:text-gray-400"
+              dir="rtl"
+            />
+            {productSearch && (
+              <button
+                onClick={() => setProductSearch('')}
+                className="text-gray-400 hover:text-[#5c4436] transition-colors"
+              >
+                <i className="fa-solid fa-xmark"></i>
+              </button>
+            )}
+          </div>
         </div>
 
         {/* Categories Filter */}

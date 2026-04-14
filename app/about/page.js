@@ -35,14 +35,14 @@ export default function AboutPage() {
           >
             <span className="text-[#8a7264] text-sm font-bold uppercase tracking-widest mb-6 block">مهمتنا</span>
             <h2 className="text-4xl md:text-6xl font-bold font-art mb-12 text-[#2c1e15]">لماذا أطلقنا منصة أثر؟</h2>
-            <div className="space-y-8 text-xl leading-loose text-gray-700 font-light text-justify md:text-center max-w-4xl mx-auto">
-              <p>
-                ولدت منصة <span className="font-bold text-[#4a3728]">"أثر"</span> لسد الفجوة بين الفنانين الفلسطينيين الموهوبين وبين متذوقي الفن حول العالم. نحن نؤمن بأن الفن ليس مجرد لوحة أو قطعة حرفية، بل هو وسيلة للتعبير عن الهوية الثقافية والحفاظ على التراث العريق.
-              </p>
-              <p>
-                توفر منصتنا للفنانين المبدعين الأدوات اللازمة لعرض أعمالهم وإدارتها والوصول إلى جمهور عالمي يقدر القيمة الفنية والمعنوية لما يصنعون. كل قطعة تقتنيها من "أثر" لا تدعم الفنان مادياً فحسب، بل تساهم في بقاء الفن الفلسطيني حياً في قلوب البيوت حول العالم.
-              </p>
-            </div>
+              <div className="space-y-8 text-xl leading-loose text-gray-700 font-light text-justify md:text-center max-w-4xl mx-auto">
+                <p>
+                  في قلب كل فلسطيني، تسكن رغبة عارمة في الحفاظ على الجمال وسط التحديات. انطلقت <span className="font-bold text-[#4a3728]">"أثر"</span> لتكون تلك المساحة التي يتنفس فيها الفن الفلسطيني بحرية، بعيداً عن قيود الجغرافيا.
+                </p>
+                <p>
+                  نحن لا نبيع مجرد منتجات؛ نحن نروي قصصاً طُرزت بخيوط الصبر، ونمنحك فرصة لاقتناء قطعة من روح الأرض المباركة. هدفنا هو تمكين المبدع اقتصادياً ومعنوياً، ليبقى صوته الفني مسموعاً عبر القارات.
+                </p>
+              </div>
           </motion.div>
         </div>
       </section>

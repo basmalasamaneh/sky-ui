@@ -1,11 +1,49 @@
 "use client";
 
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useAuth } from '../contexts/AuthContext';
+import { normalizeWork } from '../lib/artwork-utils';
+import { motion, AnimatePresence } from 'framer-motion';
 
 export default function Hero() {
   const { isAuthenticated } = useAuth();
+  const [artworks, setArtworks] = useState([]);
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchArtworks = async () => {
+      try {
+        const res = await fetch('/api/artworks');
+        const result = await res.json();
+        
+        if (res.ok && result?.data?.artworks?.length > 0) {
+          setArtworks(result.data.artworks.map(normalizeWork));
+        }
+      } catch (error) {
+        console.error('Failed to fetch Hero artworks:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchArtworks();
+  }, []);
+
+  // Auto-cycle every 10 seconds
+  useEffect(() => {
+    if (artworks.length <= 1) return;
+
+    const interval = setInterval(() => {
+      setCurrentIndex((prev) => (prev + 1) % artworks.length);
+    }, 10000);
+
+    return () => clearInterval(interval);
+  }, [artworks]);
+
+  const currentArtwork = artworks[currentIndex];
 
   return (
     <section className="max-w-7xl mx-auto px-6 py-20 grid grid-cols-1 lg:grid-cols-2 gap-12 items-center" dir="rtl">
@@ -34,91 +72,113 @@ export default function Hero() {
       </div>
 
       {/* الصورة والبطاقات - يسار */}
-      <div className="relative group">
+      <div className="relative group min-h-[500px]">
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={currentIndex}
+            initial={{ opacity: 0, scale: 0.95, x: 20 }}
+            animate={{ opacity: 1, scale: 1, x: 0 }}
+            exit={{ opacity: 0, scale: 1.05, x: -20 }}
+            transition={{ duration: 0.8, ease: "easeOut" }}
+            className="relative"
+          >
+            {/* صورة المنتج */}
+            <div className="relative rounded-3xl overflow-hidden h-[450px] shadow-2xl bg-gray-100">
+              {isLoading ? (
+                <div className="absolute inset-0 animate-pulse bg-gray-200"></div>
+              ) : currentArtwork ? (
+                <Image
+                  src={currentArtwork.images?.[0] || '/images/painting.jpg'}
+                  alt={currentArtwork.title}
+                  fill
+                  className="object-cover"
+                />
+              ) : (
+                <Image
+                  src="/images/painting.jpg"
+                  alt="لوحة فنية أثر"
+                  fill
+                  className="object-cover"
+                />
+              )}
+              
+              {/* Badge: أثر اليوم */}
+              <div className="absolute top-6 right-6 z-10">
+                <span className="bg-white/90 backdrop-blur-md text-[#1a0f0a] px-4 py-2 rounded-full text-xs font-bold shadow-lg border border-white/50 flex items-center gap-2">
+                  <i className="fa-solid fa-wand-magic-sparkles text-amber-600 animate-pulse"></i>
+                  إبداعات متجددة
+                </span>
+              </div>
+            </div>
 
-        {/* صورة المنتج */}
-        <div className="relative rounded-3xl overflow-hidden h-[450px] shadow-2xl transition-transform duration-500 group-hover:scale-[1.02]">
-          <Image
-            src="/images/painting.jpg"
-            alt="لوحة فنية أثر"
-            fill
-            className="object-cover"
-          />
-        </div>
-
-        {/* حاوية الإشعارات */}
-        <div className="absolute -bottom-8 -right-8 flex flex-col gap-4 z-10">
-          
-          {/* بطاقة 1 - معلومات الفنان */}
-          <div className="bg-white rounded-2xl shadow-xl p-4 w-72 border border-gray-100 transform transition-all duration-300 hover:-translate-x-2">
-            <div className="flex items-center justify-between mb-3">
-              <div className="flex items-center gap-3">
-                <div className="w-11 h-11 rounded-full bg-amber-100 flex items-center justify-center text-amber-800 text-base font-black">
-                  ف
+            {/* حاوية الإشعارات */}
+            <div className="absolute -bottom-8 -right-8 flex flex-col gap-4 z-10">
+              
+              {/* بطاقة 1 - معلومات الفنان */}
+              <motion.div 
+                initial={{ y: 20, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                transition={{ delay: 0.2 }}
+                className="bg-white rounded-2xl shadow-xl p-4 w-74 border border-gray-100 transform transition-transform hover:-translate-x-2"
+              >
+                <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center gap-3">
+                    <div className="w-11 h-11 rounded-full bg-amber-100 flex items-center justify-center text-amber-800 text-base font-black uppercase shadow-inner">
+                      {isLoading ? '...' : (currentArtwork?.artistName?.charAt(0) || 'ف')}
+                    </div>
+                    <div className="text-right">
+                      <p className="text-sm font-black text-gray-900">{isLoading ? 'جاري التحميل...' : (currentArtwork?.artistName || 'فنان أثر')}</p>
+                      <div className="flex items-center gap-1.5 mt-0.5">
+                        <span className="text-xs text-gray-400">{currentArtwork?.category || 'عمل فني'}</span>
+                        <span className="w-2 h-2 rounded-full bg-green-500 inline-block animate-pulse"></span>
+                      </div>
+                    </div>
+                  </div>
+                  <span className="text-[10px] bg-amber-50 text-amber-700 px-2 py-1 rounded-md font-bold">فنان موثق</span>
                 </div>
-                <div className="text-right">
-                  <p className="text-sm font-black text-gray-900">فنان تشكيلي</p>
-                  <div className="flex items-center gap-1.5 mt-0.5">
-                    <span className="text-xs text-gray-400">لوحات فنية جدارية</span>
-                    <span className="w-2 h-2 rounded-full bg-green-500 inline-block"></span>
+                <div className="h-px bg-gray-100 mb-3"></div>
+                <div className="flex items-center justify-center">
+                  <div className="text-center">
+                    <p className="text-sm font-black text-gray-900 truncate max-w-[150px]">{currentArtwork?.artistLocation || 'فلسطين'}</p>
+                    <p className="text-xs text-gray-400">الموقع</p>
                   </div>
                 </div>
-              </div>
-              <span className="text-xs text-gray-300">الآن</span>
-            </div>
-            <div className="h-px bg-gray-100 mb-3"></div>
-            <div className="flex items-center justify-around">
-              <div className="text-center">
-                <p className="text-sm font-black text-gray-900">١٢٠</p>
-                <p className="text-xs text-gray-400">عمل فني</p>
-              </div>
-              <div className="w-px h-8 bg-gray-100"></div>
-              <div className="text-center">
-                <p className="text-sm font-black text-gray-900">٩٩٪</p>
-                <p className="text-xs text-gray-400">رضا</p>
-              </div>
-              <div className="w-px h-8 bg-gray-100"></div>
-              <div className="text-center">
-                <p className="text-sm font-black text-gray-900">١٥</p>
-                <p className="text-xs text-gray-400">سنة خبرة</p>
-              </div>
-            </div>
-          </div>
+              </motion.div>
 
-          {/* بطاقة 2 - تفاصيل المنتج */}
-          <div className="bg-white rounded-2xl shadow-xl p-4 w-72 border border-gray-100 transform transition-all duration-300 hover:-translate-x-2">
-            <div className="flex items-center gap-3 mb-3">
-              <div className="w-11 h-11 rounded-xl bg-amber-100 flex items-center justify-center text-xl text-amber-700">
-                <i className="fa-solid fa-image"></i>
-              </div>
-              <div className="text-right flex-1">
-                <p className="text-sm font-black text-gray-900">لوحة شجرة فنية مميزة</p>
-                <div className="flex items-center justify-end gap-2 mt-0.5">
-                  <span className="text-xs font-bold text-amber-500 flex items-center gap-1">
-                    <i className="fa-solid fa-star text-[10px]"></i>
-                    ٥.٠
-                  </span>
-                  <span className="text-xs text-gray-300">·</span>
-                  <span className="text-xs font-black text-primary">١٤٩ ر.س</span>
+              {/* بطاقة 2 - تفاصيل المنتج */}
+              <motion.div 
+                initial={{ y: 20, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                transition={{ delay: 0.4 }}
+                className="bg-white rounded-2xl shadow-xl p-4 w-74 border border-gray-100 transform transition-transform hover:-translate-x-2"
+              >
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="w-11 h-11 rounded-xl bg-[#6f370f]/10 flex items-center justify-center text-xl text-[#6f370f]">
+                    <i className="fa-solid fa-palette"></i>
+                  </div>
+                  <div className="text-right flex-1 min-w-0">
+                    <p className="text-sm font-black text-gray-900 truncate">
+                      {isLoading ? 'جاري التحميل...' : (currentArtwork?.title || 'لوحة فنية مميزة')}
+                    </p>
+                    <div className="flex items-center justify-end gap-2 mt-0.5">
+                      <span className="text-xs font-black text-[#6f370f]">
+                        {currentArtwork?.price ? `${currentArtwork.price} ₪` : 'تواصل كأثر'}
+                      </span>
+                    </div>
+                  </div>
                 </div>
-              </div>
-              <span className="text-xs bg-amber-50 text-amber-700 font-bold px-2 py-1 rounded-lg shrink-0">
-                متبقٍ ٥
-              </span>
-            </div>
-            <div className="w-full bg-gray-100 rounded-full h-1.5">
-              <div className="bg-amber-500 h-1.5 rounded-full transition-all" style={{ width: '90%' }}></div>
-            </div>
-            <div className="flex justify-between mt-1.5">
-              <span className="text-xs text-gray-400">المبيعات</span>
-              <span className="text-xs font-bold text-gray-500">90%</span>
-            </div>
-          </div>
+                <div className="mt-2 pt-2 border-t border-gray-50">
+                   <p className="text-[10px] text-gray-500 line-clamp-2 leading-relaxed italic">
+                     "{currentArtwork?.description || 'جمال فني يجسد عراقة التراث بلمسة إبداعية حديثة.'}"
+                   </p>
+                </div>
+              </motion.div>
 
-        </div>
-
+            </div>
+          </motion.div>
+        </AnimatePresence>
       </div>
 
     </section>
-  )
+  );
 }
