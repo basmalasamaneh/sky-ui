@@ -8,6 +8,30 @@ const mapBackendErrorMessageToArabic = (message) => {
   return message;
 };
 
+const parseBackendResponse = async (backendResponse) => {
+  const contentType = backendResponse.headers.get('content-type') || '';
+  if (contentType.includes('application/json')) {
+    return await backendResponse.json();
+  }
+
+  const text = await backendResponse.text();
+  return { message: text || 'Backend returned an invalid response' };
+};
+
+const patchBackend = async (path, authHeader, body) => {
+  const backendResponse = await fetch(buildBackendApiUrl(path), {
+    method: 'PATCH',
+    headers: {
+      'Authorization': authHeader,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(body),
+  });
+
+  const result = await parseBackendResponse(backendResponse);
+  return { backendResponse, result };
+};
+
 export async function PATCH(req) {
   try {
     const authHeader = req.headers.get('authorization');
@@ -22,23 +46,7 @@ export async function PATCH(req) {
     const body = await req.json();
 
     try {
-      const backendResponse = await fetch(buildBackendApiUrl('/api/users/profile'), {
-        method: 'PATCH',
-        headers: {
-          'Authorization': authHeader,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(body),
-      });
-
-      let result;
-      const contentType = backendResponse.headers.get('content-type');
-      if (contentType && contentType.includes('application/json')) {
-        result = await backendResponse.json();
-      } else {
-        const text = await backendResponse.text();
-        throw new Error(text || 'Backend returned an invalid response');
-      }
+      const { backendResponse, result } = await patchBackend('/api/users/profile', authHeader, body);
 
       if (!backendResponse.ok) {
         return Response.json(

@@ -1,7 +1,12 @@
-import Link from 'next/link'
-import Image from 'next/image'
+"use client";
+
+import Link from 'next/link';
+import Image from 'next/image';
+import { useAuth } from '../contexts/AuthContext';
 
 export default function Hero() {
+  const { isAuthenticated } = useAuth();
+
   return (
     <section className="max-w-7xl mx-auto px-6 py-20 grid grid-cols-1 lg:grid-cols-2 gap-12 items-center" dir="rtl">
 
@@ -16,12 +21,15 @@ export default function Hero() {
           في أثر، كل قطعة تحمل روح صانعها من خطوط الرسم الحرة، إلى دقة الخرز، ونعومة التطريز، وعراقة الفخار
         </p>
         <div className="flex items-center gap-4">
-          <Link href="/products" className="flex items-center gap-2 px-6 py-3 border border-gray-300 rounded-lg text-sm font-bold text-gray-700 hover:bg-gray-50 transition-colors">
-            ▶ استعراض
+          <Link href="/products" className="flex items-center gap-2 px-6 py-3 border border-gray-300 rounded-lg text-sm font-bold text-gray-700 hover:bg-gray-50 transition-colors bg-white/50 backdrop-blur-sm">
+            <i className="fa-solid fa-eye text-xs"></i>
+            استعراض
           </Link>
-          <Link href="/signup" className="px-6 py-3 bg-gradient-to-r from-[#6f370f] via-[#a3785a] to-[#d4af37] text-white rounded-lg text-sm font-bold hover:opacity-90 transition-all shadow-md">
-            تسوق الآن
-          </Link>
+          {!isAuthenticated && (
+            <Link href="/signup" className="px-6 py-3 bg-gradient-to-r from-[#6f370f] via-[#a3785a] to-[#d4af37] text-white rounded-lg text-sm font-bold hover:opacity-90 transition-all shadow-md">
+              تسوق الآن
+            </Link>
+          )}
         </div>
       </div>
 

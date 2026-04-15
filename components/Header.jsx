@@ -147,6 +147,17 @@ export const Header = () => {
                               exit={{ opacity: 0, y: 10, scale: 0.95 }}
                               className="absolute left-0 mt-3 w-48 bg-white rounded-2xl shadow-xl border border-[#e8dcc4]/50 z-20 overflow-hidden py-2"
                             >
+                              {isArtist && (
+                                <Link 
+                                  href="/works/my" 
+                                  className="flex items-center gap-3 px-5 py-3 text-gray-700 hover:bg-[#fdfaf7] hover:text-[#3b2012] transition-colors text-right font-art"
+                                  onClick={() => setUserMenuOpen(false)}
+                                >
+                                  <i className="fa-solid fa-palette text-[#9c7b65]"></i>
+                                  <span className="text-sm font-bold">أعمالي الفنية</span>
+                                </Link>
+                              )}
+                              
                               <Link 
                                 href="/settings" 
                                 className="flex items-center gap-3 px-5 py-3 text-gray-700 hover:bg-[#fdfaf7] hover:text-[#3b2012] transition-colors text-right font-art"
@@ -233,9 +244,16 @@ export const Header = () => {
                             )}
                           </span>
                         </div>
-                        <Link href="/settings" className="text-[#9c7b65] hover:text-[#3b2012] transition-colors">
-                          <i className="fa-solid fa-gear text-xl"></i>
-                        </Link>
+                        <div className="flex items-center gap-4">
+                          {isArtist && (
+                            <Link href="/works/my" className="text-[#9c7b65] hover:text-[#3b2012] transition-colors" onClick={() => setMobileMenuOpen(false)}>
+                              <i className="fa-solid fa-palette text-xl"></i>
+                            </Link>
+                          )}
+                          <Link href="/settings" className="text-[#9c7b65] hover:text-[#3b2012] transition-colors" onClick={() => setMobileMenuOpen(false)}>
+                            <i className="fa-solid fa-gear text-xl"></i>
+                          </Link>
+                        </div>
                       </div>
                       <button 
                         onClick={() => {

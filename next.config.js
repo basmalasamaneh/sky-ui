@@ -6,15 +6,19 @@ const nextConfig = {
         protocol: 'https',
         hostname: 'images.unsplash.com',
       },
-    ],
-  },
-  async rewrites() {
-    return [
       {
-        source: '/api/:path*',
-        destination: 'http://localhost:3001/api/:path*',
+        protocol: 'http',
+        hostname: 'localhost',
+        port: '3001',
+        pathname: '/images/**',
       },
-    ]
+      {
+        protocol: 'http',
+        hostname: '127.0.0.1',
+        port: '3001',
+        pathname: '/images/**',
+      },
+    ],
   },
 }
 
