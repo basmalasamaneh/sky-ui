@@ -6,10 +6,12 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { Header } from '@/components/Header';
 import { useAuth } from '@/contexts/AuthContext';
-import { buildBackendApiUrl } from '@/lib/backend-api';
+import { useSearch } from '@/contexts/SearchContext';
+import { categories, categoryMapping, normalizeWork } from '@/lib/artwork-utils';
 
 export default function ProductsPage() {
   const { isAuthenticated, user, token } = useAuth();
+  const { globalSearchQuery } = useSearch();
   const [works, setWorks] = useState([]);
   const [isFetching, setIsFetching] = useState(true);
   
@@ -18,36 +20,15 @@ export default function ProductsPage() {
   const [currentSlideIndex, setCurrentSlideIndex] = useState(0);
   const [isLoadingArtworkDetails, setIsLoadingArtworkDetails] = useState(false);
 
-  // Filters
+  // Local products search is independent and artwork-only.
+  const [productSearch, setProductSearch] = useState('');
   const [activeCategory, setActiveCategory] = useState('الكل');
-
-  const toImageSrc = (src) => {
-    if (typeof src !== 'string' || !src.trim()) return null;
-    if (src.startsWith('http://') || src.startsWith('https://')) return src;
-    if (src.startsWith('/')) return buildBackendApiUrl(src);
-    return buildBackendApiUrl(`/images/${encodeURIComponent(src)}`);
-  };
-
-  const normalizeWork = (work) => {
-    const artworkImages = Array.isArray(work?.artwork_images) ? work.artwork_images : [];
-    const artistProfile = Array.isArray(work?.users) ? work.users[0] : work?.users;
-    const sortedImages = artworkImages.sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0));
-    const mappedImages = sortedImages
-      .map((image) => image.filename)
-      .map((src) => toImageSrc(src))
-      .filter(Boolean);
-    const featuredIndex = sortedImages.findIndex((image) => image.is_featured);
-
-    return {
-      ...work,
-      images: mappedImages,
-      mainImageIndex: featuredIndex >= 0 ? featuredIndex : 0,
-      artistName: artistProfile?.artist_name || [artistProfile?.first_name, artistProfile?.last_name].filter(Boolean).join(' '),
-      artistLocation: artistProfile?.location || null,
-      artistPhone: artistProfile?.phone || null,
-      createdAt: work?.created_at || work?.createdAt || null,
-    };
-  };
+  
+  // Pagination states
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalCount, setTotalCount] = useState(0);
+  const limit = 12; // Works per page
+  const totalPages = Math.ceil(totalCount / limit);
 
   // Close slider on escape
   useEffect(() => {
@@ -105,48 +86,71 @@ export default function ProductsPage() {
     );
   };
 
+  const [debouncedSearch, setDebouncedSearch] = useState(productSearch);
+
+  // Debounced search effect
   useEffect(() => {
-    const fetchAllWorks = async () => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(productSearch);
+    }, 500);
+    return () => clearTimeout(timer);
+  }, [productSearch]);
+
+  useEffect(() => {
+    const fetchWorks = async () => {
       setIsFetching(true);
 
       try {
-        const res = await fetch('/api/artworks');
+        const effectiveSearch = debouncedSearch || globalSearchQuery;
+        const searchBy = debouncedSearch ? 'artwork' : (globalSearchQuery ? 'global' : 'artwork');
+
+        const queryParams = new URLSearchParams();
+        if (activeCategory !== 'الكل') queryParams.append('category', activeCategory);
+        if (effectiveSearch) queryParams.append('search', effectiveSearch);
+        if (effectiveSearch) queryParams.append('searchBy', searchBy);
+        queryParams.append('page', currentPage.toString());
+        queryParams.append('limit', limit.toString());
+
+        const res = await fetch(`/api/artworks?${queryParams.toString()}`);
         const contentType = res.headers.get('content-type') || '';
         const result = contentType.includes('application/json')
           ? await res.json().catch(() => ({}))
           : {};
+        
         if (!res.ok) {
           console.error('Failed to fetch works:', res.status, result?.message);
           setWorks([]);
+          setTotalCount(0);
           return;
         }
+
         const rawWorks = Array.isArray(result?.data?.artworks) ? result.data.artworks : [];
         setWorks(rawWorks.map(normalizeWork));
+        setTotalCount(Number(result?.data?.totalCount ?? rawWorks.length) || 0);
       } catch (e) {
         console.error('Failed to fetch works:', e);
         setWorks([]);
+        setTotalCount(0);
       } finally {
         setIsFetching(false);
       }
     };
 
-    fetchAllWorks();
-  }, []);
+    fetchWorks();
+  }, [activeCategory, debouncedSearch, globalSearchQuery, currentPage]);
 
-  const categoryMapping = {
-    'لوحات فنية': 'لوحات فنية',
-    'تطريز فلسطيني': 'تطريز فلسطيني',
-    'خزف وفخار': 'خزف وفخار',
-    'خط عربي': 'خط عربي',
-    'تصوير فوتوغرافي': 'تصوير فوتوغرافي',
-    'نحت ومجسمات': 'نحت ومجسمات'
+  // Reset to first page when search changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [debouncedSearch, globalSearchQuery, activeCategory]);
+
+  const handlePageChange = (newPage) => {
+    if (newPage >= 1 && newPage <= totalPages) {
+      setCurrentPage(newPage);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
   };
 
-  const filteredWorks = activeCategory === 'الكل' 
-    ? works 
-    : works.filter(w => (categoryMapping[w.category] || w.category) === activeCategory);
-
-  const categories = ['الكل', 'لوحات فنية', 'تطريز فلسطيني', 'خزف وفخار', 'خط عربي', 'تصوير فوتوغرافي', 'نحت ومجسمات'];
   const isOwnerArtwork = (work) => Boolean(user?.id && work?.artist_id && user.id === work.artist_id);
 
   return (
@@ -160,6 +164,38 @@ export default function ProductsPage() {
             اكتشف أروع الإبداعات الفنية من مجتمع الفنانين في أثر. تصفح، وتأمل، واقتنِ ما يلامس روحك.
           </p>
         </div>
+
+        {/* Search Bar */}
+        <div className="mb-8 max-w-2xl mx-auto">
+          <div className="flex items-center gap-3 bg-white border border-[#e8dcc4] rounded-2xl px-5 py-3.5 shadow-sm focus-within:border-[#9c7b65] focus-within:shadow-md transition-all">
+            <i className="fa-solid fa-magnifying-glass text-[#9c7b65]"></i>
+            <input
+              type="text"
+              value={productSearch}
+              onChange={(e) => setProductSearch(e.target.value)}
+              placeholder="ابحث باسم العمل، الفنان، أو الوصف..."
+              className="flex-1 bg-transparent border-none text-[#4a3728] text-sm md:text-base focus:outline-none font-art placeholder:text-gray-400"
+              dir="rtl"
+            />
+            {productSearch && (
+              <button
+                onClick={() => setProductSearch('')}
+                className="text-gray-400 hover:text-[#5c4436] transition-colors"
+              >
+                <i className="fa-solid fa-xmark"></i>
+              </button>
+            )}
+          </div>
+        </div>
+
+        {globalSearchQuery.trim() && !debouncedSearch && (
+          <div className="mb-6 text-center">
+            <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-amber-50 text-amber-700 text-xs font-bold border border-amber-200">
+              <i className="fa-solid fa-globe"></i>
+              نتائج البحث العام: "{globalSearchQuery.trim()}"
+            </span>
+          </div>
+        )}
 
         {/* Categories Filter */}
         <div className="flex flex-wrap items-center justify-center gap-3 mb-12">
@@ -192,68 +228,123 @@ export default function ProductsPage() {
               </div>
             ))}
           </div>
-        ) : filteredWorks.length > 0 ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-            <AnimatePresence mode="popLayout">
-              {filteredWorks.map((work, index) => (
-                <motion.div
-                  key={work.id}
-                  layout
-                  initial={{ opacity: 0, scale: 0.9 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={{ delay: (index % 10) * 0.05 }}
-                  onClick={() => openSlider(work)}
-                  className="group bg-white rounded-3xl overflow-hidden border border-[#e8dcc4] shadow-[0_4px_20px_-10px_rgba(0,0,0,0.1)] hover:shadow-xl transition-all duration-500 flex flex-col cursor-pointer"
-                >
-                  <div 
-                    className="relative h-64 overflow-hidden m-2 rounded-2xl"
+        ) : works.length > 0 ? (
+          <>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+              <AnimatePresence mode="popLayout">
+                {works.map((work, index) => (
+                  <motion.div
+                    key={work.id}
+                    layout
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ delay: (index % limit) * 0.05 }}
+                    onClick={() => openSlider(work)}
+                    className="group bg-white rounded-3xl overflow-hidden border border-[#e8dcc4] shadow-[0_4px_20px_-10px_rgba(0,0,0,0.1)] hover:shadow-xl transition-all duration-500 flex flex-col cursor-pointer"
                   >
-                    <Image
-                      src={work.images?.[work.mainImageIndex || 0] || 'https://images.unsplash.com/photo-1541963463532-d68292c34b19?auto=format&fit=crop&q=80&w=800'}
-                      alt={work.title}
-                      fill
-                      className="object-cover transition-transform duration-700 group-hover:scale-110"
-                    />
-                    
-                    {work.images?.length > 1 && (
-                      <div className="absolute top-3 right-3 bg-black/60 backdrop-blur-sm text-white px-2.5 py-1 rounded-full text-[10px] font-bold flex items-center gap-1.5 shadow-sm">
-                        <i className="fa-solid fa-layer-group"></i>
-                        <span>{work.images.length}</span>
-                      </div>
-                    )}
-
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-4">
-                       <div className="self-end bg-white/20 backdrop-blur-md border border-white/30 text-white w-10 h-10 rounded-full flex items-center justify-center hover:bg-white hover:text-[#3b2012] transition-colors mb-2">
-                         <i className="fa-solid fa-expand text-sm"></i>
-                       </div>
-                    </div>
-                  </div>
-
-                  <div className="p-5 flex flex-col flex-1">
-                    <h3 className="text-lg font-bold text-[#3b2012] mb-4 line-clamp-1">{work.title}</h3>
-                    
-                    <div className="mt-auto flex items-center justify-between border-t border-gray-100 pt-4" onClick={(e) => e.stopPropagation()}>
-                      <span className="font-bold text-lg text-[#3b2012]">
-                        {work.price ? `${work.price} ₪` : 'متاح للعرض'}
-                      </span>
-                      {isOwnerArtwork(work) ? (
-                        <Link
-                          href={`/works/edit/${work.id}`}
-                          className="bg-[#f0ece6] text-[#5c4436] hover:bg-[#5c4436] hover:text-white px-4 py-2 rounded-xl text-xs font-bold transition-colors"
-                        >
-                          تعديل العمل
-                        </Link>
-                      ) : (
-                        <button className="bg-[#f0ece6] text-[#5c4436] hover:bg-[#5c4436] hover:text-white px-4 py-2 rounded-xl text-xs font-bold transition-colors">
-                          إضافة للسلة
-                        </button>
+                    <div 
+                      className="relative h-64 overflow-hidden m-2 rounded-2xl"
+                    >
+                      <Image
+                        src={work.images?.[work.mainImageIndex || 0] || 'https://images.unsplash.com/photo-1541963463532-d68292c34b19?auto=format&fit=crop&q=80&w=800'}
+                        alt={work.title}
+                        fill
+                        className="object-cover transition-transform duration-700 group-hover:scale-110"
+                      />
+                      
+                      {work.images?.length > 1 && (
+                        <div className="absolute top-3 right-3 bg-black/60 backdrop-blur-sm text-white px-2.5 py-1 rounded-full text-[10px] font-bold flex items-center gap-1.5 shadow-sm">
+                          <i className="fa-solid fa-layer-group"></i>
+                          <span>{work.images.length}</span>
+                        </div>
                       )}
+
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-4">
+                        <div className="self-end bg-white/20 backdrop-blur-md border border-white/30 text-white w-10 h-10 rounded-full flex items-center justify-center hover:bg-white hover:text-[#3b2012] transition-colors mb-2">
+                          <i className="fa-solid fa-expand text-sm"></i>
+                        </div>
+                      </div>
                     </div>
-                  </div>
-                </motion.div>
-              ))}
-            </AnimatePresence>
-          </div>
+
+                    <div className="p-5 flex flex-col flex-1">
+                      <h3 className="text-lg font-bold text-[#3b2012] mb-4 line-clamp-1">{work.title}</h3>
+                      
+                      <div className="mt-auto flex items-center justify-between border-t border-gray-100 pt-4" onClick={(e) => e.stopPropagation()}>
+                        <span className="font-bold text-lg text-[#3b2012]">
+                          {work.price ? `${work.price} ₪` : 'متاح للعرض'}
+                        </span>
+                        {isOwnerArtwork(work) ? (
+                          <Link
+                            href={`/works/edit/${work.id}`}
+                            className="bg-[#f0ece6] text-[#5c4436] hover:bg-[#5c4436] hover:text-white px-4 py-2 rounded-xl text-xs font-bold transition-colors"
+                          >
+                            تعديل العمل
+                          </Link>
+                        ) : (
+                          <button className="bg-[#f0ece6] text-[#5c4436] hover:bg-[#5c4436] hover:text-white px-4 py-2 rounded-xl text-xs font-bold transition-colors">
+                            إضافة للسلة
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  </motion.div>
+                ))}
+              </AnimatePresence>
+            </div>
+
+            {/* Pagination Controls */}
+            {totalPages > 1 && (
+              <div className="mt-16 flex items-center justify-center gap-2">
+                <button
+                  onClick={() => handlePageChange(currentPage - 1)}
+                  disabled={currentPage === 1}
+                  className="w-10 h-10 rounded-xl border border-[#e8dcc4] bg-white text-[#9c7b65] flex items-center justify-center disabled:opacity-30 disabled:cursor-not-allowed hover:border-[#6b4c3b] hover:text-[#3b2012] transition-all"
+                >
+                  <i className="fa-solid fa-chevron-right"></i>
+                </button>
+                
+                <div className="flex items-center gap-2">
+                  {[...Array(totalPages)].map((_, i) => {
+                    const pageNum = i + 1;
+                    // Show current page, and maybe some context around it
+                    if (
+                      pageNum === 1 || 
+                      pageNum === totalPages || 
+                      (pageNum >= currentPage - 1 && pageNum <= currentPage + 1)
+                    ) {
+                      return (
+                        <button
+                          key={pageNum}
+                          onClick={() => handlePageChange(pageNum)}
+                          className={`w-10 h-10 rounded-xl font-bold transition-all ${
+                            currentPage === pageNum
+                              ? 'bg-[#3b2012] text-white shadow-lg scale-110'
+                              : 'bg-white border border-[#e8dcc4] text-[#9c7b65] hover:border-[#6b4c3b] hover:text-[#3b2012]'
+                          }`}
+                        >
+                          {pageNum}
+                        </button>
+                      );
+                    } else if (
+                      (pageNum === 2 && currentPage > 3) ||
+                      (pageNum === totalPages - 1 && currentPage < totalPages - 2)
+                    ) {
+                      return <span key={pageNum} className="text-[#ceb29f]">...</span>;
+                    }
+                    return null;
+                  })}
+                </div>
+
+                <button
+                  onClick={() => handlePageChange(currentPage + 1)}
+                  disabled={currentPage === totalPages}
+                  className="w-10 h-10 rounded-xl border border-[#e8dcc4] bg-white text-[#9c7b65] flex items-center justify-center disabled:opacity-30 disabled:cursor-not-allowed hover:border-[#6b4c3b] hover:text-[#3b2012] transition-all"
+                >
+                  <i className="fa-solid fa-chevron-left"></i>
+                </button>
+              </div>
+            )}
+          </>
         ) : (
           <div className="flex flex-col items-center justify-center py-20 bg-white rounded-3xl border border-[#e8dcc4] text-center">
             <i className="fa-regular fa-folder-open text-6xl text-[#ceb29f] mb-4"></i>

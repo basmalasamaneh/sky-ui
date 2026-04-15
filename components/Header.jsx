@@ -5,6 +5,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { useCart } from '../contexts/CartContext';
 import { useAuth } from '../contexts/AuthContext';
+import { useSearch } from '../contexts/SearchContext';
 import { Button } from './ui/button';
 import { motion, AnimatePresence } from 'framer-motion';
 import { BecomeArtistModal } from './BecomeArtistModal';
@@ -12,6 +13,7 @@ import { BecomeArtistModal } from './BecomeArtistModal';
 export const Header = () => {
   const { totalItems } = useCart();
   const { isAuthenticated, user, logout } = useAuth();
+  const { globalSearchQuery, setGlobalSearchQuery } = useSearch();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [isSearchVisible, setIsSearchVisible] = useState(false);
@@ -69,12 +71,26 @@ export const Header = () => {
                     exit={{ width: 0, opacity: 0 }}
                     className="flex items-center w-full px-4"
                   >
-                    <input 
-                      autoFocus
-                      type="text" 
-                      placeholder="ابحث عن أثر فني..." 
-                      className="w-full bg-[#f2f0eb] border border-[#d2cfc7] rounded-full py-2.5 px-8 text-sm md:text-base text-[#4a3728] focus:outline-none focus:ring-4 focus:ring-[#5c4436]/10 font-art shadow-inner transition-all placeholder:text-gray-400"
-                    />
+                    <div className="relative w-full flex items-center bg-[#f2f0eb] border border-[#d2cfc7] rounded-full px-5 shadow-inner gap-3">
+                      <i className="fa-solid fa-magnifying-glass text-[#9c7b65] text-sm shrink-0"></i>
+                      <input 
+                        autoFocus
+                        type="text" 
+                        placeholder="ابحث عن فنان، عمل، أو فئة..." 
+                        value={globalSearchQuery}
+                        onChange={(e) => setGlobalSearchQuery(e.target.value)}
+                        className="flex-1 bg-transparent border-none py-2.5 text-sm md:text-base text-[#4a3728] focus:outline-none font-art placeholder:text-gray-400"
+                        dir="rtl"
+                      />
+                      {globalSearchQuery && (
+                        <button
+                          onClick={() => setGlobalSearchQuery('')}
+                          className="text-gray-400 hover:text-[#5c4436] transition-colors shrink-0"
+                        >
+                          <i className="fa-solid fa-xmark text-xs"></i>
+                        </button>
+                      )}
+                    </div>
                   </motion.div>
                 )}
               </AnimatePresence>
