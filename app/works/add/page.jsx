@@ -21,6 +21,7 @@ export default function AddWorkPage() {
 
   const [images, setImages] = useState([]);
   const [mainImageIndex, setMainImageIndex] = useState(0);
+  const maxImages = 3;
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitMessage, setSubmitMessage] = useState({ type: '', text: '' });
@@ -45,8 +46,8 @@ export default function AddWorkPage() {
     const files = Array.from(e.target.files);
     if (files.length === 0) return;
 
-    if (images.length + files.length > 5) {
-      setSubmitMessage({ type: 'error', text: 'يمكنك رفع 5 صور كحد أقصى للعمل الواحد.' });
+    if (images.length + files.length > maxImages) {
+      setSubmitMessage({ type: 'error', text: 'يمكنك رفع 3 صور كحد أقصى للعمل الواحد.' });
       return;
     }
 
@@ -256,8 +257,8 @@ export default function AddWorkPage() {
                   />
                   <label htmlFor="image-upload" className="flex flex-col items-center justify-center w-full h-32 bg-[#fdfaf7] border-2 border-dashed border-[#e8dcc4] rounded-2xl cursor-pointer hover:bg-[#f0ece6] transition-colors group-hover:border-[#5c4436]">
                     <i className="fa-solid fa-cloud-arrow-up text-3xl text-[#9c7b65] mb-2 group-hover:scale-110 transition-transform"></i>
-                    <span className="text-sm font-bold text-[#3b2012]">اضغط هنا لرفع الصور (1-5 صور)</span>
-                    <span className="text-xs text-gray-400 mt-1">PNG, JPG, JPEG (المتبقي: {5 - images.length})</span>
+                    <span className="text-sm font-bold text-[#3b2012]">اضغط هنا لرفع الصور (1-3 صور)</span>
+                    <span className="text-xs text-gray-400 mt-1">PNG, JPG, JPEG (المتبقي: {maxImages - images.length})</span>
                   </label>
                 </div>
               </div>

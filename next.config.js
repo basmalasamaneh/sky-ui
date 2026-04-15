@@ -7,6 +7,16 @@ const nextConfig = {
         hostname: 'images.unsplash.com',
       },
       {
+        protocol: 'https',
+        hostname: 'ofpuzdpdsambfkophjau.supabase.co',
+        pathname: '/storage/v1/object/public/artworks/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'ofpuzdpdsambfkophjau.supabase.co',
+        pathname: '/storage/v1/object/sign/artworks/**',
+      },
+      {
         protocol: 'http',
         hostname: 'localhost',
         port: '3001',
