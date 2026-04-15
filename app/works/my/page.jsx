@@ -28,14 +28,14 @@ export default function MyWorksPage() {
     if (typeof src !== 'string' || !src.trim()) return null;
     if (src.startsWith('http://') || src.startsWith('https://')) return src;
     if (src.startsWith('/')) return buildBackendApiUrl(src);
-    return buildBackendApiUrl(`/images/${encodeURIComponent(src)}`);
+    return null;
   };
 
   const normalizeWork = (work) => {
     const artworkImages = Array.isArray(work?.artwork_images) ? work.artwork_images : [];
     const sortedImages = artworkImages.sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0));
     const mappedImages = sortedImages
-      .map((image) => image.filename)
+      .map((image) => image.url || image.filename)
       .map((src) => toImageSrc(src))
       .filter(Boolean);
     const featuredIndex = sortedImages.findIndex((image) => image.is_featured);

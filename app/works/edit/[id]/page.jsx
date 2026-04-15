@@ -25,6 +25,7 @@ export default function EditWorkPage() {
   const [images, setImages] = useState([]);
   const [mainImageIndex, setMainImageIndex] = useState(0);
   const [draggedFromIndex, setDraggedFromIndex] = useState(null);
+  const maxImages = 3;
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitMessage, setSubmitMessage] = useState({ type: '', text: '' });
@@ -34,7 +35,7 @@ export default function EditWorkPage() {
     if (typeof src !== 'string' || !src.trim()) return '';
     if (src.startsWith('http://') || src.startsWith('https://')) return src;
     if (src.startsWith('/')) return buildBackendApiUrl(src);
-    return buildBackendApiUrl(`/images/${encodeURIComponent(src)}`);
+    return '';
   };
 
   // Load existing work data
@@ -80,8 +81,8 @@ export default function EditWorkPage() {
         if (artworkImages.length > 0) {
             setImages(artworkImages.map(img => ({
                 isExisting: true, // flag to indicate it's not a local file
-            storedFilename: img.filename,
-            preview: toImageSrc(img.filename),
+          storedFilename: img.storage_path || img.filename,
+          preview: toImageSrc(img.url || img.filename),
                 file: null
             })));
         }
@@ -112,8 +113,8 @@ export default function EditWorkPage() {
     const files = Array.from(e.target.files);
     if (files.length === 0) return;
 
-    if (images.length + files.length > 5) {
-      setSubmitMessage({ type: 'error', text: 'يمكنك رفع 5 صور كحد أقصى للعمل الواحد.' });
+    if (images.length + files.length > maxImages) {
+      setSubmitMessage({ type: 'error', text: 'يمكنك رفع 3 صور كحد أقصى للعمل الواحد.' });
       return;
     }
 
@@ -340,8 +341,8 @@ export default function EditWorkPage() {
                   />
                   <label htmlFor="image-upload" className="flex flex-col items-center justify-center w-full h-32 bg-[#fdfaf7] border-2 border-dashed border-[#e8dcc4] rounded-2xl cursor-pointer hover:bg-[#f0ece6] transition-colors group-hover:border-[#5c4436]">
                     <i className="fa-solid fa-cloud-arrow-up text-3xl text-[#9c7b65] mb-2 group-hover:scale-110 transition-transform"></i>
-                    <span className="text-sm font-bold text-[#3b2012]">إضافة مزيد من الصور (المجموع: 1-5)</span>
-                    <span className="text-xs text-gray-400 mt-1">المتبقي: {5 - images.length}</span>
+                    <span className="text-sm font-bold text-[#3b2012]">إضافة مزيد من الصور (المجموع: 1-3)</span>
+                    <span className="text-xs text-gray-400 mt-1">المتبقي: {maxImages - images.length}</span>
                   </label>
                 </div>
               </div>
