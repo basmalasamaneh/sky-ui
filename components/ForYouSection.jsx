@@ -1,14 +1,19 @@
 "use client";
 
 import React, { useEffect, useState } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import Image from 'next/image';
 import Link from 'next/link';
 import { normalizeWork } from '@/lib/artwork-utils';
+import { useAuth } from '@/contexts/AuthContext';
+import ArtworkDetailModal from '@/components/ArtworkDetailModal';
 
 export const ForYouSection = () => {
+  const { token } = useAuth();
   const [works, setWorks] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [activeWork, setActiveWork] = useState(null);
+  const [isLoadingArtworkDetails, setIsLoadingArtworkDetails] = useState(false);
 
   useEffect(() => {
     const fetchForYou = async () => {
@@ -31,6 +36,32 @@ export const ForYouSection = () => {
     };
     fetchForYou();
   }, []);
+
+  const openArtworkDetails = async (work) => {
+    setActiveWork(work);
+    setIsLoadingArtworkDetails(true);
+
+    try {
+      const res = await fetch(`/api/artworks/${work.id}`, {
+        headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+      });
+
+      const contentType = res.headers.get('content-type') || '';
+      const result = contentType.includes('application/json')
+        ? await res.json().catch(() => ({}))
+        : {};
+
+      if (!res.ok || !result?.data?.artwork) {
+        return;
+      }
+
+      setActiveWork(normalizeWork(result.data.artwork));
+    } catch (error) {
+      console.error('Failed to fetch artwork details:', error);
+    } finally {
+      setIsLoadingArtworkDetails(false);
+    }
+  };
 
   if (!isLoading && works.length === 0) return null;
 
@@ -68,7 +99,8 @@ export const ForYouSection = () => {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: index * 0.2 }}
-                className="group relative h-[550px] rounded-[3rem] overflow-hidden shadow-2xl hover:shadow-amber-900/10 transition-all duration-700"
+                onClick={() => openArtworkDetails(work)}
+                className="group relative h-[550px] rounded-[3rem] overflow-hidden shadow-2xl hover:shadow-amber-900/10 transition-all duration-700 cursor-pointer"
               >
                 {/* Background Image */}
                 <Image
@@ -105,12 +137,16 @@ export const ForYouSection = () => {
                           {work.price ? `${work.price} ₪` : 'حسب الطلب'}
                         </span>
                       </div>
-                      <Link 
-                        href={`/products?id=${work.id}`}
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          openArtworkDetails(work);
+                        }}
                         className="bg-white text-[#1a0f0a] px-6 py-3 rounded-2xl font-bold text-sm hover:bg-amber-50 transition-colors shadow-lg"
                       >
                         تفاصيل العمل
-                      </Link>
+                      </button>
                     </div>
                   </div>
                 </div>
@@ -129,6 +165,19 @@ export const ForYouSection = () => {
             ))
           )}
         </div>
+
+        <AnimatePresence>
+          {activeWork && (
+            <ArtworkDetailModal
+              work={activeWork}
+              isLoadingDetails={isLoadingArtworkDetails}
+              onClose={() => {
+                setActiveWork(null);
+                setIsLoadingArtworkDetails(false);
+              }}
+            />
+          )}
+        </AnimatePresence>
       </div>
     </section>
   );

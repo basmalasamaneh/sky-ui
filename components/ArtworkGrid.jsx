@@ -6,7 +6,8 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useAuth } from '@/contexts/AuthContext';
 import { useSearch } from '@/contexts/SearchContext';
-import { normalizeWork, categoryMapping, categories } from '@/lib/artwork-utils';
+import { normalizeWork, categories } from '@/lib/artwork-utils';
+import ArtworkDetailModal from '@/components/ArtworkDetailModal';
 
 export const ArtworkGrid = ({ limit = null, showCategories = true, title = null }) => {
   const { isAuthenticated, user, token } = useAuth();
@@ -18,7 +19,6 @@ export const ArtworkGrid = ({ limit = null, showCategories = true, title = null 
   
   // Slider states
   const [activeSliderWork, setActiveSliderWork] = useState(null);
-  const [currentSlideIndex, setCurrentSlideIndex] = useState(0);
   const [isLoadingArtworkDetails, setIsLoadingArtworkDetails] = useState(false);
 
   useEffect(() => {
@@ -66,7 +66,6 @@ export const ArtworkGrid = ({ limit = null, showCategories = true, title = null 
 
   const openSlider = async (work) => {
     setActiveSliderWork(work);
-    setCurrentSlideIndex(0);
     setIsLoadingArtworkDetails(true);
 
     try {
@@ -153,12 +152,6 @@ export const ArtworkGrid = ({ limit = null, showCategories = true, title = null 
                     fill
                     className="object-cover transition-transform duration-700 group-hover:scale-110"
                   />
-                  {work.images?.length > 1 && (
-                    <div className="absolute top-3 right-3 bg-black/60 backdrop-blur-sm text-white px-2.5 py-1 rounded-full text-[10px] font-bold flex items-center gap-1.5 shadow-sm">
-                      <i className="fa-solid fa-layer-group"></i>
-                      <span>{work.images.length}</span>
-                    </div>
-                  )}
                 </div>
                 <div className="p-5 flex flex-col flex-1">
                   <h3 className="text-lg font-bold text-[#3b2012] mb-4 line-clamp-1">{work.title}</h3>
@@ -168,8 +161,25 @@ export const ArtworkGrid = ({ limit = null, showCategories = true, title = null 
                     </span>
                     {isOwnerArtwork(work) ? (
                       <Link href={`/works/edit/${work.id}`} className="bg-[#f0ece6] text-[#5c4436] hover:bg-[#5c4436] hover:text-white px-4 py-2 rounded-xl text-xs font-bold transition-colors">تعديل العمل</Link>
+                    ) : !isAuthenticated ? (
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          openSlider(work);
+                        }}
+                        className="bg-[#f0ece6] text-[#5c4436] hover:bg-[#5c4436] hover:text-white px-4 py-2 rounded-xl text-xs font-bold transition-colors"
+                      >
+                        تسوق الآن
+                      </button>
                     ) : (
-                      <button className="bg-[#f0ece6] text-[#5c4436] hover:bg-[#5c4436] hover:text-white px-4 py-2 rounded-xl text-xs font-bold transition-colors">إضافة للسلة</button>
+                      <button
+                        type="button"
+                        onClick={(e) => e.stopPropagation()}
+                        className="bg-[#f0ece6] text-[#5c4436] hover:bg-[#5c4436] hover:text-white px-4 py-2 rounded-xl text-xs font-bold transition-colors"
+                      >
+                        إضافة للسلة
+                      </button>
                     )}
                   </div>
                 </div>
@@ -185,55 +195,14 @@ export const ArtworkGrid = ({ limit = null, showCategories = true, title = null 
         </div>
       )}
 
-      {/* Modal is shared here */}
+      {/* Artwork Detail Modal */}
       <AnimatePresence>
         {activeSliderWork && (
-          <motion.div 
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[150] bg-black/60 backdrop-blur-md flex items-center justify-center p-4"
-            onClick={() => setActiveSliderWork(null)}
-          >
-            {/* Simple Modal Content for brevity in this component, or move full modal logic here */}
-            {/* For now, I'll just close it. Ideally, you'd have a separate ArtworkModal component */}
-            <div 
-              className="bg-white w-full max-w-5xl h-[90vh] overflow-hidden rounded-[2rem] shadow-2xl relative flex flex-col md:flex-row"
-              onClick={(e) => e.stopPropagation()}
-            >
-               <button 
-                onClick={() => setActiveSliderWork(null)}
-                className="absolute top-6 left-6 z-50 w-10 h-10 bg-white/80 hover:bg-white rounded-full flex items-center justify-center text-[#3b2012] shadow-md"
-              >
-                <i className="fa-solid fa-xmark text-lg"></i>
-              </button>
-              
-              <div className="md:w-1/2 bg-[#fdfaf7] relative h-[40vh] md:h-auto">
-                 <Image
-                    src={activeSliderWork.images?.[0] || 'https://images.unsplash.com/photo-1541963463532-d68292c34b19?auto=format&fit=crop&q=80&w=800'}
-                    alt={activeSliderWork.title}
-                    fill
-                    className="object-contain p-4"
-                  />
-              </div>
-              
-              <div className="md:w-1/2 p-8 overflow-y-auto">
-                <h2 className="text-3xl font-bold text-[#3b2012] mb-4">{activeSliderWork.title}</h2>
-                <div className="flex items-center gap-4 mb-6">
-                  <div className="w-12 h-12 bg-brown-gradient rounded-full flex items-center justify-center text-white font-bold">{activeSliderWork.artistName?.charAt(0)}</div>
-                  <div>
-                    <p className="text-xs text-[#9c7b65]">الفنان</p>
-                    <p className="font-bold text-[#3b2012]">{activeSliderWork.artistName}</p>
-                  </div>
-                </div>
-                <p className="text-[#9c7b65] leading-relaxed mb-8">{activeSliderWork.description}</p>
-                <div className="pt-6 border-t border-gray-100 flex items-center justify-between">
-                  <p className="text-3xl font-black text-[#3b2012]">{activeSliderWork.price} ₪</p>
-                  <button className="h-14 px-8 bg-[#3b2012] text-white rounded-2xl font-bold">إضافة للسلة</button>
-                </div>
-              </div>
-            </div>
-          </motion.div>
+          <ArtworkDetailModal
+            work={activeSliderWork}
+            isLoadingDetails={isLoadingArtworkDetails}
+            onClose={() => { setActiveSliderWork(null); setIsLoadingArtworkDetails(false); }}
+          />
         )}
       </AnimatePresence>
     </div>
