@@ -1,8 +1,9 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
+import { usePathname } from 'next/navigation';
 import { useCart } from '../contexts/CartContext';
 import { useAuth } from '../contexts/AuthContext';
 import { useSearch } from '../contexts/SearchContext';
@@ -13,16 +14,30 @@ import { BecomeArtistModal } from './BecomeArtistModal';
 export const Header = () => {
   const { totalItems } = useCart();
   const { isAuthenticated, user, logout } = useAuth();
-  const { globalSearchQuery, setGlobalSearchQuery } = useSearch();
+  const {
+    globalSearchQuery,
+    setGlobalSearchQuery,
+    clearGlobalSearch,
+  } = useSearch();
+  const pathname = usePathname();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [isSearchVisible, setIsSearchVisible] = useState(false);
   const [isBecomeArtistModalOpen, setIsBecomeArtistModalOpen] = useState(false);
   
   const isArtist = user?.role === 'artist';
+  const isGlobalSearchDisabledRoute = pathname === '/about' || pathname === '/works/my' || pathname === '/products';
+  const canUseGlobalSearch = !isGlobalSearchDisabledRoute;
   const userFirstName = user?.firstName || user?.first_name || 'مستخدم';
   const displayName = isArtist ? (user?.artistName || user?.artist_name || userFirstName) : userFirstName;
   const userInitial = displayName?.charAt(0).toUpperCase() || 'م';
+
+  useEffect(() => {
+    if (isGlobalSearchDisabledRoute) {
+      setIsSearchVisible(false);
+      clearGlobalSearch();
+    }
+  }, [clearGlobalSearch, isGlobalSearchDisabledRoute]);
 
   return (
     <>
@@ -50,7 +65,7 @@ export const Header = () => {
             {/* Nav Pill / Search Bar Hub */}
             <div className="flex-1 max-w-xl mx-8 relative flex justify-center">
               <AnimatePresence mode="wait">
-                {!isSearchVisible ? (
+                {!isSearchVisible || !canUseGlobalSearch ? (
                   <motion.nav 
                     key="nav"
                     initial={{ opacity: 0, y: 10 }}
@@ -76,7 +91,7 @@ export const Header = () => {
                       <input 
                         autoFocus
                         type="text" 
-                        placeholder="ابحث عن فنان، عمل، أو فئة..." 
+                        placeholder="ابحث عن فنان، عمل ..."
                         value={globalSearchQuery}
                         onChange={(e) => setGlobalSearchQuery(e.target.value)}
                         className="flex-1 bg-transparent border-none py-2.5 text-sm md:text-base text-[#4a3728] focus:outline-none font-art placeholder:text-gray-400"
@@ -99,12 +114,14 @@ export const Header = () => {
             {/* Actions */}
             <div className="flex items-center gap-5">
               <div className="flex items-center gap-2 text-gray-400">
-                <button 
-                  onClick={() => setIsSearchVisible(!isSearchVisible)}
-                  className={`hover:text-[#5c4436] transition-all p-2.5 rounded-full ${isSearchVisible ? 'bg-brown-gradient text-white' : 'hover:bg-gray-100'}`}
-                >
-                  {isSearchVisible ? <i className="fa-solid fa-xmark text-lg"></i> : <i className="fa-solid fa-magnifying-glass text-lg"></i>}
-                </button>
+                {canUseGlobalSearch && (
+                  <button 
+                    onClick={() => setIsSearchVisible(!isSearchVisible)}
+                    className={`hover:text-[#5c4436] transition-all p-2.5 rounded-full ${isSearchVisible ? 'bg-brown-gradient text-white' : 'hover:bg-gray-100'}`}
+                  >
+                    {isSearchVisible ? <i className="fa-solid fa-xmark text-lg"></i> : <i className="fa-solid fa-magnifying-glass text-lg"></i>}
+                  </button>
+                )}
 
                 <Link href="/cart" className="relative hover:text-[#5c4436] transition-colors p-2.5">
                   <i className="fa-solid fa-bag-shopping text-lg"></i>

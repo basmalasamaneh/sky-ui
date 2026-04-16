@@ -266,14 +266,6 @@ export default function MyWorksPage() {
                           <i className="fa-solid fa-expand text-2xl"></i>
                         </div>
                       </div>
-                      
-                      {/* Badge for multiple images */}
-                      {work.images?.length > 1 && (
-                        <div className="absolute top-4 right-4 bg-black/60 backdrop-blur-sm text-white px-3 py-1.5 rounded-full text-[10px] font-bold flex items-center gap-1.5">
-                          <i className="fa-solid fa-layer-group"></i>
-                          <span>{work.images.length} صور</span>
-                        </div>
-                      )}
                     </div>
 
                     {/* Actions Bar (Edit/Delete) */}
@@ -415,13 +407,13 @@ export default function MyWorksPage() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="fixed inset-0 z-[150] bg-black/60 backdrop-blur-md flex items-center justify-center p-4 md:p-10"
+              className="fixed inset-0 z-[150] bg-black/60 backdrop-blur-md flex items-start md:items-center justify-center p-2 sm:p-4 md:p-10 overflow-y-auto"
             >
               <motion.div 
                 initial={{ scale: 0.9, opacity: 0, y: 20 }}
                 animate={{ scale: 1, opacity: 1, y: 0 }}
                 exit={{ scale: 0.9, opacity: 0, y: 20 }}
-                className="bg-white w-full max-w-5xl max-h-[90vh] overflow-hidden rounded-[2.5rem] shadow-2xl flex flex-col md:flex-row relative"
+                className="bg-white w-full max-w-5xl h-[calc(100dvh-1rem)] md:h-[90vh] overflow-hidden rounded-[2.5rem] shadow-2xl flex flex-col md:flex-row relative"
               >
                 {/* Close Button */}
                 <button 
@@ -486,7 +478,7 @@ export default function MyWorksPage() {
                 </div>
 
                 {/* Right Side: Details */}
-                <div className="md:w-1/2 p-8 md:p-12 overflow-y-auto bg-white flex flex-col h-full overflow-y-auto no-scrollbar">
+                <div className="md:w-1/2 p-6 md:p-12 bg-white flex flex-col flex-1 min-h-0 overflow-y-auto no-scrollbar">
                   <div className="space-y-8 animate-fade-in">
                     <div className="space-y-2">
                       <div className="flex items-center gap-2">

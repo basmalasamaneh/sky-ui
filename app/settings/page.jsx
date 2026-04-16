@@ -8,11 +8,20 @@ import { motion } from 'framer-motion';
 export default function SettingsPage() {
   const { user, isAuthenticated, isLoading, token, logout, login } = useAuth();
   const router = useRouter();
+  const DUPLICATE_ARTIST_NAME_MESSAGE = 'اسم الفنان مستخدم بالفعل. اختر اسماً فنياً آخر.';
+  const FIELD_LABELS = {
+    artistName: 'اسم الشهرة',
+    bio: 'النبذة الشخصية',
+    location: 'الموقع / المدينة',
+    phone: 'رقم الهاتف',
+    socialMedia: 'روابط التواصل الاجتماعي',
+  };
 
   const [isDeleting, setIsDeleting] = useState(false);
   const [deleteMessage, setDeleteMessage] = useState('');
   const [isUpdating, setIsUpdating] = useState(false);
   const [updateMessage, setUpdateMessage] = useState({ type: '', text: '' });
+  const [fieldErrors, setFieldErrors] = useState({});
   const [isFetchingProfile, setIsFetchingProfile] = useState(false);
 
   const [formData, setFormData] = useState({
@@ -24,6 +33,83 @@ export default function SettingsPage() {
   });
 
   const [showPlatformPicker, setShowPlatformPicker] = useState(false);
+
+  const toFieldErrorMessage = (fieldKey, message) => {
+    if (!message) return '';
+    const label = FIELD_LABELS[fieldKey] || 'الحقل';
+    return `${label}: ${message}`;
+  };
+
+  const normalizeFieldKey = (fieldName) => {
+    if (!fieldName) return 'submit';
+    const raw = String(fieldName);
+    if (raw.startsWith('socialMedia')) return 'socialMedia';
+    if (raw === 'artist_name') return 'artistName';
+    return raw;
+  };
+
+  const mapServerValidationErrors = (serverErrors) => {
+    if (!Array.isArray(serverErrors)) return null;
+
+    const mapped = {};
+    for (const issue of serverErrors) {
+      const key = normalizeFieldKey(issue?.field);
+      const message = issue?.message;
+      if (!message) continue;
+      mapped[key] = toFieldErrorMessage(key, message);
+    }
+
+    return Object.keys(mapped).length > 0 ? mapped : null;
+  };
+
+  const validateArtistField = (name, value) => {
+    if (name === 'artistName') {
+      if (!String(value || '').trim()) return 'اسم الشهرة مطلوب';
+      if (String(value).trim().length < 3) return 'اسم الشهرة يجب أن يكون 3 أحرف على الأقل';
+      return '';
+    }
+
+    if (name === 'bio') {
+      const trimmed = String(value || '').trim();
+      if (!trimmed) return 'النبذة الشخصية مطلوبة';
+      if (trimmed.length < 20) return 'النبذة يجب أن تكون 20 حرفاً على الأقل';
+      if (trimmed.length > 1000) return 'النبذة لا يجب أن تتجاوز 1000 حرف';
+      return '';
+    }
+
+    if (name === 'location') {
+      const trimmed = String(value || '').trim();
+      if (!trimmed) return 'الموقع / المدينة مطلوب';
+      if (trimmed.length < 3) return 'الموقع / المدينة يجب أن يكون 3 أحرف على الأقل';
+      return '';
+    }
+
+    if (name === 'phone') {
+      const trimmed = String(value || '').trim();
+      if (!trimmed) return 'رقم الهاتف مطلوب';
+      if (trimmed.length !== 10) return 'رقم الهاتف يجب أن يتكون من 10 أرقام بالضبط';
+      return '';
+    }
+
+    return '';
+  };
+
+  const validateSocialMedia = (socialMedia) => {
+    const invalidLink = (socialMedia || []).some((social) => {
+      const url = String(social?.url || '').trim();
+      if (!url) return false;
+      try {
+        const parsed = new URL(url);
+        return !/^https?:$/i.test(parsed.protocol);
+      } catch {
+        return true;
+      }
+    });
+
+    return invalidLink
+      ? 'روابط التواصل الاجتماعي: الرجاء إدخال رابط صحيح يبدأ بـ http:// أو https://'
+      : '';
+  };
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
@@ -66,11 +152,16 @@ export default function SettingsPage() {
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
+
+    if (updateMessage.type === 'error') {
+      setUpdateMessage({ type: '', text: '' });
+    }
     
     // Validation for phone: only numbers
     if (name === 'phone') {
       const numericValue = value.replace(/\D/g, '');
       setFormData(prev => ({ ...prev, [name]: numericValue }));
+      setFieldErrors(prev => ({ ...prev, phone: '' }));
       return;
     }
 
@@ -79,20 +170,38 @@ export default function SettingsPage() {
       const newSocial = [...formData.socialMedia];
       newSocial[index].url = value;
       setFormData(prev => ({ ...prev, socialMedia: newSocial }));
+      setFieldErrors(prev => ({ ...prev, socialMedia: '' }));
       return;
     }
 
     setFormData(prev => ({ ...prev, [name]: value }));
+    setFieldErrors(prev => ({ ...prev, [name]: '' }));
   };
 
   const handleUpdateProfile = async (e) => {
     e.preventDefault();
     setIsUpdating(true);
     setUpdateMessage({ type: '', text: '' });
+    setFieldErrors({});
 
-    // Phone validation: min 10 digits
-    if (formData.phone && formData.phone.length < 10) {
-      setUpdateMessage({ type: 'error', text: 'رقم الهاتف يجب أن يكون 10 أرقام على الأقل.' });
+    const localErrors = {};
+    if (isArtist) {
+      const artistNameError = validateArtistField('artistName', formData.artistName);
+      const bioError = validateArtistField('bio', formData.bio);
+      const locationError = validateArtistField('location', formData.location);
+      const phoneError = validateArtistField('phone', formData.phone);
+      const socialMediaError = validateSocialMedia(formData.socialMedia);
+
+      if (artistNameError) localErrors.artistName = artistNameError;
+      if (bioError) localErrors.bio = bioError;
+      if (locationError) localErrors.location = locationError;
+      if (phoneError) localErrors.phone = phoneError;
+      if (socialMediaError) localErrors.socialMedia = socialMediaError;
+    }
+
+    if (Object.keys(localErrors).length > 0) {
+      setFieldErrors(localErrors);
+      setUpdateMessage({ type: 'error', text: 'يرجى تصحيح الحقول المحددة ثم إعادة المحاولة.' });
       setIsUpdating(false);
       return;
     }
@@ -110,6 +219,19 @@ export default function SettingsPage() {
       const result = await res.json();
 
       if (!res.ok) {
+        const serverFieldErrors = mapServerValidationErrors(result?.errors);
+        if (serverFieldErrors) {
+          setFieldErrors(serverFieldErrors);
+          setUpdateMessage({ type: 'error', text: 'يرجى تصحيح الحقول المحددة ثم إعادة المحاولة.' });
+          return;
+        }
+
+        if (res.status === 409) {
+          setFieldErrors({ artistName: DUPLICATE_ARTIST_NAME_MESSAGE });
+          setUpdateMessage({ type: 'error', text: DUPLICATE_ARTIST_NAME_MESSAGE });
+          return;
+        }
+
         setUpdateMessage({ type: 'error', text: result.message || 'حدث خطأ أثناء تحديث البيانات.' });
         return;
       }
@@ -117,6 +239,8 @@ export default function SettingsPage() {
       if (result.data?.user) {
         login({ ...user, ...result.data.user }, token);
       }
+
+      setFieldErrors({});
       
       setUpdateMessage({ type: 'success', text: 'تم تحديث بياناتك بنجاح!' });
       setTimeout(() => setUpdateMessage({ type: '', text: '' }), 3000);
@@ -250,9 +374,12 @@ export default function SettingsPage() {
                           name="artistName"
                           value={formData.artistName}
                           onChange={handleInputChange}
-                          className="w-full h-14 bg-[#fdfaf7] border border-[#e8dcc4] rounded-2xl px-5 text-[#3b2012] outline-none focus:ring-2 focus:ring-[#5c4436]/20 focus:border-[#5c4436] transition-all font-bold"
+                          className={`w-full h-14 bg-[#fdfaf7] border ${fieldErrors.artistName ? 'border-red-400' : 'border-[#e8dcc4]'} rounded-2xl px-5 text-[#3b2012] outline-none focus:ring-2 focus:ring-[#5c4436]/20 focus:border-[#5c4436] transition-all font-bold`}
                         />
                       </div>
+                      {fieldErrors.artistName && (
+                        <p className="text-red-500 text-xs mt-2 mr-1">{fieldErrors.artistName}</p>
+                      )}
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6 bg-[#fdfaf7]/50 p-6 rounded-[2rem] border border-[#e8dcc4]/20">
@@ -311,8 +438,11 @@ export default function SettingsPage() {
                         value={formData.bio}
                         onChange={handleInputChange}
                         rows="4"
-                        className="w-full bg-[#fdfaf7] border border-[#e8dcc4] rounded-2xl px-5 py-4 text-[#3b2012] outline-none focus:ring-2 focus:ring-[#5c4436]/20 focus:border-[#5c4436] transition-all resize-none"
+                        className={`w-full bg-[#fdfaf7] border ${fieldErrors.bio ? 'border-red-400' : 'border-[#e8dcc4]'} rounded-2xl px-5 py-4 text-[#3b2012] outline-none focus:ring-2 focus:ring-[#5c4436]/20 focus:border-[#5c4436] transition-all resize-none`}
                       />
+                      {fieldErrors.bio && (
+                        <p className="text-red-500 text-xs mt-2 mr-1">{fieldErrors.bio}</p>
+                      )}
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -326,7 +456,7 @@ export default function SettingsPage() {
                             name="location"
                             value={formData.location}
                             onChange={handleInputChange}
-                            className="w-full h-14 bg-[#fdfaf7] border border-[#e8dcc4] rounded-2xl px-5 text-[#3b2012] outline-none focus:ring-2 focus:ring-[#5c4436]/20 focus:border-[#5c4436] transition-all appearance-none"
+                            className={`w-full h-14 bg-[#fdfaf7] border ${fieldErrors.location ? 'border-red-400' : 'border-[#e8dcc4]'} rounded-2xl px-5 text-[#3b2012] outline-none focus:ring-2 focus:ring-[#5c4436]/20 focus:border-[#5c4436] transition-all appearance-none`}
                           >
                             <option value="">اختر المدينة</option>
                             <option value="القدس">القدس</option>
@@ -347,6 +477,9 @@ export default function SettingsPage() {
                           </select>
                           <i className="fa-solid fa-chevron-down absolute left-5 top-1/2 -translate-y-1/2 text-[10px] text-[#9c7b65] pointer-events-none"></i>
                         </div>
+                        {fieldErrors.location && (
+                          <p className="text-red-500 text-xs mt-2 mr-1">{fieldErrors.location}</p>
+                        )}
                       </div>
                       <div>
                         <label className="block text-sm font-bold text-[#3b2012] mb-2 pr-2 flex items-center gap-2">
@@ -359,8 +492,11 @@ export default function SettingsPage() {
                           dir="ltr"
                           value={formData.phone}
                           onChange={handleInputChange}
-                          className="w-full h-14 bg-[#fdfaf7] border border-[#e8dcc4] rounded-2xl px-5 text-right text-[#3b2012] outline-none focus:ring-2 focus:ring-[#5c4436]/20 focus:border-[#5c4436] transition-all"
+                          className={`w-full h-14 bg-[#fdfaf7] border ${fieldErrors.phone ? 'border-red-400' : 'border-[#e8dcc4]'} rounded-2xl px-5 text-right text-[#3b2012] outline-none focus:ring-2 focus:ring-[#5c4436]/20 focus:border-[#5c4436] transition-all`}
                         />
+                        {fieldErrors.phone && (
+                          <p className="text-red-500 text-xs mt-2 mr-1">{fieldErrors.phone}</p>
+                        )}
                       </div>
                     </div>
 
@@ -452,6 +588,9 @@ export default function SettingsPage() {
                   </div>
                 )}
 
+                    {fieldErrors.socialMedia && (
+                      <p className="text-red-500 text-xs mt-1 mr-1">{fieldErrors.socialMedia}</p>
+                    )}
                 <div className="pt-6">
                   <button
                     type="submit"

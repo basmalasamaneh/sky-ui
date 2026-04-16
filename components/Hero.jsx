@@ -119,7 +119,7 @@ export default function Hero() {
                 initial={{ y: 20, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
                 transition={{ delay: 0.2 }}
-                className="bg-white rounded-2xl shadow-xl p-4 w-74 border border-gray-100 transform transition-transform hover:-translate-x-2"
+                className="bg-white rounded-2xl shadow-xl p-4 w-72 border border-gray-100 transform transition-transform hover:-translate-x-2"
               >
                 <div className="flex items-center justify-between mb-3">
                   <div className="flex items-center gap-3">
@@ -150,7 +150,7 @@ export default function Hero() {
                 initial={{ y: 20, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
                 transition={{ delay: 0.4 }}
-                className="bg-white rounded-2xl shadow-xl p-4 w-74 border border-gray-100 transform transition-transform hover:-translate-x-2"
+                className="bg-white rounded-2xl shadow-xl p-4 w-72 border border-gray-100 transform transition-transform hover:-translate-x-2"
               >
                 <div className="flex items-center gap-3 mb-3">
                   <div className="w-11 h-11 rounded-xl bg-[#6f370f]/10 flex items-center justify-center text-xl text-[#6f370f]">

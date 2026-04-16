@@ -7,6 +7,13 @@ import { useAuth } from '../contexts/AuthContext';
 export const BecomeArtistModal = ({ isOpen, onClose, user }) => {
   const { login, token } = useAuth();
   const DUPLICATE_ARTIST_NAME_MESSAGE = 'اسم الفنان مستخدم بالفعل. اختر اسماً فنياً آخر.';
+  const FIELD_LABELS = {
+    artistName: 'اسم الفنان',
+    bio: 'النبذة الشخصية',
+    location: 'الموقع / المدينة',
+    phone: 'رقم الهاتف',
+    socialMedia: 'روابط التواصل',
+  };
 
   const mapServerErrorMessage = (message) => {
     if (!message) return 'حدث خطأ. حاول مرة أخرى.';
@@ -30,6 +37,35 @@ export const BecomeArtistModal = ({ isOpen, onClose, user }) => {
   const [errors, setErrors] = useState({});
   const [touched, setTouched] = useState({});
   const [showPlatformPicker, setShowPlatformPicker] = useState(false);
+  const hasBlockingFieldErrors = Object.entries(errors).some(([key, value]) => key !== 'submit' && !!value);
+
+  const toFieldErrorMessage = (fieldKey, message) => {
+    if (!message) return '';
+    const label = FIELD_LABELS[fieldKey] || 'الحقل';
+    return `${label}: ${message}`;
+  };
+
+  const normalizeFieldKey = (fieldName) => {
+    if (!fieldName) return 'submit';
+    const raw = String(fieldName);
+    if (raw.startsWith('socialMedia')) return 'socialMedia';
+    if (raw === 'artist_name') return 'artistName';
+    return raw;
+  };
+
+  const mapServerValidationErrors = (serverErrors) => {
+    if (!Array.isArray(serverErrors)) return null;
+
+    const mapped = {};
+    for (const issue of serverErrors) {
+      const key = normalizeFieldKey(issue?.field);
+      const message = mapServerErrorMessage(issue?.message);
+      if (!message) continue;
+      mapped[key] = toFieldErrorMessage(key, message);
+    }
+
+    return Object.keys(mapped).length > 0 ? mapped : null;
+  };
 
   // Close on Escape key
   React.useEffect(() => {
@@ -42,13 +78,22 @@ export const BecomeArtistModal = ({ isOpen, onClose, user }) => {
 
   const validate = (name, value) => {
     let error = '';
+    if (name === 'artistName') {
+      if (!value.trim()) error = 'الاسم الفني مطلوب';
+      else if (value.trim().length < 3) error = 'الاسم الفني يجب أن يكون 3 أحرف على الأقل';
+    }
     if (name === 'bio') {
       if (!value.trim()) error = 'النبذة الشخصية مطلوبة';
       else if (value.trim().length < 20) error = 'النبذة يجب أن تكون 20 حرفاً على الأقل';
       else if (value.length > 1000) error = 'النبذة لا يجب أن تتجاوز 1000 حرف';
     }
-    if (name === 'phone' && value && value.length < 10) {
-      error = 'رقم الهاتف يجب أن يكون 10 أرقام على الأقل';
+    if (name === 'location') {
+      if (!value.trim()) error = 'الموقع / المدينة مطلوب';
+      else if (value.trim().length < 3) error = 'الموقع / المدينة يجب أن يكون 3 أحرف على الأقل';
+    }
+    if (name === 'phone') {
+      if (!value.trim()) error = 'رقم الهاتف مطلوب';
+      else if (value.length !== 10) error = 'رقم الهاتف يجب أن يتكون من 10 أرقام بالضبط';
     }
     return error;
   };
@@ -62,6 +107,11 @@ export const BecomeArtistModal = ({ isOpen, onClose, user }) => {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
+
+    // Submit-level errors come from backend; allow retry as user edits any field.
+    if (errors.submit) {
+      setErrors(prev => ({ ...prev, submit: '' }));
+    }
     
     let finalValue = value;
     // Validation for phone: only numbers
@@ -74,6 +124,10 @@ export const BecomeArtistModal = ({ isOpen, onClose, user }) => {
       const newSocial = [...formData.socialMedia];
       newSocial[index].url = value;
       setFormData(prev => ({ ...prev, socialMedia: newSocial }));
+
+      if (errors.socialMedia) {
+        setErrors(prev => ({ ...prev, socialMedia: '' }));
+      }
       return;
     }
 
@@ -109,10 +163,27 @@ export const BecomeArtistModal = ({ isOpen, onClose, user }) => {
 
     // Validate all
     const newErrors = {};
-    Object.keys(formData).forEach(key => {
+    Object.keys(formData).forEach((key) => {
+      if (key === 'socialMedia') return;
       const err = validate(key, formData[key]);
       if (err) newErrors[key] = err;
     });
+
+    const socialMediaHasInvalidUrl = formData.socialMedia.some((social) => {
+      const url = String(social?.url || '').trim();
+      if (!url) return false;
+      try {
+        const parsed = new URL(url);
+        return !/^https?:$/i.test(parsed.protocol);
+      } catch {
+        return true;
+      }
+    });
+
+    if (socialMediaHasInvalidUrl) {
+      newErrors.socialMedia = 'روابط التواصل: الرجاء إدخال رابط صحيح يبدأ بـ http:// أو https://';
+    }
+
     setErrors(newErrors);
 
     if (Object.keys(newErrors).length > 0) return;
@@ -142,6 +213,12 @@ export const BecomeArtistModal = ({ isOpen, onClose, user }) => {
       const result = await res.json();
 
       if (!res.ok) {
+        const fieldErrors = mapServerValidationErrors(result?.errors);
+        if (fieldErrors) {
+          setErrors(prev => ({ ...prev, ...fieldErrors, submit: '' }));
+          return;
+        }
+
         const backendMessage = mapServerErrorMessage(result?.message);
         if (res.status === 409) {
           setErrors(prev => ({ ...prev, artistName: backendMessage, submit: '' }));
@@ -422,7 +499,7 @@ export const BecomeArtistModal = ({ isOpen, onClose, user }) => {
 
                 <button 
                   type="submit"
-                  disabled={isSubmitting || formData.bio.trim().length < 20 || Object.keys(errors).some(k => errors[k])}
+                  disabled={isSubmitting || formData.bio.trim().length < 20 || hasBlockingFieldErrors}
                   className="w-full bg-brown-gradient text-white h-12 rounded-2xl font-bold font-art text-lg shadow-lg hover:opacity-90 transition-all active:scale-95 flex items-center justify-center mt-2 disabled:opacity-50 disabled:grayscale"
                 >
                   {isSubmitting ? (

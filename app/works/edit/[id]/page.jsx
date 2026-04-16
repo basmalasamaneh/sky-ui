@@ -326,6 +326,7 @@ export default function EditWorkPage() {
                     required
                     value={formData.price}
                     onChange={handleInputChange}
+                    onWheel={(e) => e.currentTarget.blur()}
                     placeholder="مثال: 150"
                     className="price-input-with-ils w-full h-14 bg-[#fdfaf7] border border-[#e8dcc4] rounded-2xl px-5 pl-14 text-[#3b2012] outline-none focus:ring-2 focus:ring-[#5c4436]/20 focus:border-[#5c4436] transition-all font-bold"
                   />
