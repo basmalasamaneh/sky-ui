@@ -1,6 +1,17 @@
 import { buildBackendApiUrl } from '@/lib/backend-api';
 import { normalizeUserData } from '@/lib/normalize-user';
 
+const mapBackendErrorMessageToArabic = (message) => {
+  if (!message) return 'فشل تحديث البيانات';
+  if (String(message).includes('الاسم الفني مستخدم بالفعل')) {
+    return 'اسم الفنان مستخدم بالفعل. اختر اسماً فنياً آخر.';
+  }
+  if (String(message).toLowerCase().includes('artist name is already in use')) {
+    return 'اسم الفنان مستخدم بالفعل. اختر اسماً فنياً آخر.';
+  }
+  return message;
+};
+
 export async function GET(req) {
   try {
     const authHeader = req.headers.get('authorization');
@@ -81,8 +92,19 @@ export async function PATCH(req) {
       }
 
       if (!backendResponse.ok) {
+        const mappedErrors = Array.isArray(result?.errors)
+          ? result.errors.map((errorItem) => ({
+              field: errorItem?.field,
+              message: mapBackendErrorMessageToArabic(errorItem?.message),
+            }))
+          : undefined;
+
         return Response.json(
-          { status: 'error', message: result?.message || 'فشل تحديث البيانات' },
+          {
+            status: 'error',
+            message: mapBackendErrorMessageToArabic(result?.message) || 'فشل تحديث البيانات',
+            ...(mappedErrors ? { errors: mappedErrors } : {}),
+          },
           { status: backendResponse.status }
         );
       }

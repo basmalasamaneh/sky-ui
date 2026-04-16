@@ -13,7 +13,7 @@ export const metadata = {
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="ar" dir="rtl">
+    <html lang="ar" dir="rtl" suppressHydrationWarning>
       <head>
         <link
           rel="stylesheet"
@@ -23,7 +23,7 @@ export default function RootLayout({ children }) {
           referrerPolicy="no-referrer"
         />
       </head>
-      <body className="antialiased selection:bg-gold selection:text-white bg-white">
+      <body className="antialiased selection:bg-[#5c4436] selection:text-white bg-white">
         <AuthProvider>
           <CartProvider>
             <SearchProvider>
