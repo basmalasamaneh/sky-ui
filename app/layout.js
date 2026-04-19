@@ -23,7 +23,7 @@ export default function RootLayout({ children }) {
           referrerPolicy="no-referrer"
         />
       </head>
-      <body className="antialiased selection:bg-[#5c4436] selection:text-white bg-white">
+      <body className="antialiased selection:bg-[#5c4436] selection:text-white bg-[#fcfaf8] dark:bg-[#1a120c] text-gray-900 dark:text-[#e4ded8]">
         <AuthProvider>
           <CartProvider>
             <SearchProvider>

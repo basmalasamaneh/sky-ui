@@ -41,7 +41,7 @@ export const Header = () => {
 
   return (
     <>
-      <header id="main-header" className="fixed top-0 z-50 w-full border-b bg-white/95 backdrop-blur-md shadow-sm" dir="ltr">
+      <header id="main-header" className="fixed top-0 z-50 w-full border-b bg-white/95 backdrop-blur-md shadow-sm" dir="rtl">
         <div className="container mx-auto px-4">
           <div className="flex h-16 items-center justify-between">
             
@@ -76,6 +76,7 @@ export const Header = () => {
                   >
                     <Link href="/" className="text-[16px] font-bold text-gray-700 hover:text-[#5c4436] transition-all hover:scale-105 duration-300 font-art">الرئيسية</Link>
                     <Link href="/products" className="text-[16px] font-bold text-gray-700 hover:text-[#5c4436] transition-all hover:scale-105 duration-300 font-art">المنتجات</Link>
+                    <Link href="/artists" className="text-[16px] font-bold text-gray-700 hover:text-[#5c4436] transition-all hover:scale-105 duration-300 font-art">الفنانون</Link>
                     <Link href="/about" className="text-[16px] font-bold text-gray-700 hover:text-[#5c4436] transition-all hover:scale-105 duration-300 font-art">عن أثر</Link>
                   </motion.nav>
                 ) : (
@@ -243,6 +244,7 @@ export const Header = () => {
               <div className="flex flex-col p-6 gap-2">
                 <Link href="/" className="py-5 px-4 text-xl font-bold text-gray-800 rounded-xl hover:bg-gray-50 text-right font-art">الرئيسية</Link>
                 <Link href="/products" className="py-5 px-4 text-xl font-bold text-gray-800 rounded-xl hover:bg-gray-50 text-right font-art">المنتجات</Link>
+                <Link href="/artists" className="py-5 px-4 text-xl font-bold text-gray-800 rounded-xl hover:bg-gray-50 text-right font-art">الفنانون</Link>
                 <Link href="/about" className="py-5 px-4 text-xl font-bold text-gray-800 rounded-xl hover:bg-gray-50 text-right font-art">عن أثر</Link>
                 <div className="pt-6 border-t border-gray-100 mt-2 flex flex-col gap-3">
                   {!isAuthenticated ? (

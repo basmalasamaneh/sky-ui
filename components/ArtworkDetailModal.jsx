@@ -130,15 +130,19 @@ export default function ArtworkDetailModal({ work, isLoadingDetails = false, onC
               </div>
 
               <div className="p-6 bg-[#fdfaf7] rounded-[2rem] border border-[#e8dcc4]/50 space-y-6">
-                <div className="flex items-center gap-4">
-                  <div className="w-14 h-14 bg-brown-gradient rounded-full flex items-center justify-center text-white text-xl font-bold shadow-md">
-                    {(work.artistName || 'ف').charAt(0)}
+                <Link href={`/artists/${work.artist_id}`} className="flex items-center gap-4 group/artist" onClick={onClose}>
+                  <div className="relative w-14 h-14 bg-[#f0ece6] rounded-full flex items-center justify-center text-[#6b4c3b] text-xl font-bold shadow-md transition-transform group-hover/artist:scale-110 overflow-hidden border-2 border-white">
+                    <img 
+                      src={work.artistAvatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(work.artistName || 'ف')}&background=5c4436&color=fff&size=200&font-size=0.4&bold=true`} 
+                      alt={work.artistName || 'فنان'}
+                      className="w-full h-full object-cover"
+                    />
                   </div>
                   <div className="flex-1">
                     <p className="text-xs text-[#9c7b65] mb-0.5">الفنان المبدع</p>
-                    <p className="text-lg font-bold text-[#3b2012]">{work.artistName || 'غير متوفر'}</p>
+                    <p className="text-lg font-bold text-[#3b2012] group-hover/artist:text-[#6b4c3b] transition-colors">{work.artistName || 'غير متوفر'}</p>
                   </div>
-                </div>
+                </Link>
 
                 <div className="grid grid-cols-2 gap-4">
                   <Link href="/login" className="relative overflow-hidden bg-white p-4 rounded-2xl border border-[#e8dcc4]/30 shadow-sm flex items-center gap-3">
@@ -308,15 +312,19 @@ export default function ArtworkDetailModal({ work, isLoadingDetails = false, onC
               </div>
 
               <div className="p-6 bg-[#fdfaf7] rounded-[2rem] border border-[#e8dcc4]/50 space-y-6">
-                <div className="flex items-center gap-4">
-                  <div className="w-14 h-14 bg-brown-gradient rounded-full flex items-center justify-center text-white text-xl font-bold shadow-md">
-                    {work.artistName ? work.artistName.charAt(0) : 'ف'}
+                <Link href={`/artists/${work.artist_id}`} className="flex items-center gap-4 group/artist" onClick={onClose}>
+                  <div className="relative w-14 h-14 bg-[#f0ece6] rounded-full flex items-center justify-center text-[#6b4c3b] text-xl font-bold shadow-md transition-transform group-hover/artist:scale-110 overflow-hidden border-2 border-white">
+                    <img 
+                      src={work.artistAvatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(work.artistName || 'ف')}&background=5c4436&color=fff&size=200&font-size=0.4&bold=true`} 
+                      alt={work.artistName || 'فنان'}
+                      className="w-full h-full object-cover"
+                    />
                   </div>
                   <div className="flex-1">
                     <p className="text-xs text-[#9c7b65] mb-0.5">الفنان المبدع</p>
-                    <p className="text-lg font-bold text-[#3b2012]">{work.artistName || 'غير متوفر'}</p>
+                    <p className="text-lg font-bold text-[#3b2012] group-hover/artist:text-[#6b4c3b] transition-colors">{work.artistName || 'غير متوفر'}</p>
                   </div>
-                </div>
+                </Link>
 
                 <div className="grid grid-cols-2 gap-4">
                   <div className="bg-white p-4 rounded-2xl border border-[#e8dcc4]/30 shadow-sm flex items-center gap-3 group">

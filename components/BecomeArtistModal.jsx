@@ -29,7 +29,8 @@ export const BecomeArtistModal = ({ isOpen, onClose, user }) => {
     bio: '',
     location: '',
     phone: '',
-    socialMedia: []
+    socialMedia: [],
+    avatarPreview: null
   });
 
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -311,6 +312,38 @@ export const BecomeArtistModal = ({ isOpen, onClose, user }) => {
             ) : (
               <form onSubmit={handleSubmit} className="space-y-4">
                 <p className="text-center text-sm text-[#9c7b65] font-amiri mb-4">قم بتعبئة بياناتك للبدء في رحلتك الفنية</p>
+                
+                {/* Visual Avatar Upload (Frontend Only Preview) */}
+                <div className="flex flex-col items-center mb-6">
+                  <div className="relative group/avatar cursor-pointer">
+                    <input 
+                      type="file" 
+                      accept="image/*"
+                      className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                      onChange={(e) => {
+                        if (e.target.files && e.target.files[0]) {
+                          const url = URL.createObjectURL(e.target.files[0]);
+                          setFormData(prev => ({ ...prev, avatarPreview: url }));
+                        }
+                      }}
+                      title="اختر صورة شخصية (تصميم فقط)"
+                    />
+                    <div className="w-24 h-24 rounded-full overflow-hidden border-4 border-white shadow-lg bg-[#f0ece6] flex items-center justify-center relative transition-transform group-hover/avatar:scale-105">
+                      {formData.avatarPreview ? (
+                        <img src={formData.avatarPreview} alt="Avatar Preview" className="w-full h-full object-cover" />
+                      ) : (
+                        <i className="fa-solid fa-user text-3xl text-[#ceb29f]"></i>
+                      )}
+                      <div className="absolute inset-0 bg-black/40 flex flex-col items-center justify-center opacity-0 group-hover/avatar:opacity-100 transition-opacity">
+                        <i className="fa-solid fa-camera text-white text-xl mb-1"></i>
+                      </div>
+                    </div>
+                  </div>
+                  <p className="text-xs text-[#9c7b65] font-bold mt-2">صورتك الشخصية</p>
+                  <p className="text-[9px] text-gray-400 mt-1 max-w-[200px] text-center">
+                    (هذا الزر جاهز برمجياً كواجهة لتقوم بربطه لاحقاً مع الباك إند)
+                  </p>
+                </div>
                 
                 {/* Artist Name */}
                 <div className="relative">

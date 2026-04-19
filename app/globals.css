@@ -11,10 +11,19 @@
   --primary: #4a3728;
 }
 
+@media (prefers-color-scheme: dark) {
+  :root {
+    --foreground-rgb: 228, 222, 216; /* #e4ded8 */
+    --background-start-rgb: 26, 18, 12; /* #1a120c */
+    --background-end-rgb: 26, 18, 12;
+    --primary: #c4a993; /* lighter brown */
+  }
+}
+
 body {
-  color: rgb(var(--foreground-rgb));
-  background: white;
   font-family: 'Outfit', sans-serif;
+  color: rgb(var(--foreground-rgb));
+  background: transparent;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
