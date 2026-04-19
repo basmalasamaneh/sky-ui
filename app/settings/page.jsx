@@ -23,6 +23,8 @@ export default function SettingsPage() {
   const [updateMessage, setUpdateMessage] = useState({ type: '', text: '' });
   const [fieldErrors, setFieldErrors] = useState({});
   const [isFetchingProfile, setIsFetchingProfile] = useState(false);
+  const [isUploadingProfileImage, setIsUploadingProfileImage] = useState(false);
+  const [profileImageMessage, setProfileImageMessage] = useState({ type: '', text: '' });
 
   const [formData, setFormData] = useState({
     artistName: '',
@@ -284,6 +286,49 @@ export default function SettingsPage() {
     }
   };
 
+  const handleProfileImageChange = async (event) => {
+    const file = event.target.files?.[0];
+    if (!file || !token || !isArtist) return;
+
+    setProfileImageMessage({ type: '', text: '' });
+    setIsUploadingProfileImage(true);
+
+    try {
+      const formData = new FormData();
+      formData.append('image', file);
+
+      const response = await fetch('/api/users/profile/image', {
+        method: 'PATCH',
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        body: formData,
+      });
+
+      const result = await response.json().catch(() => ({}));
+
+      if (!response.ok) {
+        setProfileImageMessage({
+          type: 'error',
+          text: result?.message || 'تعذر تحديث الصورة الشخصية حالياً.',
+        });
+        return;
+      }
+
+      if (result?.data?.user) {
+        login({ ...user, ...result.data.user }, token);
+      }
+
+      setProfileImageMessage({ type: 'success', text: 'تم تحديث الصورة الشخصية بنجاح.' });
+    } catch (error) {
+      console.error('Profile image upload failed:', error);
+      setProfileImageMessage({ type: 'error', text: 'حدث خطأ أثناء رفع الصورة.' });
+    } finally {
+      setIsUploadingProfileImage(false);
+      event.target.value = '';
+    }
+  };
+
   if (!isLoading && !isAuthenticated) {
     return null;
   }
@@ -305,8 +350,36 @@ export default function SettingsPage() {
         {/* Header Section */}
         <div className="flex flex-col md:flex-row items-center gap-8 mb-12 animate-fade-in">
           <div className="relative">
-            <div className="w-32 h-32 bg-brown-gradient rounded-full flex items-center justify-center text-white text-5xl font-bold border-4 border-white shadow-xl relative overflow-hidden">
-              {user?.firstName?.charAt(0).toUpperCase()}
+            <div className="w-32 h-32 bg-brown-gradient rounded-full flex items-center justify-center text-white text-5xl font-bold border-4 border-white shadow-xl relative overflow-hidden group">
+              {user?.profileImage ? (
+                <img
+                  src={user.profileImage}
+                  alt={user?.artistName || user?.firstName || 'profile'}
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                user?.firstName?.charAt(0).toUpperCase()
+              )}
+
+              {isArtist && (
+                <>
+                  <div className="absolute inset-0 bg-black/45 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                    {isUploadingProfileImage ? (
+                      <i className="fa-solid fa-spinner fa-spin text-white text-2xl"></i>
+                    ) : (
+                      <i className="fa-solid fa-camera text-white text-2xl"></i>
+                    )}
+                  </div>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    className="absolute inset-0 opacity-0 cursor-pointer"
+                    onChange={handleProfileImageChange}
+                    disabled={isUploadingProfileImage}
+                    title="تغيير الصورة الشخصية"
+                  />
+                </>
+              )}
             </div>
             {isArtist ? (
               <div className="absolute bottom-1 right-1 bg-white p-1 rounded-full shadow-lg border border-gray-100">
@@ -328,6 +401,17 @@ export default function SettingsPage() {
               )}
             </div>
             <p className="text-[#9c7b65] text-lg">أهلاً بك، {user?.firstName} {user?.lastName}. يمكنك مراجعة وتعديل بياناتك هنا.</p>
+            {isArtist && (
+              <p className="text-xs text-[#9c7b65] mt-2">
+                اضغط على الصورة لتغيير صورة الملف الشخصي.
+              </p>
+            )}
+            {profileImageMessage.text && (
+              <p className={`text-sm font-bold mt-2 ${profileImageMessage.type === 'success' ? 'text-green-600' : 'text-red-600'}`}>
+                <i className={`fa-solid ${profileImageMessage.type === 'success' ? 'fa-circle-check' : 'fa-circle-exclamation'} ml-2`}></i>
+                {profileImageMessage.text}
+              </p>
+            )}
           </div>
         </div>
 

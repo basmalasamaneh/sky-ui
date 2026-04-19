@@ -44,6 +44,7 @@ const normalizeUser = (userData, authToken) => {
     bio: normalizedUser.bio || normalizedPayload.bio,
     location: normalizedUser.location || normalizedPayload.location,
     phone: normalizedUser.phone || normalizedPayload.phone,
+    profileImage: normalizedUser.profileImage || normalizedPayload.profileImage,
     socialMedia: normalizedUser.socialMedia || normalizedPayload.socialMedia,
   }
 }
@@ -85,6 +86,39 @@ export function AuthProvider({ children }) {
       setIsLoading(false)
     }
   }, [])
+
+  // Keep auth user in sync with backend profile globally,
+  // so fields like profileImage appear immediately on any page.
+  useEffect(() => {
+    if (!token || !isAuthenticated) return
+
+    let cancelled = false
+
+    const syncProfile = async () => {
+      try {
+        const response = await fetch('/api/users/profile', {
+          headers: { Authorization: `Bearer ${token}` },
+        })
+
+        const result = await response.json().catch(() => ({}))
+        if (!response.ok || !result?.data?.user || cancelled) return
+
+        const mergedUser = { ...(user || {}), ...result.data.user }
+        const normalizedUser = normalizeUser(mergedUser, token)
+
+        setUser(normalizedUser)
+        localStorage.setItem(USER_KEY, JSON.stringify(normalizedUser))
+      } catch (error) {
+        console.error('Failed to sync auth profile:', error)
+      }
+    }
+
+    syncProfile()
+
+    return () => {
+      cancelled = true
+    }
+  }, [token, isAuthenticated])
 
   const login = (userData, authToken) => {
     const normalizedUser = normalizeUser(userData, authToken)

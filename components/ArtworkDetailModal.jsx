@@ -238,15 +238,27 @@ export default function ArtworkDetailModal({ work, isLoadingDetails = false, onC
               </div>
 
               <div className="p-6 bg-[#fdfaf7] rounded-[2rem] border border-[#e8dcc4]/50 space-y-6">
-                <div className="flex items-center gap-4">
-                  <div className="w-14 h-14 bg-brown-gradient rounded-full flex items-center justify-center text-white text-xl font-bold shadow-md">
-                    {user?.firstName?.charAt(0) || 'أ'}
+                <Link
+                  href={`/artists/${work.artist_id || user?.id}`}
+                  className="flex items-center gap-4 group/artist"
+                  onClick={onClose}
+                >
+                  <div className="w-14 h-14 bg-brown-gradient rounded-full flex items-center justify-center text-white text-xl font-bold shadow-md overflow-hidden border-2 border-white transition-transform group-hover/artist:scale-110">
+                    {user?.profileImage || work.artistAvatar ? (
+                      <img
+                        src={user?.profileImage || work.artistAvatar}
+                        alt={user?.artistName || work.artistName || 'فنان'}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      user?.firstName?.charAt(0) || 'أ'
+                    )}
                   </div>
                   <div className="flex-1">
                     <p className="text-xs text-[#9c7b65] mb-0.5">الفنان (أنت)</p>
-                    <p className="text-lg font-bold text-[#3b2012]">{user?.artistName || `${user?.firstName || ''} ${user?.lastName || ''}`.trim()}</p>
+                    <p className="text-lg font-bold text-[#3b2012] group-hover/artist:text-[#6b4c3b] transition-colors">{user?.artistName || `${user?.firstName || ''} ${user?.lastName || ''}`.trim()}</p>
                   </div>
-                </div>
+                </Link>
 
                 <div className="grid grid-cols-2 gap-4">
                   <div className="bg-white p-4 rounded-2xl border border-[#e8dcc4]/30 shadow-sm flex items-center gap-3">

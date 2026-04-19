@@ -31,6 +31,12 @@ export const Header = () => {
   const userFirstName = user?.firstName || user?.first_name || 'مستخدم';
   const displayName = isArtist ? (user?.artistName || user?.artist_name || userFirstName) : userFirstName;
   const userInitial = displayName?.charAt(0).toUpperCase() || 'م';
+  const userProfileImage = user?.profileImage || user?.profile_image || '';
+  const [avatarImageError, setAvatarImageError] = useState(false);
+
+  useEffect(() => {
+    setAvatarImageError(false);
+  }, [userProfileImage]);
 
   useEffect(() => {
     if (isGlobalSearchDisabledRoute) {
@@ -158,8 +164,17 @@ export const Header = () => {
                         onClick={() => setUserMenuOpen(!userMenuOpen)}
                         className="flex items-center gap-3 bg-white px-3 py-1.5 rounded-full border-2 border-[#e8dcc4] shadow-sm hover:shadow-md hover:border-[#6b4c3b] transition-all duration-300 group"
                       >
-                        <div className="w-8 h-8 bg-brown-gradient rounded-full flex items-center justify-center text-white font-bold shadow-sm border border-white/50 text-xs transition-transform group-hover:scale-110">
-                          {userInitial}
+                        <div className="w-8 h-8 bg-brown-gradient rounded-full flex items-center justify-center text-white font-bold shadow-sm border border-white/50 text-xs transition-transform group-hover:scale-110 overflow-hidden">
+                          {userProfileImage && !avatarImageError ? (
+                            <img
+                              src={userProfileImage}
+                              alt={displayName}
+                              className="w-full h-full object-cover"
+                              onError={() => setAvatarImageError(true)}
+                            />
+                          ) : (
+                            userInitial
+                          )}
                         </div>
                         <span className="text-[#3b2012] font-bold font-art text-sm whitespace-nowrap flex items-center gap-1.5">
                           {displayName}
@@ -181,6 +196,17 @@ export const Header = () => {
                               exit={{ opacity: 0, y: 10, scale: 0.95 }}
                               className="absolute left-0 mt-3 w-48 bg-white rounded-2xl shadow-xl border border-[#e8dcc4]/50 z-20 overflow-hidden py-2"
                             >
+                              {isArtist && (
+                                <Link 
+                                  href={`/artists/${user?.id}`} 
+                                  className="flex items-center gap-3 px-5 py-3 text-gray-700 hover:bg-[#fdfaf7] hover:text-[#3b2012] transition-colors text-right font-art"
+                                  onClick={() => setUserMenuOpen(false)}
+                                >
+                                  <i className="fa-solid fa-user-pen text-[#9c7b65]"></i>
+                                  <span className="text-sm font-bold">صفحتي الفنية</span>
+                                </Link>
+                              )}
+
                               {isArtist && (
                                 <Link 
                                   href="/works/my" 
@@ -269,8 +295,17 @@ export const Header = () => {
                       
                       <div className="flex items-center justify-between bg-[#fdfaf7] p-5 rounded-2xl border border-[#e8dcc4]/50 shadow-sm">
                         <div className="flex items-center gap-4">
-                          <div className="w-12 h-12 bg-brown-gradient rounded-full flex items-center justify-center text-white text-xl font-bold shadow-md border-2 border-white">
-                            {userInitial}
+                          <div className="w-12 h-12 bg-brown-gradient rounded-full flex items-center justify-center text-white text-xl font-bold shadow-md border-2 border-white overflow-hidden">
+                            {userProfileImage && !avatarImageError ? (
+                              <img
+                                src={userProfileImage}
+                                alt={displayName}
+                                className="w-full h-full object-cover"
+                                onError={() => setAvatarImageError(true)}
+                              />
+                            ) : (
+                              userInitial
+                            )}
                           </div>
                           <span className="text-[#3b2012] font-bold font-art text-xl flex items-center gap-2">
                             {displayName}
@@ -280,6 +315,11 @@ export const Header = () => {
                           </span>
                         </div>
                         <div className="flex items-center gap-4">
+                          {isArtist && (
+                            <Link href={`/artists/${user?.id}`} className="text-[#9c7b65] hover:text-[#3b2012] transition-colors" onClick={() => setMobileMenuOpen(false)}>
+                              <i className="fa-solid fa-user-pen text-xl"></i>
+                            </Link>
+                          )}
                           {isArtist && (
                             <Link href="/works/my" className="text-[#9c7b65] hover:text-[#3b2012] transition-colors" onClick={() => setMobileMenuOpen(false)}>
                               <i className="fa-solid fa-palette text-xl"></i>
