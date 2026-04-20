@@ -50,7 +50,7 @@ export default function Hero() {
 
       {/* النص - يمين */}
       <div className="space-y-6">
-        <h1 className="text-6xl md:text-7xl lg:text-8xl font-black text-gray-900 leading-tight tracking-tight">
+        <h1 className="text-6xl md:text-7xl lg:text-8xl font-black text-gray-900 dark:text-[#e8dcc4] leading-tight tracking-tight">
           من <span className="bg-gradient-to-r from-[#6f370f] via-[#a3785a] to-[#d4af37] bg-clip-text text-transparent">تراثنا</span>
           <br />
           إلى روحك
@@ -59,7 +59,7 @@ export default function Hero() {
           في أثر، كل قطعة تحمل روح صانعها من خطوط الرسم الحرة، إلى دقة الخرز، ونعومة التطريز، وعراقة الفخار
         </p>
         <div className="flex items-center gap-4">
-          <Link href="/products" className="flex items-center gap-2 px-6 py-3 border border-gray-300 rounded-lg text-sm font-bold text-gray-700 hover:bg-gray-50 transition-colors bg-white/50 backdrop-blur-sm">
+          <Link href="/products" className="flex items-center gap-2 px-6 py-3 border border-gray-300 dark:border-gray-600 dark:border-gray-600 rounded-lg text-sm font-bold text-gray-700 dark:text-[#e8dcc4] hover:bg-gray-50 dark:hover:bg-gray-900 dark:bg-gray-900 transition-colors bg-white dark:bg-black dark:black/50 dark:bg-black/50 backdrop-blur-sm">
             <i className="fa-solid fa-eye text-xs"></i>
             استعراض
           </Link>
@@ -83,7 +83,7 @@ export default function Hero() {
             className="relative"
           >
             {/* صورة المنتج */}
-            <div className="relative rounded-3xl overflow-hidden h-[450px] shadow-2xl bg-gray-100">
+            <div className="relative rounded-3xl overflow-hidden h-[450px] shadow-2xl bg-gray-100 dark:bg-gray-800">
               {isLoading ? (
                 <div className="absolute inset-0 animate-pulse bg-gray-200"></div>
               ) : currentArtwork ? (
@@ -104,7 +104,7 @@ export default function Hero() {
               
               {/* Badge: أثر اليوم */}
               <div className="absolute top-6 right-6 z-10">
-                <span className="bg-white/90 backdrop-blur-md text-[#1a0f0a] px-4 py-2 rounded-full text-xs font-bold shadow-lg border border-white/50 flex items-center gap-2">
+                <span className="bg-white dark:bg-black dark:black/90 dark:bg-black/90 backdrop-blur-md text-[#1a0f0a] dark:text-[#e8dcc4] px-4 py-2 rounded-full text-xs font-bold shadow-lg border border-white/50 flex items-center gap-2">
                   <i className="fa-solid fa-wand-magic-sparkles text-amber-600 animate-pulse"></i>
                   إبداعات متجددة
                 </span>
@@ -119,7 +119,7 @@ export default function Hero() {
                 initial={{ y: 20, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
                 transition={{ delay: 0.2 }}
-                className="bg-white rounded-2xl shadow-xl p-4 w-72 border border-gray-100 transform transition-transform hover:-translate-x-2"
+                className="bg-white dark:bg-black rounded-2xl shadow-xl p-4 w-72 border border-gray-100 dark:border-gray-800 dark:border-gray-800 transform transition-transform hover:-translate-x-2"
               >
                 <div className="flex items-center justify-between mb-3">
                   <div className="flex items-center gap-3">
@@ -127,7 +127,7 @@ export default function Hero() {
                       {isLoading ? '...' : (currentArtwork?.artistName?.charAt(0) || 'ف')}
                     </div>
                     <div className="text-right">
-                      <p className="text-sm font-black text-gray-900">{isLoading ? 'جاري التحميل...' : (currentArtwork?.artistName || 'فنان أثر')}</p>
+                      <p className="text-sm font-black text-gray-900 dark:text-[#e8dcc4]">{isLoading ? 'جاري التحميل...' : (currentArtwork?.artistName || 'فنان أثر')}</p>
                       <div className="flex items-center gap-1.5 mt-0.5">
                         <span className="text-xs text-gray-400">{currentArtwork?.category || 'عمل فني'}</span>
                         <span className="w-2 h-2 rounded-full bg-green-500 inline-block animate-pulse"></span>
@@ -136,10 +136,10 @@ export default function Hero() {
                   </div>
                   <span className="text-[10px] bg-amber-50 text-amber-700 px-2 py-1 rounded-md font-bold">فنان موثق</span>
                 </div>
-                <div className="h-px bg-gray-100 mb-3"></div>
+                <div className="h-px bg-gray-100 dark:bg-gray-800 mb-3"></div>
                 <div className="flex items-center justify-center">
                   <div className="text-center">
-                    <p className="text-sm font-black text-gray-900 truncate max-w-[150px]">{currentArtwork?.artistLocation || 'فلسطين'}</p>
+                    <p className="text-sm font-black text-gray-900 dark:text-[#e8dcc4] truncate max-w-[150px]">{currentArtwork?.artistLocation || 'فلسطين'}</p>
                     <p className="text-xs text-gray-400">الموقع</p>
                   </div>
                 </div>
@@ -150,14 +150,14 @@ export default function Hero() {
                 initial={{ y: 20, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
                 transition={{ delay: 0.4 }}
-                className="bg-white rounded-2xl shadow-xl p-4 w-72 border border-gray-100 transform transition-transform hover:-translate-x-2"
+                className="bg-white dark:bg-black rounded-2xl shadow-xl p-4 w-72 border border-gray-100 dark:border-gray-800 dark:border-gray-800 transform transition-transform hover:-translate-x-2"
               >
                 <div className="flex items-center gap-3 mb-3">
-                  <div className="w-11 h-11 rounded-xl bg-[#6f370f]/10 flex items-center justify-center text-xl text-[#6f370f]">
+                  <div className="w-11 h-11 rounded-xl [#6f370f]/10 dark:bg-black/10 flex items-center justify-center text-xl text-[#6f370f]">
                     <i className="fa-solid fa-palette"></i>
                   </div>
                   <div className="text-right flex-1 min-w-0">
-                    <p className="text-sm font-black text-gray-900 truncate">
+                    <p className="text-sm font-black text-gray-900 dark:text-[#e8dcc4] truncate">
                       {isLoading ? 'جاري التحميل...' : (currentArtwork?.title || 'لوحة فنية مميزة')}
                     </p>
                     <div className="flex items-center justify-end gap-2 mt-0.5">

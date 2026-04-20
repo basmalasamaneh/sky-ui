@@ -180,14 +180,14 @@ export default function MyWorksPage() {
   // منع عرض أي مكونات إذا لم يكن مصرحاً له
   if (isLoading || !isAuthenticated || user?.role !== 'artist') {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#fdfaf7]">
+      <div className="min-h-screen flex items-center justify-center bg-[#fdfaf7] dark:bg-black">
         <div className="w-12 h-12 border-4 border-[#3b2012] border-t-transparent rounded-full animate-spin"></div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-[#fdfaf7] py-28 px-4 md:px-8 font-amiri" dir="rtl">
+    <div className="min-h-screen bg-[#fdfaf7] dark:bg-black py-28 px-4 md:px-8 font-amiri" dir="rtl">
       <div className="max-w-7xl mx-auto">
         
         {/* قسم الترويسة (Header Section) */}
@@ -199,9 +199,9 @@ export default function MyWorksPage() {
           >
             <div className="flex items-center gap-4 mb-4">
               <div className="w-3 h-12 bg-brown-gradient rounded-full"></div>
-              <h1 className="text-4xl md:text-5xl font-bold text-[#3b2012] font-art">معرضي الفني</h1>
+              <h1 className="text-4xl md:text-5xl font-bold text-[#3b2012] dark:text-[#e8dcc4] font-art">معرضي الفني</h1>
             </div>
-            <p className="text-[#9c7b65] text-lg md:text-xl max-w-2xl">
+            <p className="text-[#9c7b65] dark:text-[#e8dcc4] text-lg md:text-xl max-w-2xl">
               مرحباً {user?.artistName || user?.firstName}، هنا مساحتك الخاصة لإدارة وعرض إبداعاتك لمجتمع أثر.
             </p>
           </motion.div>
@@ -224,7 +224,7 @@ export default function MyWorksPage() {
         {isFetching ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {[1, 2, 3].map(i => (
-              <div key={i} className="bg-white rounded-[2.5rem] h-[480px] animate-pulse border border-[#e8dcc4] p-4 flex flex-col">
+              <div key={i} className="bg-white dark:bg-black rounded-[2.5rem] h-[480px] animate-pulse border border-[#e8dcc4] dark:border-gray-800 p-4 flex flex-col">
                 <div className="w-full h-64 bg-gray-200 rounded-[2rem] mb-4"></div>
                 <div className="w-3/4 h-6 bg-gray-200 rounded-full mb-2"></div>
                 <div className="w-full h-16 bg-gray-200 rounded-xl mb-4"></div>
@@ -247,7 +247,7 @@ export default function MyWorksPage() {
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: (index % limit) * 0.1 }}
                     onClick={() => openSlider(work)}
-                    className="group bg-white rounded-[2.5rem] overflow-hidden border border-[#e8dcc4] shadow-sm hover:shadow-2xl transition-all duration-500 relative flex flex-col h-full cursor-pointer"
+                    className="group bg-white dark:bg-black rounded-[2.5rem] overflow-hidden border border-[#e8dcc4] dark:border-gray-800 shadow-sm hover:shadow-2xl transition-all duration-500 relative flex flex-col h-full cursor-pointer"
                   >
                     {/* حاوية الصورة (Image Container) */}
                     <div 
@@ -262,7 +262,7 @@ export default function MyWorksPage() {
                       
                       {/* طبقة التحكم السريعة (Hover Actions) */}
                       <div className="absolute inset-0 bg-gradient-to-t from-[#3b2012]/90 via-[#3b2012]/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center p-6">
-                        <div className="bg-white/20 backdrop-blur-md border border-white/30 text-white p-4 rounded-full font-bold hover:bg-white hover:text-[#3b2012] transition-colors flex items-center justify-center shadow-xl hover:scale-110 transform">
+                        <div className="bg-white dark:bg-black dark:black/20 dark:bg-black/20 backdrop-blur-md border border-white/30 text-white p-4 rounded-full font-bold hover:bg-white dark:bg-black hover:text-[#3b2012] dark:text-[#e8dcc4] transition-colors flex items-center justify-center shadow-xl hover:scale-110 transform">
                           <i className="fa-solid fa-expand text-2xl"></i>
                         </div>
                       </div>
@@ -272,7 +272,7 @@ export default function MyWorksPage() {
                     <div className="flex px-4 pt-2 gap-2 relative z-10" onClick={(e) => e.stopPropagation()}>
                       <Link 
                         href={`/works/edit/${work.id}`}
-                        className="flex-1 bg-[#fdfaf7] text-[#9c7b65] border border-[#e8dcc4] py-2 rounded-xl font-bold hover:bg-[#e8dcc4] hover:text-[#3b2012] transition-colors flex items-center justify-center gap-2 text-xs"
+                        className="flex-1 bg-[#fdfaf7] dark:bg-black text-[#9c7b65] dark:text-[#e8dcc4] border border-[#e8dcc4] dark:border-gray-800 py-2 rounded-xl font-bold hover:bg-[#e8dcc4] hover:text-[#3b2012] dark:text-[#e8dcc4] transition-colors flex items-center justify-center gap-2 text-xs"
                       >
                         <i className="fa-solid fa-pen-to-square"></i>
                         تعديل
@@ -295,17 +295,17 @@ export default function MyWorksPage() {
                         </span>
                       </div>
                       <h3 
-                        className="text-2xl font-bold text-[#3b2012] mb-3 group-hover:text-[#6f370f] transition-colors line-clamp-1 cursor-pointer"
+                        className="text-2xl font-bold text-[#3b2012] dark:text-[#e8dcc4] mb-3 group-hover:text-[#6f370f] transition-colors line-clamp-1 cursor-pointer"
                         onClick={() => openSlider(work)}
                       >
                         {work.title}
                       </h3>
-                      <p className="text-[#9c7b65] text-sm leading-relaxed line-clamp-2">
+                      <p className="text-[#9c7b65] dark:text-[#e8dcc4] text-sm leading-relaxed line-clamp-2">
                         {work.description}
                       </p>
                       
                       <div className="mt-6 pt-4 border-t border-[#f0ece6] flex items-center justify-between">
-                        <span className="text-xl font-black text-[#3b2012]">
+                        <span className="text-xl font-black text-[#3b2012] dark:text-[#e8dcc4]">
                           {work.price ? `${work.price} ₪` : 'السعر غير محدد'}
                         </span>
                       </div>
@@ -321,7 +321,7 @@ export default function MyWorksPage() {
                 <button
                   onClick={() => handlePageChange(currentPage - 1)}
                   disabled={currentPage === 1}
-                  className="w-12 h-12 rounded-2xl border border-[#e8dcc4] bg-white text-[#9c7b65] flex items-center justify-center disabled:opacity-30 disabled:cursor-not-allowed hover:border-[#6b4c3b] hover:text-[#3b2012] transition-all shadow-sm"
+                  className="w-12 h-12 rounded-2xl border border-[#e8dcc4] dark:border-gray-800 bg-white dark:bg-black text-[#9c7b65] dark:text-[#e8dcc4] flex items-center justify-center disabled:opacity-30 disabled:cursor-not-allowed hover:border-[#6b4c3b] hover:text-[#3b2012] dark:text-[#e8dcc4] transition-all shadow-sm"
                 >
                   <i className="fa-solid fa-chevron-right"></i>
                 </button>
@@ -341,7 +341,7 @@ export default function MyWorksPage() {
                           className={`w-12 h-12 rounded-2xl font-bold transition-all ${
                             currentPage === pageNum
                               ? 'bg-brown-gradient text-white shadow-lg scale-110'
-                              : 'bg-white border border-[#e8dcc4] text-[#9c7b65] hover:border-[#6b4c3b] hover:text-[#3b2012]'
+                              : 'bg-white dark:bg-black border border-[#e8dcc4] dark:border-gray-800 text-[#9c7b65] dark:text-[#e8dcc4] hover:border-[#6b4c3b] hover:text-[#3b2012] dark:text-[#e8dcc4]'
                           }`}
                         >
                           {pageNum}
@@ -360,7 +360,7 @@ export default function MyWorksPage() {
                 <button
                   onClick={() => handlePageChange(currentPage + 1)}
                   disabled={currentPage === totalPages}
-                  className="w-12 h-12 rounded-2xl border border-[#e8dcc4] bg-white text-[#9c7b65] flex items-center justify-center disabled:opacity-30 disabled:cursor-not-allowed hover:border-[#6b4c3b] hover:text-[#3b2012] transition-all shadow-sm"
+                  className="w-12 h-12 rounded-2xl border border-[#e8dcc4] dark:border-gray-800 bg-white dark:bg-black text-[#9c7b65] dark:text-[#e8dcc4] flex items-center justify-center disabled:opacity-30 disabled:cursor-not-allowed hover:border-[#6b4c3b] hover:text-[#3b2012] dark:text-[#e8dcc4] transition-all shadow-sm"
                 >
                   <i className="fa-solid fa-chevron-left"></i>
                 </button>
@@ -372,7 +372,7 @@ export default function MyWorksPage() {
           <motion.div 
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="flex flex-col items-center justify-center py-24 px-6 bg-white rounded-[3rem] border border-[#e8dcc4] text-center shadow-lg"
+            className="flex flex-col items-center justify-center py-24 px-6 bg-white dark:bg-black rounded-[3rem] border border-[#e8dcc4] dark:border-gray-800 text-center shadow-lg"
           >
             {fetchError && (
               <div className="w-full mb-8 bg-red-50 border border-red-200 text-red-700 px-5 py-4 rounded-2xl flex items-center gap-3 text-sm font-bold font-amiri">
@@ -380,14 +380,14 @@ export default function MyWorksPage() {
                 {fetchError}
               </div>
             )}
-            <div className="w-32 h-32 bg-[#fdfaf7] rounded-full flex items-center justify-center mb-8 relative border-4 border-white shadow-inner">
+            <div className="w-32 h-32 bg-[#fdfaf7] dark:bg-black rounded-full flex items-center justify-center mb-8 relative border-4 border-white shadow-inner">
                <i className="fa-solid fa-paintbrush text-5xl text-[#ceb29f]"></i>
                <div className="absolute -top-2 -right-2 w-10 h-10 bg-brown-gradient rounded-full flex items-center justify-center text-white shadow-lg border-2 border-white">
                   <i className="fa-solid fa-star"></i>
                </div>
             </div>
-            <h3 className="text-3xl font-bold text-[#3b2012] mb-4 font-art">لم تقم بإضافة أي أعمال بعد</h3>
-            <p className="text-[#9c7b65] text-lg max-w-md mb-10 leading-relaxed font-amiri">
+            <h3 className="text-3xl font-bold text-[#3b2012] dark:text-[#e8dcc4] mb-4 font-art">لم تقم بإضافة أي أعمال بعد</h3>
+            <p className="text-[#9c7b65] dark:text-[#e8dcc4] text-lg max-w-md mb-10 leading-relaxed font-amiri">
               معرضك الفني جاهز! ابدأ بمشاركة إبداعاتك مع العالم ودع الجميع يرى بصمتك الفنية الفريدة على منصة أثر.
             </p>
             <Link 
@@ -413,18 +413,18 @@ export default function MyWorksPage() {
                 initial={{ scale: 0.9, opacity: 0, y: 20 }}
                 animate={{ scale: 1, opacity: 1, y: 0 }}
                 exit={{ scale: 0.9, opacity: 0, y: 20 }}
-                className="bg-white w-full max-w-5xl h-[calc(100dvh-1rem)] md:h-[90vh] overflow-hidden rounded-[2.5rem] shadow-2xl flex flex-col md:flex-row relative"
+                className="bg-white dark:bg-black w-full max-w-5xl h-[calc(100dvh-1rem)] md:h-[90vh] overflow-hidden rounded-[2.5rem] shadow-2xl flex flex-col md:flex-row relative"
               >
                 {/* Close Button */}
                 <button 
                   onClick={closeSlider}
-                  className="absolute top-6 left-6 z-50 w-10 h-10 bg-white/80 hover:bg-white rounded-full flex items-center justify-center text-[#3b2012] shadow-md transition-all active:scale-95"
+                  className="absolute top-6 left-6 z-50 w-10 h-10 bg-white dark:bg-black dark:black/80 dark:bg-black/80 hover:bg-white dark:bg-black rounded-full flex items-center justify-center text-[#3b2012] dark:text-[#e8dcc4] shadow-md transition-all active:scale-95"
                 >
                   <i className="fa-solid fa-xmark text-lg"></i>
                 </button>
 
                 {/* Left Side: Image Gallery */}
-                <div className="md:w-1/2 bg-[#fdfaf7] relative h-[40vh] md:h-auto border-l border-[#e8dcc4]/50">
+                <div className="md:w-1/2 bg-[#fdfaf7] dark:bg-black relative h-[40vh] md:h-auto border-l border-[#e8dcc4]/50">
                   <div className="relative w-full h-full p-4 flex items-center justify-center">
                     <AnimatePresence mode="wait">
                       <motion.div 
@@ -447,13 +447,13 @@ export default function MyWorksPage() {
                       <>
                         <button 
                           onClick={prevSlide}
-                          className="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-white/50 hover:bg-white rounded-full flex items-center justify-center shadow-sm text-[#3b2012] transition-all"
+                          className="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-white dark:bg-black dark:black/50 dark:bg-black/50 hover:bg-white dark:bg-black rounded-full flex items-center justify-center shadow-sm text-[#3b2012] dark:text-[#e8dcc4] transition-all"
                         >
                           <i className="fa-solid fa-chevron-right"></i>
                         </button>
                         <button 
                           onClick={nextSlide}
-                          className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-white/50 hover:bg-white rounded-full flex items-center justify-center shadow-sm text-[#3b2012] transition-all"
+                          className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-white dark:bg-black dark:black/50 dark:bg-black/50 hover:bg-white dark:bg-black rounded-full flex items-center justify-center shadow-sm text-[#3b2012] dark:text-[#e8dcc4] transition-all"
                         >
                           <i className="fa-solid fa-chevron-left"></i>
                         </button>
@@ -478,7 +478,7 @@ export default function MyWorksPage() {
                 </div>
 
                 {/* Right Side: Details */}
-                <div className="md:w-1/2 p-6 md:p-12 bg-white flex flex-col flex-1 min-h-0 overflow-y-auto no-scrollbar">
+                <div className="md:w-1/2 p-6 md:p-12 bg-white dark:bg-black flex flex-col flex-1 min-h-0 overflow-y-auto no-scrollbar">
                   <div className="space-y-8 animate-fade-in">
                     <div className="space-y-2">
                       <div className="flex items-center gap-2">
@@ -490,69 +490,69 @@ export default function MyWorksPage() {
                            عملي الخاص
                         </span>
                       </div>
-                      <h2 className="text-4xl font-bold text-[#3b2012] font-art leading-tight">
+                      <h2 className="text-4xl font-bold text-[#3b2012] dark:text-[#e8dcc4] font-art leading-tight">
                         {activeSliderWork.title}
                       </h2>
                     </div>
 
-                    <div className="p-6 bg-[#fdfaf7] rounded-[2rem] border border-[#e8dcc4]/50 space-y-6">
+                    <div className="p-6 bg-[#fdfaf7] dark:bg-black rounded-[2rem] border border-[#e8dcc4]/50 space-y-6">
                       {/* Artist Box (Current user) */}
                       <div className="flex items-center gap-4">
                         <div className="w-14 h-14 bg-brown-gradient rounded-full flex items-center justify-center text-white text-xl font-bold shadow-md">
                           {user?.artistAvatar || user?.firstName?.charAt(0) || 'أ'}
                         </div>
                         <div className="flex-1">
-                           <p className="text-xs text-[#9c7b65] mb-0.5">الفنان (أنت)</p>
-                           <p className="text-lg font-bold text-[#3b2012]">{user?.artistName || (user?.firstName + ' ' + user?.lastName)}</p>
+                           <p className="text-xs text-[#9c7b65] dark:text-[#e8dcc4] mb-0.5">الفنان (أنت)</p>
+                           <p className="text-lg font-bold text-[#3b2012] dark:text-[#e8dcc4]">{user?.artistName || (user?.firstName + ' ' + user?.lastName)}</p>
                         </div>
                       </div>
 
                       <div className="grid grid-cols-2 gap-4">
-                        <div className="bg-white p-4 rounded-2xl border border-[#e8dcc4]/30 shadow-sm flex items-center gap-3">
+                        <div className="bg-white dark:bg-black p-4 rounded-2xl border border-[#e8dcc4]/30 shadow-sm flex items-center gap-3">
                            <div className="w-10 h-10 bg-amber-50 rounded-xl flex items-center justify-center text-amber-600">
                              <i className="fa-solid fa-location-dot"></i>
                            </div>
                            <div>
                               <p className="text-[10px] text-gray-400">الموقع</p>
-                              <p className="text-sm font-bold text-[#3b2012]">{user?.location || activeSliderWork.artistLocation || 'نابلس، فلسطين'}</p>
+                              <p className="text-sm font-bold text-[#3b2012] dark:text-[#e8dcc4]">{user?.location || activeSliderWork.artistLocation || 'نابلس، فلسطين'}</p>
                            </div>
                         </div>
-                        <div className="bg-white p-4 rounded-2xl border border-[#e8dcc4]/30 shadow-sm flex items-center gap-3">
+                        <div className="bg-white dark:bg-black p-4 rounded-2xl border border-[#e8dcc4]/30 shadow-sm flex items-center gap-3">
                            <div className="w-10 h-10 bg-green-50 rounded-xl flex items-center justify-center text-green-600">
                              <i className="fa-solid fa-phone"></i>
                            </div>
                            <div>
                               <p className="text-[10px] text-gray-400">رقم التواصل</p>
-                              <p className="text-sm font-bold text-[#3b2012] font-mono tracking-wider" dir="ltr">{user?.phone || activeSliderWork.artistPhone || '059xxxxxxx'}</p>
+                              <p className="text-sm font-bold text-[#3b2012] dark:text-[#e8dcc4] font-mono tracking-wider" dir="ltr">{user?.phone || activeSliderWork.artistPhone || '059xxxxxxx'}</p>
                            </div>
                         </div>
                       </div>
                     </div>
 
                     <div className="space-y-4">
-                      <h4 className="text-lg font-bold text-[#3b2012] flex items-center gap-2">
+                      <h4 className="text-lg font-bold text-[#3b2012] dark:text-[#e8dcc4] flex items-center gap-2">
                          <i className="fa-solid fa-align-right text-amber-600 text-sm"></i>
                          عن العمل الفني
                       </h4>
-                      <p className="text-[#9c7b65] text-lg leading-relaxed font-amiri">
+                      <p className="text-[#9c7b65] dark:text-[#e8dcc4] text-lg leading-relaxed font-amiri">
                         {activeSliderWork.description}
                       </p>
-                      <p className="text-[10px] text-gray-400 font-bold bg-gray-50 inline-block px-3 py-1 rounded-md">
+                      <p className="text-[10px] text-gray-400 font-bold bg-gray-50 dark:bg-gray-900 inline-block px-3 py-1 rounded-md">
                          تاريخ النشر: {new Date(activeSliderWork.createdAt).toLocaleDateString('ar-EG', { year: 'numeric', month: 'long', day: 'numeric' })}
                       </p>
                     </div>
 
-                    <div className="pt-8 border-t border-gray-100 flex items-center justify-between mt-auto">
+                    <div className="pt-8 border-t border-gray-100 dark:border-gray-800 dark:border-gray-800 flex items-center justify-between mt-auto">
                        <div className="space-y-1">
                           <p className="text-xs text-gray-400 font-bold">السعر</p>
-                          <p className="text-3xl font-black text-[#3b2012]">
+                          <p className="text-3xl font-black text-[#3b2012] dark:text-[#e8dcc4]">
                             {activeSliderWork.price ? `${activeSliderWork.price} ₪` : 'حسب الطلب'}
                           </p>
                        </div>
                        <div className="flex gap-2">
                           <Link 
                             href={`/works/edit/${activeSliderWork.id}`}
-                            className="h-14 px-6 bg-[#f0ece6] text-[#3b2012] rounded-2xl font-bold flex items-center justify-center gap-2 hover:bg-[#e8dcc4] transition-all"
+                            className="h-14 px-6 bg-[#f0ece6] dark:bg-black text-[#3b2012] dark:text-[#e8dcc4] rounded-2xl font-bold flex items-center justify-center gap-2 hover:bg-[#e8dcc4] transition-all"
                           >
                              <i className="fa-solid fa-pen-to-square"></i>
                              <span>تعديل</span>

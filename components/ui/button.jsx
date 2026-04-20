@@ -16,9 +16,9 @@ export const Button = ({ children, variant = 'primary', size = 'md', href, onCli
 
   const variantStyles = {
     primary: 'bg-gold-gradient text-black shadow-lg hover:shadow-xl hover:scale-[1.02]',
-    secondary: 'bg-gray-100 text-gray-800 hover:bg-gray-200 border border-gray-200',
-    ghost: 'bg-transparent text-gray-600 hover:bg-gray-50',
-    outline: 'border border-gray-200 text-gray-700 hover:bg-gray-50',
+    secondary: 'bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-[#e8dcc4] hover:bg-gray-200 border border-gray-200 dark:border-gray-700 dark:border-gray-700',
+    ghost: 'bg-transparent text-gray-600 hover:bg-gray-50 dark:hover:bg-gray-900 dark:bg-gray-900',
+    outline: 'border border-gray-200 dark:border-gray-700 dark:border-gray-700 text-gray-700 dark:text-[#e8dcc4] hover:bg-gray-50 dark:hover:bg-gray-900 dark:bg-gray-900',
     destructive: 'bg-red-500 text-white hover:bg-red-600',
   }
 

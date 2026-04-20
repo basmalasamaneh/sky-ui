@@ -230,69 +230,69 @@ export default function EditWorkPage() {
 
   if (isLoading || !isAuthenticated || user?.role !== 'artist' || isPageLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#fdfaf7]">
+      <div className="min-h-screen flex items-center justify-center bg-[#fdfaf7] dark:bg-black">
         <div className="w-12 h-12 border-4 border-[#3b2012] border-t-transparent rounded-full animate-spin"></div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-[#fdfaf7] py-28 px-4 md:px-8 font-amiri" dir="rtl">
+    <div className="min-h-screen bg-[#fdfaf7] dark:bg-black py-28 px-4 md:px-8 font-amiri" dir="rtl">
       <div className="max-w-4xl mx-auto">
         <Link 
           href="/works/my"
-          className="inline-flex items-center gap-2 text-[#9c7b65] hover:text-[#3b2012] mb-10 transition-colors font-bold group"
+          className="inline-flex items-center gap-2 text-[#9c7b65] dark:text-[#e8dcc4] hover:text-[#3b2012] dark:text-[#e8dcc4] mb-10 transition-colors font-bold group"
         >
           <i className="fa-solid fa-arrow-right group-hover:translate-x-1 transition-transform"></i>
           العودة لمعرضي الفني
         </Link>
 
-        <div className="bg-white rounded-[3rem] p-8 md:p-12 border border-[#e8dcc4] shadow-2xl overflow-hidden relative">
+        <div className="bg-white dark:bg-black rounded-[3rem] p-8 md:p-12 border border-[#e8dcc4] dark:border-gray-800 shadow-2xl overflow-hidden relative">
           <div className="absolute top-0 right-0 w-32 h-32 bg-brown-gradient opacity-5 rounded-bl-full"></div>
           
           <div className="flex flex-col items-center mb-12">
             <div className="w-20 h-20 bg-brown-gradient rounded-full flex items-center justify-center text-white text-3xl mb-6 shadow-xl border-4 border-white ring-4 ring-[#fdfaf7]">
               <i className="fa-solid fa-pen-to-square"></i>
             </div>
-            <h1 className="text-3xl md:text-4xl font-bold text-[#3b2012] font-art mb-2">تعديل العمل الفني</h1>
-            <p className="text-[#9c7b65] text-center max-w-md">قم بتحديث تفاصيل عملك أو إضافة صور جديدة.</p>
+            <h1 className="text-3xl md:text-4xl font-bold text-[#3b2012] dark:text-[#e8dcc4] font-art mb-2">تعديل العمل الفني</h1>
+            <p className="text-[#9c7b65] dark:text-[#e8dcc4] text-center max-w-md">قم بتحديث تفاصيل عملك أو إضافة صور جديدة.</p>
           </div>
 
           <form onSubmit={handleSubmit} className="grid grid-cols-1 lg:grid-cols-2 gap-12">
             <div className="space-y-8">
               <div>
-                <label className="block text-sm font-bold text-[#3b2012] mb-3 pr-2">عنوان العمل הפني <span className="text-red-500">*</span></label>
+                <label className="block text-sm font-bold text-[#3b2012] dark:text-[#e8dcc4] mb-3 pr-2">عنوان العمل הפني <span className="text-red-500">*</span></label>
                 <div className="relative group">
                   <input 
                     type="text" name="title" required value={formData.title} onChange={handleInputChange}
-                    className="w-full h-14 bg-[#fdfaf7] border border-[#e8dcc4] rounded-2xl px-5 text-[#3b2012] outline-none focus:ring-2 focus:ring-[#5c4436]/20 focus:border-[#5c4436] transition-all font-bold"
+                    className="w-full h-14 bg-[#fdfaf7] dark:bg-black border border-[#e8dcc4] dark:border-gray-800 rounded-2xl px-5 text-[#3b2012] dark:text-[#e8dcc4] outline-none focus:ring-2 focus:ring-[#5c4436]/20 focus:border-[#5c4436] transition-all font-bold"
                   />
                   <i className="fa-solid fa-pen absolute left-5 top-1/2 -translate-y-1/2 text-gray-300"></i>
                 </div>
               </div>
 
               <div>
-                <label className="block text-sm font-bold text-[#3b2012] mb-3 pr-2 flex justify-between items-center">
+                <label className="block text-sm font-bold text-[#3b2012] dark:text-[#e8dcc4] mb-3 pr-2 flex justify-between items-center">
                   <span>وصف العمل <span className="text-red-500">*</span></span>
                   <span className="text-[10px] text-gray-400 font-normal">{formData.description.length} / 500</span>
                 </label>
                 <div className="relative">
                   <textarea 
                     name="description" required value={formData.description} maxLength={500} onChange={handleInputChange} rows="5"
-                    className="w-full bg-[#fdfaf7] border border-[#e8dcc4] rounded-2xl px-5 py-4 text-[#3b2012] outline-none focus:ring-2 focus:ring-[#5c4436]/20 focus:border-[#5c4436] transition-all resize-none font-amiri"
+                    className="w-full bg-[#fdfaf7] dark:bg-black border border-[#e8dcc4] dark:border-gray-800 rounded-2xl px-5 py-4 text-[#3b2012] dark:text-[#e8dcc4] outline-none focus:ring-2 focus:ring-[#5c4436]/20 focus:border-[#5c4436] transition-all resize-none font-amiri"
                   />
                 </div>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                  <label className="block text-sm font-bold text-[#3b2012] mb-3 pr-2">الفئة <span className="text-red-500">*</span></label>
+                  <label className="block text-sm font-bold text-[#3b2012] dark:text-[#e8dcc4] mb-3 pr-2">الفئة <span className="text-red-500">*</span></label>
                   <select 
                     name="category"
                     required
                     value={formData.category}
                     onChange={handleInputChange}
-                    className="w-full h-14 bg-[#fdfaf7] border border-[#e8dcc4] rounded-2xl px-5 text-[#3b2012] outline-none focus:ring-2 focus:ring-[#5c4436]/20 focus:border-[#5c4436] transition-all font-bold appearance-none relative"
+                    className="w-full h-14 bg-[#fdfaf7] dark:bg-black border border-[#e8dcc4] dark:border-gray-800 rounded-2xl px-5 text-[#3b2012] dark:text-[#e8dcc4] outline-none focus:ring-2 focus:ring-[#5c4436]/20 focus:border-[#5c4436] transition-all font-bold appearance-none relative"
                   >
                     <option value="">اختر الفئة</option>
                     <option value="لوحات فنية">لوحات فنية</option>
@@ -304,7 +304,7 @@ export default function EditWorkPage() {
                   </select>
                 </div>
                 <div>
-                  <label className="block text-sm font-bold text-[#3b2012] mb-3 pr-2">الكمية المتوفرة <span className="text-red-500">*</span></label>
+                  <label className="block text-sm font-bold text-[#3b2012] dark:text-[#e8dcc4] mb-3 pr-2">الكمية المتوفرة <span className="text-red-500">*</span></label>
                   <input 
                     type="number" 
                     name="quantity"
@@ -312,13 +312,13 @@ export default function EditWorkPage() {
                     required
                     value={formData.quantity}
                     onChange={handleInputChange}
-                    className="w-full h-14 bg-[#fdfaf7] border border-[#e8dcc4] rounded-2xl px-5 text-[#3b2012] outline-none focus:ring-2 focus:ring-[#5c4436]/20 focus:border-[#5c4436] transition-all font-bold"
+                    className="w-full h-14 bg-[#fdfaf7] dark:bg-black border border-[#e8dcc4] dark:border-gray-800 rounded-2xl px-5 text-[#3b2012] dark:text-[#e8dcc4] outline-none focus:ring-2 focus:ring-[#5c4436]/20 focus:border-[#5c4436] transition-all font-bold"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-sm font-bold text-[#3b2012] mb-3 pr-2">السعر (بالشيكل) <span className="text-red-500">*</span></label>
+                <label className="block text-sm font-bold text-[#3b2012] dark:text-[#e8dcc4] mb-3 pr-2">السعر (بالشيكل) <span className="text-red-500">*</span></label>
                 <div className="relative">
                   <input 
                     type="number" 
@@ -328,21 +328,21 @@ export default function EditWorkPage() {
                     onChange={handleInputChange}
                     onWheel={(e) => e.currentTarget.blur()}
                     placeholder="مثال: 150"
-                    className="price-input-with-ils w-full h-14 bg-[#fdfaf7] border border-[#e8dcc4] rounded-2xl px-5 pl-14 text-[#3b2012] outline-none focus:ring-2 focus:ring-[#5c4436]/20 focus:border-[#5c4436] transition-all font-bold"
+                    className="price-input-with-ils w-full h-14 bg-[#fdfaf7] dark:bg-black border border-[#e8dcc4] dark:border-gray-800 rounded-2xl px-5 pl-14 text-[#3b2012] dark:text-[#e8dcc4] outline-none focus:ring-2 focus:ring-[#5c4436]/20 focus:border-[#5c4436] transition-all font-bold"
                   />
                   <span className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-500 font-bold">₪</span>
                 </div>
               </div>
 
               <div>
-                <label className="block text-sm font-bold text-[#3b2012] mb-3 pr-2">صور العمل الفني <span className="text-red-500">*</span></label>
+                <label className="block text-sm font-bold text-[#3b2012] dark:text-[#e8dcc4] mb-3 pr-2">صور العمل الفني <span className="text-red-500">*</span></label>
                 <div className="relative group">
                   <input 
                     type="file" multiple accept="image/*" onChange={handleImageUpload} className="hidden" id="image-upload"
                   />
-                  <label htmlFor="image-upload" className="flex flex-col items-center justify-center w-full h-32 bg-[#fdfaf7] border-2 border-dashed border-[#e8dcc4] rounded-2xl cursor-pointer hover:bg-[#f0ece6] transition-colors group-hover:border-[#5c4436]">
-                    <i className="fa-solid fa-cloud-arrow-up text-3xl text-[#9c7b65] mb-2 group-hover:scale-110 transition-transform"></i>
-                    <span className="text-sm font-bold text-[#3b2012]">إضافة مزيد من الصور (المجموع: 1-3)</span>
+                  <label htmlFor="image-upload" className="flex flex-col items-center justify-center w-full h-32 bg-[#fdfaf7] dark:bg-black border-2 border-dashed border-[#e8dcc4] dark:border-gray-800 rounded-2xl cursor-pointer hover:bg-[#f0ece6] dark:bg-black transition-colors group-hover:border-[#5c4436]">
+                    <i className="fa-solid fa-cloud-arrow-up text-3xl text-[#9c7b65] dark:text-[#e8dcc4] mb-2 group-hover:scale-110 transition-transform"></i>
+                    <span className="text-sm font-bold text-[#3b2012] dark:text-[#e8dcc4]">إضافة مزيد من الصور (المجموع: 1-3)</span>
                     <span className="text-xs text-gray-400 mt-1">المتبقي: {maxImages - images.length}</span>
                   </label>
                 </div>
@@ -350,12 +350,12 @@ export default function EditWorkPage() {
             </div>
 
             <div className="flex flex-col h-full mt-4 lg:mt-0">
-              <label className="block text-sm font-bold text-[#3b2012] mb-3 pr-2 flex items-center gap-2">
-                <i className="fa-solid fa-images text-[#9c7b65]"></i>
+              <label className="block text-sm font-bold text-[#3b2012] dark:text-[#e8dcc4] mb-3 pr-2 flex items-center gap-2">
+                <i className="fa-solid fa-images text-[#9c7b65] dark:text-[#e8dcc4]"></i>
                 معاينة واختيار صورة العرض
               </label>
               
-              <div className="flex-1 bg-[#fdfaf7] rounded-[2rem] border-2 border-dashed border-[#e8dcc4] p-4 flex flex-col relative min-h-[400px]">
+              <div className="flex-1 bg-[#fdfaf7] dark:bg-black rounded-[2rem] border-2 border-dashed border-[#e8dcc4] dark:border-gray-800 p-4 flex flex-col relative min-h-[400px]">
                 {images.length > 0 ? (
                   <div className="flex flex-col h-full gap-4">
                     <div className="relative w-full h-64 rounded-2xl overflow-hidden shadow-md shrink-0">
@@ -380,7 +380,7 @@ export default function EditWorkPage() {
                           className={`relative w-24 h-24 rounded-xl overflow-hidden shrink-0 cursor-grab active:cursor-grabbing border-4 transition-all ${
                             draggedFromIndex === idx ? 'opacity-50' : ''
                           } ${
-                            mainImageIndex === idx ? 'border-amber-500 shadow-md scale-105' : 'border-transparent hover:border-[#e8dcc4]'
+                            mainImageIndex === idx ? 'border-amber-500 shadow-md scale-105' : 'border-transparent hover:border-[#e8dcc4] dark:border-gray-800'
                           }`}
                         >
                           <Image src={img.preview} alt={`Thumb ${idx}`} fill className="object-cover" />
@@ -396,10 +396,10 @@ export default function EditWorkPage() {
                   </div>
                 ) : (
                   <div className="flex flex-col items-center justify-center h-full text-[#ceb29f]">
-                    <div className="w-24 h-24 bg-white rounded-full flex items-center justify-center mb-4 shadow-sm border border-[#e8dcc4]/50">
+                    <div className="w-24 h-24 bg-white dark:bg-black rounded-full flex items-center justify-center mb-4 shadow-sm border border-[#e8dcc4]/50">
                       <i className="fa-regular fa-images text-4xl"></i>
                     </div>
-                    <p className="text-sm font-bold font-art text-[#9c7b65]">لا توجد صور لهذا العمل</p>
+                    <p className="text-sm font-bold font-art text-[#9c7b65] dark:text-[#e8dcc4]">لا توجد صور لهذا العمل</p>
                   </div>
                 )}
               </div>
@@ -418,7 +418,7 @@ export default function EditWorkPage() {
                       <><i className="fa-solid fa-check"></i> حفظ التعديلات</>
                     )}
                   </button>
-                  <Link href="/works/my" className="w-full sm:w-auto text-center text-[#9c7b65] font-bold hover:text-[#3b2012] bg-[#f0ece6] hover:bg-[#e8dcc4] px-8 py-4 rounded-2xl transition-colors">
+                  <Link href="/works/my" className="w-full sm:w-auto text-center text-[#9c7b65] dark:text-[#e8dcc4] font-bold hover:text-[#3b2012] dark:text-[#e8dcc4] bg-[#f0ece6] dark:bg-black hover:bg-[#e8dcc4] px-8 py-4 rounded-2xl transition-colors">
                     إلغاء
                   </Link>
                 </div>
