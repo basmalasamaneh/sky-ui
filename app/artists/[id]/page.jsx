@@ -347,56 +347,72 @@ export default function ArtistPage({ params }) {
   };
 
   useEffect(() => {
-    if (!token) {
-      setIsFetching(false);
-      return;
-    }
-
     const fetchArtistDataAndWorks = async () => {
       setIsFetching(true);
       setNotFound(false);
       try {
-        const headers = { Authorization: `Bearer ${token}` };
+        if (token) {
+          // Authenticated: fetch full profile + artworks in parallel
+          const [profileRes, worksRes] = await Promise.all([
+            fetch(`/api/artists/${artistId}`, { headers: { Authorization: `Bearer ${token}` } }),
+            fetch(`/api/artists/${artistId}/artworks`, { headers: { Authorization: `Bearer ${token}` } }),
+          ]);
 
-        // Fetch artist profile and artworks in parallel
-        const [profileRes, worksRes] = await Promise.all([
-          fetch(`/api/artists/${artistId}`, { headers }),
-          fetch(`/api/artists/${artistId}/artworks`, { headers }),
-        ]);
+          if (profileRes.status === 404) {
+            setNotFound(true);
+            return;
+          }
 
-        // Handle artist not found
-        if (profileRes.status === 404) {
-          setNotFound(true);
-          return;
-        }
+          const profileResult = profileRes.ok ? await profileRes.json().catch(() => ({})) : {};
+          const worksResult = worksRes.ok ? await worksRes.json().catch(() => ({})) : {};
 
-        const profileResult = profileRes.ok
-          ? await profileRes.json().catch(() => ({}))
-          : {};
-        const worksResult = worksRes.ok
-          ? await worksRes.json().catch(() => ({}))
-          : {};
+          const artist = profileResult?.data;
+          if (artist) {
+            const displayName =
+              artist.artist_name ||
+              [artist.first_name, artist.last_name].filter(Boolean).join(' ') ||
+              'غير متوفر';
+            setArtistData({
+              id: artist.id,
+              name: displayName,
+              location: artist.location || null,
+              phone: artist.phone || null,
+              bio: artist.bio || null,
+              socialMedia: parseSocialMedia(artist.social_media),
+              artistSince: artist.artist_since || null,
+              avatar: artist.profile_image || `https://ui-avatars.com/api/?name=${encodeURIComponent(displayName)}&background=5c4436&color=fff&size=200&font-size=0.4&bold=true`,
+            });
+          }
 
-        const artist = profileResult?.data;
-        if (artist) {
-          const displayName =
-            artist.artist_name ||
-            [artist.first_name, artist.last_name].filter(Boolean).join(' ') ||
-            'غير متوفر';
+          const rawWorks = worksResult?.data?.artworks ?? [];
+          setWorks(rawWorks.map(normalizeWork));
+        } else {
+          // Guest: use the public artworks endpoint which embeds artist info
+          const artworksRes = await fetch('/api/artworks?limit=200');
+          const artworksResult = artworksRes.ok ? await artworksRes.json().catch(() => ({})) : {};
+          const rawWorks = artworksResult?.data?.artworks ?? [];
+          const normalizedWorks = rawWorks.map(normalizeWork);
+          const artistWorks = normalizedWorks.filter((w) => String(w.artist_id) === String(artistId));
+
+          if (artistWorks.length === 0) {
+            setNotFound(true);
+            return;
+          }
+
+          const firstWork = artistWorks[0];
+          const displayName = firstWork.artistName || 'غير متوفر';
           setArtistData({
-            id: artist.id,
+            id: artistId,
             name: displayName,
-            location: artist.location || null,
-            phone: artist.phone || null,
-            bio: artist.bio || null,
-            socialMedia: parseSocialMedia(artist.social_media),
-            artistSince: artist.artist_since || null,
-            avatar: artist.profile_image || `https://ui-avatars.com/api/?name=${encodeURIComponent(displayName)}&background=5c4436&color=fff&size=200&font-size=0.4&bold=true`,
+            location: firstWork.artistLocation || null,
+            phone: firstWork.artistPhone || null,
+            bio: firstWork.artistBio || null,
+            socialMedia: firstWork.artistSocialMedia || [],
+            artistSince: null,
+            avatar: firstWork.artistAvatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(displayName)}&background=5c4436&color=fff&size=200&font-size=0.4&bold=true`,
           });
+          setWorks(artistWorks);
         }
-
-        const rawWorks = worksResult?.data?.artworks ?? [];
-        setWorks(rawWorks.map(normalizeWork));
       } catch (e) {
         console.error('Failed to fetch artist details:', e);
       } finally {
@@ -437,16 +453,7 @@ export default function ArtistPage({ params }) {
           الرجوع
         </button>
 
-        {!isAuthenticated && !isFetching ? (
-          <div className="text-center py-20 bg-white rounded-[2rem] border border-[#e8dcc4] shadow-sm">
-            <i className="fa-solid fa-lock text-6xl text-gray-300 mb-4"></i>
-            <h2 className="text-2xl font-bold text-[#3b2012] mb-2">يجب تسجيل الدخول أولاً</h2>
-            <p className="text-[#9c7b65] mb-6">عرض ملف الفنان متاح للأعضاء المسجلين فقط.</p>
-            <Link href="/login" className="inline-block bg-[#5c4436] text-white px-8 py-3 rounded-2xl font-bold hover:bg-[#3b2012] transition-colors">
-              تسجيل الدخول
-            </Link>
-          </div>
-        ) : notFound ? (
+        {notFound ? (
           <div className="text-center py-20 bg-white rounded-[2rem] border border-[#e8dcc4] shadow-sm">
             <i className="fa-solid fa-user-slash text-6xl text-gray-300 mb-4"></i>
             <h2 className="text-2xl font-bold text-[#3b2012]">لم يتم العثور على الفنان</h2>
@@ -747,45 +754,101 @@ export default function ArtistPage({ params }) {
                     </div>
                   )}
 
-                  <div className="bg-[#fcfbf9] border border-[#e8dcc4] rounded-xl px-4 py-3 flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-full bg-amber-50 text-amber-600 flex items-center justify-center shrink-0">
-                      <i className="fa-solid fa-location-dot"></i>
+                  {!isAuthenticated ? (
+                    <Link href="/login" className="relative overflow-hidden bg-[#fcfbf9] border border-[#e8dcc4] rounded-xl px-4 py-3 flex items-center gap-3">
+                      <div className="w-8 h-8 rounded-full bg-amber-50 text-amber-600 flex items-center justify-center shrink-0">
+                        <i className="fa-solid fa-location-dot"></i>
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <span className="text-[10px] text-gray-400 font-bold mb-0.5 block">الموقع</span>
+                        <div className="relative mt-1">
+                          <p className="text-sm font-bold text-[#3b2012] blur-sm select-none">معلومات مخفية</p>
+                          <div className="absolute inset-0 flex items-center justify-end">
+                            <span className="inline-flex items-center gap-1 bg-white/90 text-[#6b4c3b] text-[10px] font-bold px-2 py-1 rounded-full border border-[#e8dcc4]">
+                              <i className="fa-solid fa-lock text-[9px]"></i>
+                              سجل الدخول
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    </Link>
+                  ) : (
+                    <div className="bg-[#fcfbf9] border border-[#e8dcc4] rounded-xl px-4 py-3 flex items-center gap-3">
+                      <div className="w-8 h-8 rounded-full bg-amber-50 text-amber-600 flex items-center justify-center shrink-0">
+                        <i className="fa-solid fa-location-dot"></i>
+                      </div>
+                      <div className="flex flex-col">
+                        <span className="text-[10px] text-gray-400 font-bold mb-0.5">الموقع</span>
+                        {artistData.location ? (
+                          <span className="text-sm font-bold text-[#3b2012]">{artistData.location}</span>
+                        ) : (
+                          <span className="text-xs text-gray-400">غير محدد</span>
+                        )}
+                      </div>
                     </div>
-                    <div className="flex flex-col">
-                      <span className="text-[10px] text-gray-400 font-bold mb-0.5">الموقع</span>
-                      {artistData.location ? (
-                        <span className="text-sm font-bold text-[#3b2012]">{artistData.location}</span>
-                      ) : !isAuthenticated ? (
-                        <span className="text-xs font-bold text-[#9c7b65]"><i className="fa-solid fa-lock text-[10px] ml-1"></i> معلومات مخفية للزوار</span>
-                      ) : (
-                        <span className="text-xs text-gray-400">غير محدد</span>
-                      )}
-                    </div>
-                  </div>
+                  )}
 
-                  <div className="bg-[#fcfbf9] border border-[#e8dcc4] rounded-xl px-4 py-3 flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-full bg-green-50 text-green-600 flex items-center justify-center shrink-0">
-                      <i className="fa-solid fa-phone"></i>
+                  {!isAuthenticated ? (
+                    <Link href="/login" className="relative overflow-hidden bg-[#fcfbf9] border border-[#e8dcc4] rounded-xl px-4 py-3 flex items-center gap-3">
+                      <div className="w-8 h-8 rounded-full bg-green-50 text-green-600 flex items-center justify-center shrink-0">
+                        <i className="fa-solid fa-phone"></i>
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <span className="text-[10px] text-gray-400 font-bold mb-0.5 block">رقم التواصل</span>
+                        <div className="relative mt-1">
+                          <p className="text-sm font-bold text-[#3b2012] font-mono tracking-wider blur-sm select-none" dir="ltr">0000000000</p>
+                          <div className="absolute inset-0 flex items-center justify-end">
+                            <span className="inline-flex items-center gap-1 bg-white/90 text-[#6b4c3b] text-[10px] font-bold px-2 py-1 rounded-full border border-[#e8dcc4]">
+                              <i className="fa-solid fa-lock text-[9px]"></i>
+                              سجل الدخول
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    </Link>
+                  ) : (
+                    <div className="bg-[#fcfbf9] border border-[#e8dcc4] rounded-xl px-4 py-3 flex items-center gap-3">
+                      <div className="w-8 h-8 rounded-full bg-green-50 text-green-600 flex items-center justify-center shrink-0">
+                        <i className="fa-solid fa-phone"></i>
+                      </div>
+                      <div className="flex flex-col">
+                        <span className="text-[10px] text-gray-400 font-bold mb-0.5">رقم التواصل</span>
+                        {artistData.phone ? (
+                          <span className="text-sm font-bold text-[#3b2012]" dir="ltr">{artistData.phone}</span>
+                        ) : (
+                          <span className="text-xs text-gray-400">غير محدد</span>
+                        )}
+                      </div>
                     </div>
-                    <div className="flex flex-col">
-                      <span className="text-[10px] text-gray-400 font-bold mb-0.5">رقم التواصل</span>
-                      {artistData.phone ? (
-                        <span className="text-sm font-bold text-[#3b2012]" dir="ltr">{artistData.phone}</span>
-                      ) : !isAuthenticated ? (
-                        <span className="text-xs font-bold text-[#9c7b65]"><i className="fa-solid fa-lock text-[10px] ml-1"></i> معلومات مخفية للزوار</span>
-                      ) : (
-                        <span className="text-xs text-gray-400">غير محدد</span>
-                      )}
-                    </div>
-                  </div>
-                  
-                  {artistData.socialMedia && artistData.socialMedia.length > 0 && (
+                  )}
+
+                  {!isAuthenticated ? (
+                    <Link href="/login" className="bg-[#fcfbf9] border border-[#e8dcc4] hover:border-[#6b4c3b] rounded-xl px-4 py-3 flex items-center gap-3 transition-colors">
+                      <div className="w-8 h-8 rounded-full bg-[#f0ece6] text-[#6b4c3b] flex items-center justify-center shrink-0">
+                        <i className="fa-solid fa-share-nodes"></i>
+                      </div>
+                      <div className="flex-1">
+                        <span className="text-[10px] text-gray-400 font-bold mb-0.5 block">التواصل الاجتماعي</span>
+                        <div className="flex items-center gap-1.5 mt-1">
+                          {['fa-instagram', 'fa-facebook-f', 'fa-x-twitter'].map((icon, i) => (
+                            <div key={i} className="w-7 h-7 rounded-lg bg-gray-100 flex items-center justify-center blur-sm select-none">
+                              <i className={`fa-brands ${icon} text-xs text-gray-400`}></i>
+                            </div>
+                          ))}
+                          <span className="inline-flex items-center gap-1 bg-white/90 text-[#6b4c3b] text-[10px] font-bold px-2 py-1 rounded-full border border-[#e8dcc4] mr-1">
+                            <i className="fa-solid fa-lock text-[9px]"></i>
+                            سجل الدخول
+                          </span>
+                        </div>
+                      </div>
+                    </Link>
+                  ) : artistData.socialMedia && artistData.socialMedia.length > 0 ? (
                     <div className="flex items-center gap-2 pt-1">
                       {artistData.socialMedia.map((social, index) => {
                         let icon = 'fa-link';
                         let colorClass = 'bg-gray-50 text-gray-600 hover:bg-gray-100 hover:text-gray-900 border-[#e8dcc4]';
                         const p = social.platform?.toLowerCase();
-                        
+
                         if (p === 'instagram') { icon = 'fa-instagram'; colorClass = 'bg-pink-50 text-pink-600 hover:bg-pink-100 hover:text-pink-700 border-pink-100'; }
                         else if (p === 'facebook') { icon = 'fa-facebook-f'; colorClass = 'bg-blue-50 text-blue-600 hover:bg-blue-100 hover:text-blue-700 border-blue-100'; }
                         else if (p === 'x') { icon = 'fa-x-twitter'; colorClass = 'bg-gray-100 text-gray-800 hover:bg-gray-200 hover:text-black border-gray-200'; }
@@ -793,12 +856,12 @@ export default function ArtistPage({ params }) {
                         else if (p === 'pinterest') { icon = 'fa-pinterest-p'; colorClass = 'bg-red-50 text-red-600 hover:bg-red-100 hover:text-red-700 border-red-100'; }
 
                         return (
-                          <a 
-                            key={index} 
-                            href={social.url} 
-                            target="_blank" 
-                            rel="noreferrer" 
-                            title={social.platform} 
+                          <a
+                            key={index}
+                            href={social.url}
+                            target="_blank"
+                            rel="noreferrer"
+                            title={social.platform}
                             className={`w-11 h-11 rounded-xl border flex items-center justify-center transition-all duration-300 hover:scale-110 shadow-sm ${colorClass}`}
                           >
                             <i className={`fa-brands ${icon} text-xl`}></i>
@@ -806,7 +869,7 @@ export default function ArtistPage({ params }) {
                         );
                       })}
                     </div>
-                  )}
+                  ) : null}
                 </div>
               </div>
             </motion.div>

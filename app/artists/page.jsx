@@ -12,30 +12,16 @@ export default function ArtistsDirectoryPage() {
   const [isFetching, setIsFetching] = useState(true);
 
   useEffect(() => {
-    if (!token) {
-      setIsFetching(false);
-      return;
-    }
-
     const fetchArtists = async () => {
       setIsFetching(true);
       try {
-        const headers = { Authorization: `Bearer ${token}` };
-
-        // Fetch artists list and artworks for preview images in parallel
-        const [artistsRes, artworksRes] = await Promise.all([
-          fetch('/api/artists', { headers }),
-          fetch('/api/artworks?limit=200'),
-        ]);
-
-        const artistsResult = artistsRes.ok ? await artistsRes.json().catch(() => ({})) : {};
+        const artworksRes = await fetch('/api/artworks?limit=200');
         const artworksResult = artworksRes.ok ? await artworksRes.json().catch(() => ({})) : {};
-
-        const rawArtists = artistsResult?.data ?? [];
         const rawWorks = artworksResult?.data?.artworks ?? [];
         const normalizedWorks = rawWorks.map(normalizeWork);
 
-        // Build preview images and work counts from the artworks response
+        // Build artist entries from artworks (public endpoint embeds artist info)
+        const artistMap = new Map();
         const previewMap = new Map();
         const worksCountMap = new Map();
 
@@ -50,23 +36,41 @@ export default function ArtistsDirectoryPage() {
           if (imgs.length < 3 && work.images?.length > 0) {
             imgs.push(work.images[work.mainImageIndex || 0]);
           }
+
+          if (!artistMap.has(aid)) {
+            const displayName = work.artistName || 'غير متوفر';
+            artistMap.set(aid, {
+              id: aid,
+              name: displayName,
+              avatar: work.artistAvatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(displayName)}&background=5c4436&color=fff&size=200&font-size=0.4&bold=true`,
+            });
+          }
         });
 
-        const mapped = rawArtists.map((a) => {
-          const displayName =
-            a.artist_name ||
-            [a.first_name, a.last_name].filter(Boolean).join(' ') ||
-            'غير متوفر';
-          return {
-            id: a.id,
-            name: displayName,
-            bio: a.bio || null,
-            location: a.location || null,
-            worksCount: worksCountMap.get(a.id) || 0,
-            previewImages: previewMap.get(a.id) || [],
-            avatar: a.profile_image || `https://ui-avatars.com/api/?name=${encodeURIComponent(displayName)}&background=5c4436&color=fff&size=200&font-size=0.4&bold=true`,
-          };
-        });
+        // For authenticated users, also fetch the full artists list for richer data
+        if (token) {
+          const artistsRes = await fetch('/api/artists', { headers: { Authorization: `Bearer ${token}` } });
+          const artistsResult = artistsRes.ok ? await artistsRes.json().catch(() => ({})) : {};
+          const rawArtists = artistsResult?.data ?? [];
+
+          rawArtists.forEach((a) => {
+            const displayName =
+              a.artist_name ||
+              [a.first_name, a.last_name].filter(Boolean).join(' ') ||
+              'غير متوفر';
+            artistMap.set(a.id, {
+              id: a.id,
+              name: displayName,
+              avatar: a.profile_image || `https://ui-avatars.com/api/?name=${encodeURIComponent(displayName)}&background=5c4436&color=fff&size=200&font-size=0.4&bold=true`,
+            });
+          });
+        }
+
+        const mapped = Array.from(artistMap.values()).map((a) => ({
+          ...a,
+          worksCount: worksCountMap.get(a.id) || 0,
+          previewImages: previewMap.get(a.id) || [],
+        }));
 
         setArtists(mapped);
       } catch (e) {
@@ -78,24 +82,6 @@ export default function ArtistsDirectoryPage() {
 
     fetchArtists();
   }, [token]);
-
-  // Guest: not authenticated — backend requires auth for /api/artists
-  if (!isFetching && !isAuthenticated) {
-    return (
-      <div className="min-h-[80vh] bg-[#fdfaf7] flex items-center justify-center px-4 font-art" dir="rtl">
-        <div className="text-center max-w-md mx-auto">
-          <div className="inline-flex items-center justify-center w-20 h-20 bg-brown-gradient rounded-full text-white text-3xl mb-6 shadow-lg">
-            <i className="fa-solid fa-lock"></i>
-          </div>
-          <h2 className="text-2xl font-bold text-[#3b2012] mb-3">يجب تسجيل الدخول أولاً</h2>
-          <p className="text-[#9c7b65] mb-6">تصفح قائمة الفنانين متاح للأعضاء المسجلين فقط.</p>
-          <Link href="/login" className="inline-block bg-[#5c4436] text-white px-8 py-3 rounded-2xl font-bold hover:bg-[#3b2012] transition-colors">
-            تسجيل الدخول
-          </Link>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="min-h-[80vh] bg-[#fdfaf7] py-12 px-4 sm:px-6 lg:px-8 font-art" dir="rtl">
