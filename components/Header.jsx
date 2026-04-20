@@ -26,7 +26,7 @@ export const Header = () => {
   const [isBecomeArtistModalOpen, setIsBecomeArtistModalOpen] = useState(false);
   
   const isArtist = user?.role === 'artist';
-  const isGlobalSearchDisabledRoute = pathname === '/about' || pathname === '/works/my' || pathname === '/products';
+  const isGlobalSearchDisabledRoute = pathname === '/about' || pathname === '/works/my' || pathname === '/products' || pathname.startsWith('/artists');
   const canUseGlobalSearch = !isGlobalSearchDisabledRoute;
   const userFirstName = user?.firstName || user?.first_name || 'مستخدم';
   const displayName = isArtist ? (user?.artistName || user?.artist_name || userFirstName) : userFirstName;
@@ -58,7 +58,13 @@ export const Header = () => {
                   src="/images/logo.png" 
                   alt="Logo Athar" 
                   fill 
-                  className="object-contain"
+                  className="object-contain dark:hidden"
+                />
+                <Image 
+                  src="/images/icon-dark.png" 
+                  alt="Logo Athar" 
+                  fill 
+                  className="object-contain hidden dark:block"
                 />
               </div>
               <div className="flex items-center gap-3">

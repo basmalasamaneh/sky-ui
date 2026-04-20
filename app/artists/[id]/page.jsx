@@ -446,7 +446,7 @@ export default function ArtistPage({ params }) {
   };
 
   return (
-    <div className="min-h-[80vh] bg-[#faf8f5] py-12 px-4 sm:px-6 lg:px-8 font-art" dir="rtl">
+    <div className="min-h-[80vh] bg-[#faf8f5] dark:bg-black py-12 px-4 sm:px-6 lg:px-8 font-art" dir="rtl">
       <div className="max-w-7xl mx-auto">
         <button onClick={() => router.back()} className="inline-flex items-center gap-2 text-[#9c7b65] dark:text-[#e8dcc4] hover:text-[#5c4436] dark:text-[#e8dcc4] font-bold mb-8 transition-colors group border-none bg-transparent cursor-pointer">
           <i className="fa-solid fa-arrow-right group-hover:-translate-x-1 transition-transform"></i>
@@ -454,15 +454,15 @@ export default function ArtistPage({ params }) {
         </button>
 
         {notFound ? (
-          <div className="text-center py-20 bg-white dark:bg-black rounded-[2rem] border border-[#e8dcc4] dark:border-gray-800 shadow-sm">
+          <div className="text-center py-20 bg-white dark:bg-[#1a0f0a] rounded-[2rem] border border-[#e8dcc4] dark:border-gray-800 shadow-sm">
             <i className="fa-solid fa-user-slash text-6xl text-gray-300 mb-4"></i>
             <h2 className="text-2xl font-bold text-[#3b2012] dark:text-[#e8dcc4]">لم يتم العثور على الفنان</h2>
-            <p className="text-[#9c7b65] dark:text-[#e8dcc4] mt-2">قد يكون هذا الفنان غير موجود أو لا ينتمي لقائمة الفنانين.</p>
+            <p className="text-[#9c7b65] dark:text-gray-500 mt-2">قد يكون هذا الفنان غير موجود أو لا ينتمي لقائمة الفنانين.</p>
           </div>
         ) : isFetching ? (
           <div className="space-y-10">
             {/* Skeleton Profile */}
-            <div className="bg-white dark:bg-black rounded-[2rem] p-8 shadow-sm flex flex-col md:flex-row items-center md:items-start gap-8 animate-pulse border border-[#e8dcc4] dark:border-gray-800">
+            <div className="bg-white dark:bg-[#1a0f0a] rounded-[2rem] p-8 shadow-sm flex flex-col md:flex-row items-center md:items-start gap-8 animate-pulse border border-[#e8dcc4] dark:border-gray-800">
               <div className="w-32 h-32 bg-gray-200 rounded-full shrink-0"></div>
               <div className="flex-1 space-y-4 w-full">
                 <div className="h-8 bg-gray-200 rounded-md w-1/3 mx-auto md:mx-0"></div>
@@ -474,10 +474,10 @@ export default function ArtistPage({ params }) {
             </div>
           </div>
         ) : !artistData ? (
-          <div className="text-center py-20 bg-white dark:bg-black rounded-[2rem] border border-[#e8dcc4] dark:border-gray-800 shadow-sm">
+          <div className="text-center py-20 bg-white dark:bg-[#1a0f0a] rounded-[2rem] border border-[#e8dcc4] dark:border-gray-800 shadow-sm">
             <i className="fa-solid fa-user-slash text-6xl text-gray-300 mb-4"></i>
             <h2 className="text-2xl font-bold text-[#3b2012] dark:text-[#e8dcc4]">لم يتم العثور على الفنان</h2>
-            <p className="text-[#9c7b65] dark:text-[#e8dcc4] mt-2">قد يكون هذا الفنان غير موجود أو لا ينتمي لقائمة الفنانين.</p>
+            <p className="text-[#9c7b65] dark:text-gray-500 mt-2">قد يكون هذا الفنان غير موجود أو لا ينتمي لقائمة الفنانين.</p>
           </div>
         ) : (
           <div className="space-y-12">
@@ -485,9 +485,9 @@ export default function ArtistPage({ params }) {
             <motion.div 
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              className="bg-white dark:bg-black rounded-[2rem] p-8 shadow-sm border border-[#e8dcc4] dark:border-gray-800 flex flex-col md:flex-row items-center md:items-start gap-8 relative overflow-hidden"
+              className="bg-white dark:bg-[#1a0f0a] rounded-[2rem] p-8 shadow-sm border border-[#e8dcc4] dark:border-gray-800 flex flex-col md:flex-row items-center md:items-start gap-8 relative overflow-hidden"
             >
-              <div className="w-32 h-32 relative rounded-full overflow-hidden shrink-0 border-4 border-white shadow-xl bg-[#fdfaf7] dark:bg-black flex items-center justify-center -mt-16 md:mt-0 group/profilepic">
+              <div className="w-32 h-32 relative rounded-full overflow-hidden shrink-0 border-4 border-white dark:border-[#3e2f27] shadow-xl bg-[#fdfaf7] dark:bg-[#2a1f18] flex items-center justify-center -mt-16 md:mt-0 group/profilepic">
                 <img src={artistData.avatar} alt={artistData.name} className="w-full h-full object-cover transition-transform group-hover/profilepic:scale-105" />
                 {canEditProfileImage && (
                   <>
@@ -522,7 +522,7 @@ export default function ArtistPage({ params }) {
                         <button
                           type="button"
                           onClick={() => setIsEditingProfile((prev) => !prev)}
-                          className="bg-[#f0ece6] dark:bg-black text-[#5c4436] dark:text-[#e8dcc4] hover:bg-[#5c4436] hover:text-white px-3 py-1 rounded-lg text-xs font-bold transition-colors"
+                          className="bg-[#f0ece6] dark:bg-[#2a1f18] text-[#5c4436] dark:text-[#c4a993] hover:bg-[#5c4436] hover:text-white dark:hover:bg-[#5c4436] dark:hover:text-white px-3 py-1 rounded-lg text-xs font-bold transition-colors"
                         >
                           <i className="fa-solid fa-pen-to-square ml-1"></i>
                           {isEditingProfile ? 'إلغاء التعديل' : 'تعديل الصفحة'}
@@ -537,7 +537,7 @@ export default function ArtistPage({ params }) {
                       </p>
                     )}
                     {artistData.bio && (
-                      <p className="text-[#5c4436] dark:text-[#e8dcc4] text-sm leading-relaxed mt-4 p-4 bg-[#fcfbf9] rounded-xl border border-[#e8dcc4]/50 max-w-2xl mx-auto md:mx-0">
+                      <p className="text-[#5c4436] dark:text-[#c4a993] text-sm leading-relaxed mt-4 p-4 bg-[#fcfbf9] dark:bg-[#2a1f18] rounded-xl border border-[#e8dcc4]/50 dark:border-[#3e2f27]/50 max-w-2xl mx-auto md:mx-0">
                         {artistData.bio}
                       </p>
                     )}
@@ -546,7 +546,7 @@ export default function ArtistPage({ params }) {
 
                 <div className="flex flex-wrap justify-center md:justify-start gap-3 pt-6 border-t border-gray-100 dark:border-gray-800 dark:border-gray-800">
                   {canEditOwnProfile && isEditingProfile && (
-                    <div className="w-full bg-white dark:bg-black rounded-[2rem] p-6 border border-[#e8dcc4] dark:border-gray-800 shadow-sm space-y-6">
+                    <div className="w-full bg-white dark:bg-[#1a0f0a] rounded-[2rem] p-6 border border-[#e8dcc4] dark:border-gray-800 shadow-sm space-y-6">
                       <div className="flex items-center justify-between pb-2 border-b border-gray-100 dark:border-gray-800 dark:border-gray-800">
                         <h3 className="text-xl font-bold text-[#3b2012] dark:text-[#e8dcc4] flex items-center gap-2">
                           <i className="fa-solid fa-user-pen text-[#9c7b65] dark:text-[#e8dcc4]"></i>
@@ -650,7 +650,7 @@ export default function ArtistPage({ params }) {
                             <button
                               type="button"
                               onClick={() => setShowPlatformPicker(!showPlatformPicker)}
-                              className={`flex items-center gap-2 px-4 py-2 rounded-full text-xs font-bold transition-all duration-300 ${showPlatformPicker ? 'bg-[#5c4436] text-white' : 'bg-[#f0ece6] dark:bg-black text-[#5c4436] dark:text-[#e8dcc4] hover:bg-[#e8dcc4]'}`}
+                              className={`flex items-center gap-2 px-4 py-2 rounded-full text-xs font-bold transition-all duration-300 ${showPlatformPicker ? 'bg-[#5c4436] text-white' : 'bg-[#f0ece6] dark:bg-[#2a1f18] text-[#5c4436] dark:text-[#c4a993] hover:bg-[#e8dcc4] dark:hover:bg-[#3e2f27]'}`}
                             >
                               <i className={`fa-solid ${showPlatformPicker ? 'fa-xmark' : 'fa-plus'} transition-transform duration-300`}></i>
                               <span>إضافة رابط جديد</span>
@@ -662,7 +662,7 @@ export default function ArtistPage({ params }) {
                               initial={{ opacity: 0, y: -10, scale: 0.95 }}
                               animate={{ opacity: 1, y: 0, scale: 1 }}
                               exit={{ opacity: 0, y: -10, scale: 0.95 }}
-                              className="flex items-center justify-around bg-[#fcf9f5] p-4 rounded-3xl border border-[#e8dcc4]/40 shadow-inner"
+                              className="flex items-center justify-around bg-[#fcf9f5] dark:bg-[#2a1f18] p-4 rounded-3xl border border-[#e8dcc4]/40 dark:border-[#3e2f27]/40 shadow-inner"
                             >
                               {[
                                 { id: 'instagram', icon: 'fa-instagram', color: 'text-pink-600', name: 'إنستغرام' },
@@ -683,7 +683,7 @@ export default function ArtistPage({ params }) {
                                     }}
                                     className={`flex flex-col items-center gap-2 transition-all duration-300 ${isAdded ? 'opacity-20 grayscale' : 'hover:scale-110'}`}
                                   >
-                                    <div className="w-12 h-12 bg-white dark:bg-black rounded-2xl shadow-sm flex items-center justify-center border border-gray-100 dark:border-gray-800 dark:border-gray-800">
+                                    <div className="w-12 h-12 bg-white dark:bg-[#3e2f27] rounded-2xl shadow-sm flex items-center justify-center border border-gray-100 dark:border-[#4a3728]">
                                       <i className={`fa-brands ${p.icon} text-xl ${p.color}`}></i>
                                     </div>
                                     <span className="text-[10px] font-bold text-[#9c7b65] dark:text-[#e8dcc4]">{p.name}</span>
@@ -755,8 +755,8 @@ export default function ArtistPage({ params }) {
                   )}
 
                   {!isAuthenticated ? (
-                    <Link href="/login" className="relative overflow-hidden bg-[#fcfbf9] border border-[#e8dcc4] dark:border-gray-800 rounded-xl px-4 py-3 flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-full bg-amber-50 text-amber-600 flex items-center justify-center shrink-0">
+                    <Link href="/login" className="relative overflow-hidden bg-[#fcfbf9] dark:bg-[#1a0f0a] border border-[#e8dcc4] dark:border-gray-800 rounded-xl px-4 py-3 flex items-center gap-3">
+                      <div className="w-8 h-8 rounded-full bg-amber-50 dark:bg-amber-950/30 text-amber-600 flex items-center justify-center shrink-0">
                         <i className="fa-solid fa-location-dot"></i>
                       </div>
                       <div className="flex-1 min-w-0">
@@ -764,7 +764,7 @@ export default function ArtistPage({ params }) {
                         <div className="relative mt-1">
                           <p className="text-sm font-bold text-[#3b2012] dark:text-[#e8dcc4] blur-sm select-none">معلومات مخفية</p>
                           <div className="absolute inset-0 flex items-center justify-end">
-                            <span className="inline-flex items-center gap-1 bg-white dark:bg-black dark:black/90 dark:bg-black/90 text-[#6b4c3b] text-[10px] font-bold px-2 py-1 rounded-full border border-[#e8dcc4] dark:border-gray-800">
+                            <span className="inline-flex items-center gap-1 bg-white dark:bg-[#2a1f18] text-[#6b4c3b] dark:text-[#c4a993] text-[10px] font-bold px-2 py-1 rounded-full border border-[#e8dcc4] dark:border-gray-700">
                               <i className="fa-solid fa-lock text-[9px]"></i>
                               سجل الدخول
                             </span>
@@ -773,8 +773,8 @@ export default function ArtistPage({ params }) {
                       </div>
                     </Link>
                   ) : (
-                    <div className="bg-[#fcfbf9] border border-[#e8dcc4] dark:border-gray-800 rounded-xl px-4 py-3 flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-full bg-amber-50 text-amber-600 flex items-center justify-center shrink-0">
+                    <div className="bg-[#fcfbf9] dark:bg-[#1a0f0a] border border-[#e8dcc4] dark:border-gray-800 rounded-xl px-4 py-3 flex items-center gap-3">
+                      <div className="w-8 h-8 rounded-full bg-amber-50 dark:bg-amber-950/30 text-amber-600 flex items-center justify-center shrink-0">
                         <i className="fa-solid fa-location-dot"></i>
                       </div>
                       <div className="flex flex-col">
@@ -789,8 +789,8 @@ export default function ArtistPage({ params }) {
                   )}
 
                   {!isAuthenticated ? (
-                    <Link href="/login" className="relative overflow-hidden bg-[#fcfbf9] border border-[#e8dcc4] dark:border-gray-800 rounded-xl px-4 py-3 flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-full bg-green-50 text-green-600 flex items-center justify-center shrink-0">
+                    <Link href="/login" className="relative overflow-hidden bg-[#fcfbf9] dark:bg-[#1a0f0a] border border-[#e8dcc4] dark:border-gray-800 rounded-xl px-4 py-3 flex items-center gap-3">
+                      <div className="w-8 h-8 rounded-full bg-green-50 dark:bg-green-950/30 text-green-600 flex items-center justify-center shrink-0">
                         <i className="fa-solid fa-phone"></i>
                       </div>
                       <div className="flex-1 min-w-0">
@@ -798,7 +798,7 @@ export default function ArtistPage({ params }) {
                         <div className="relative mt-1">
                           <p className="text-sm font-bold text-[#3b2012] dark:text-[#e8dcc4] font-mono tracking-wider blur-sm select-none" dir="ltr">0000000000</p>
                           <div className="absolute inset-0 flex items-center justify-end">
-                            <span className="inline-flex items-center gap-1 bg-white dark:bg-black dark:black/90 dark:bg-black/90 text-[#6b4c3b] text-[10px] font-bold px-2 py-1 rounded-full border border-[#e8dcc4] dark:border-gray-800">
+                            <span className="inline-flex items-center gap-1 bg-white dark:bg-[#2a1f18] text-[#6b4c3b] dark:text-[#c4a993] text-[10px] font-bold px-2 py-1 rounded-full border border-[#e8dcc4] dark:border-gray-700">
                               <i className="fa-solid fa-lock text-[9px]"></i>
                               سجل الدخول
                             </span>
@@ -807,8 +807,8 @@ export default function ArtistPage({ params }) {
                       </div>
                     </Link>
                   ) : (
-                    <div className="bg-[#fcfbf9] border border-[#e8dcc4] dark:border-gray-800 rounded-xl px-4 py-3 flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-full bg-green-50 text-green-600 flex items-center justify-center shrink-0">
+                    <div className="bg-[#fcfbf9] dark:bg-[#1a0f0a] border border-[#e8dcc4] dark:border-gray-800 rounded-xl px-4 py-3 flex items-center gap-3">
+                      <div className="w-8 h-8 rounded-full bg-green-50 dark:bg-green-950/30 text-green-600 flex items-center justify-center shrink-0">
                         <i className="fa-solid fa-phone"></i>
                       </div>
                       <div className="flex flex-col">
@@ -823,8 +823,8 @@ export default function ArtistPage({ params }) {
                   )}
 
                   {!isAuthenticated ? (
-                    <Link href="/login" className="bg-[#fcfbf9] border border-[#e8dcc4] dark:border-gray-800 hover:border-[#6b4c3b] rounded-xl px-4 py-3 flex items-center gap-3 transition-colors">
-                      <div className="w-8 h-8 rounded-full bg-[#f0ece6] dark:bg-black text-[#6b4c3b] flex items-center justify-center shrink-0">
+                    <Link href="/login" className="bg-[#fcfbf9] dark:bg-[#1a0f0a] border border-[#e8dcc4] dark:border-gray-800 hover:border-[#6b4c3b] rounded-xl px-4 py-3 flex items-center gap-3 transition-colors">
+                      <div className="w-8 h-8 rounded-full bg-[#f0ece6] dark:bg-[#2a1f18] text-[#6b4c3b] dark:text-[#c4a993] flex items-center justify-center shrink-0">
                         <i className="fa-solid fa-share-nodes"></i>
                       </div>
                       <div className="flex-1">
@@ -835,7 +835,7 @@ export default function ArtistPage({ params }) {
                               <i className={`fa-brands ${icon} text-xs text-gray-400`}></i>
                             </div>
                           ))}
-                          <span className="inline-flex items-center gap-1 bg-white dark:bg-black dark:black/90 dark:bg-black/90 text-[#6b4c3b] text-[10px] font-bold px-2 py-1 rounded-full border border-[#e8dcc4] dark:border-gray-800 mr-1">
+                          <span className="inline-flex items-center gap-1 bg-white dark:bg-[#2a1f18] text-[#6b4c3b] dark:text-[#c4a993] text-[10px] font-bold px-2 py-1 rounded-full border border-[#e8dcc4] dark:border-gray-700 mr-1">
                             <i className="fa-solid fa-lock text-[9px]"></i>
                             سجل الدخول
                           </span>
@@ -883,8 +883,8 @@ export default function ArtistPage({ params }) {
               </h2>
 
               {works.length === 0 ? (
-                <div className="text-center py-20 bg-white dark:bg-black rounded-3xl border border-[#e8dcc4] dark:border-gray-800">
-                  <p className="text-xl text-[#9c7b65] dark:text-[#e8dcc4] font-bold">لا يوجد أعمال فنية حالياً</p>
+                <div className="text-center py-20 bg-white dark:bg-[#1a0f0a] rounded-3xl border border-[#e8dcc4] dark:border-gray-800">
+                  <p className="text-xl text-[#9c7b65] dark:text-gray-500 font-bold">لا يوجد أعمال فنية حالياً</p>
                 </div>
               ) : (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
@@ -895,7 +895,7 @@ export default function ArtistPage({ params }) {
                       animate={{ opacity: 1, scale: 1 }}
                       transition={{ delay: index * 0.05 }}
                       onClick={() => openSlider(work)}
-                      className="group bg-white dark:bg-black rounded-3xl overflow-hidden border border-[#e8dcc4] dark:border-gray-800 shadow-[0_4px_20px_-10px_rgba(0,0,0,0.1)] hover:shadow-xl transition-all duration-500 flex flex-col cursor-pointer"
+                      className="group bg-white dark:bg-[#1a0f0a] rounded-3xl overflow-hidden border border-[#e8dcc4] dark:border-gray-800 shadow-[0_4px_20px_-10px_rgba(0,0,0,0.1)] hover:shadow-xl transition-all duration-500 flex flex-col cursor-pointer"
                     >
                       <div className="relative h-64 overflow-hidden m-2 rounded-2xl">
                         <Image
@@ -917,7 +917,7 @@ export default function ArtistPage({ params }) {
                               e.stopPropagation();
                               openSlider(work);
                             }}
-                            className="bg-[#f0ece6] dark:bg-black text-[#5c4436] dark:text-[#e8dcc4] hover:bg-[#5c4436] hover:text-white px-4 py-2 rounded-xl text-xs font-bold transition-colors"
+                            className="bg-[#f0ece6] dark:bg-[#2a1f18] text-[#5c4436] dark:text-[#c4a993] hover:bg-[#5c4436] hover:text-white dark:hover:bg-[#5c4436] dark:hover:text-white px-4 py-2 rounded-xl text-xs font-bold transition-colors"
                           >
                             عرض التفاصيل
                           </button>

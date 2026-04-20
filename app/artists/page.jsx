@@ -10,6 +10,11 @@ export default function ArtistsDirectoryPage() {
   const { token, isAuthenticated } = useAuth();
   const [artists, setArtists] = useState([]);
   const [isFetching, setIsFetching] = useState(true);
+  const [searchQuery, setSearchQuery] = useState('');
+
+  const filteredArtists = artists.filter((a) =>
+    a.name.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   useEffect(() => {
     const fetchArtists = async () => {
@@ -94,6 +99,26 @@ export default function ArtistsDirectoryPage() {
           <p className="text-[#9c7b65] dark:text-[#e8dcc4] font-amiri text-lg">
             اكتشف نخبة من الفنانين الموهوبين وتعرّف على أعمالهم وإبداعاتهم التي تترك أثراً في عالم الفن.
           </p>
+
+          {/* Search */}
+          <div className="relative mt-8 max-w-md mx-auto">
+            <i className="fa-solid fa-magnifying-glass absolute right-4 top-1/2 -translate-y-1/2 text-[#9c7b65] pointer-events-none"></i>
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="ابحث عن فنان..."
+              className="w-full h-12 bg-white dark:bg-[#1a0f0a] border border-[#e8dcc4] dark:border-[#3e2f27] rounded-2xl pr-12 pl-4 text-[#3b2012] dark:text-[#e8dcc4] placeholder:text-[#ceb29f] focus:outline-none focus:ring-2 focus:ring-[#5c4436]/20 focus:border-[#5c4436] transition-all font-amiri"
+            />
+            {searchQuery && (
+              <button
+                onClick={() => setSearchQuery('')}
+                className="absolute left-4 top-1/2 -translate-y-1/2 text-[#9c7b65] hover:text-[#3b2012] dark:hover:text-[#e8dcc4] transition-colors"
+              >
+                <i className="fa-solid fa-xmark"></i>
+              </button>
+            )}
+          </div>
         </div>
 
         {isFetching ? (
@@ -121,9 +146,15 @@ export default function ArtistsDirectoryPage() {
             <h2 className="text-2xl font-bold text-[#3b2012] dark:text-[#e8dcc4] mb-2">لا يوجد فنانين حالياً</h2>
             <p className="text-[#9c7b65] dark:text-[#e8dcc4]">كن أنت أول فنان ينضم لمنصتنا من خلال إنشاء حساب فنان!</p>
           </div>
+        ) : filteredArtists.length === 0 ? (
+          <div className="text-center py-20 bg-white dark:bg-black rounded-[2rem] border border-[#e8dcc4] dark:border-gray-800 shadow-sm">
+            <i className="fa-solid fa-user-magnifying-glass text-6xl text-gray-300 mb-4"></i>
+            <h2 className="text-2xl font-bold text-[#3b2012] dark:text-[#e8dcc4] mb-2">لا توجد نتائج</h2>
+            <p className="text-[#9c7b65] dark:text-[#e8dcc4] font-amiri">لم نجد أي فنان يطابق &quot;{searchQuery}&quot;</p>
+          </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {artists.map((artist, i) => (
+            {filteredArtists.map((artist, i) => (
               <motion.div
                 key={artist.id}
                 initial={{ opacity: 0, y: 30 }}

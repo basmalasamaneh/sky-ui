@@ -13,7 +13,13 @@ export default function Footer() {
               src="/images/logo.png"
               alt="أثر"
               fill
-              className="object-contain"
+              className="object-contain dark:hidden"
+            />
+            <Image
+              src="/images/icon-dark.png"
+              alt="أثر"
+              fill
+              className="object-contain hidden dark:block"
             />
           </div>
           <div className="flex items-center gap-2">
