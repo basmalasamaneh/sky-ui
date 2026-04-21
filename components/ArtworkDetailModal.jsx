@@ -5,11 +5,14 @@ import { motion, AnimatePresence } from 'framer-motion';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useAuth } from '@/contexts/AuthContext';
+import { useCart } from '@/contexts/CartContext';
 import { categoryMapping } from '@/lib/artwork-utils';
 
 export default function ArtworkDetailModal({ work, isLoadingDetails = false, onClose }) {
   const { isAuthenticated, user } = useAuth();
+  const { addItem } = useCart();
   const [currentSlideIndex, setCurrentSlideIndex] = useState(0);
+  const [isAdding, setIsAdding] = useState(false);
 
   // Reset slide index when a new artwork is opened
   useEffect(() => {
@@ -375,9 +378,23 @@ export default function ArtworkDetailModal({ work, isLoadingDetails = false, onC
                     {work.price ? `${work.price} ₪` : 'حسب الطلب'}
                   </p>
                 </div>
-                <button className="h-14 px-10 bg-[#3b2012] text-white rounded-2xl font-bold flex items-center justify-center gap-3 shadow-xl hover:bg-[#5c3d2e] transition-all active:scale-95 group">
-                  <span>إضافة للسلة</span>
-                  <i className="fa-solid fa-bag-shopping transition-transform group-hover:-translate-y-1"></i>
+                <button 
+                  onClick={() => {
+                    setIsAdding(true);
+                    addItem({
+                      id: work.id,
+                      title: work.title,
+                      price: work.price,
+                      image: work.images?.[0] || fallbackImage,
+                      artistName: work.artistName
+                    });
+                    setTimeout(() => setIsAdding(false), 1000);
+                  }}
+                  disabled={isAdding}
+                  className={`h-14 px-10 rounded-2xl font-bold flex items-center justify-center gap-3 shadow-xl transition-all active:scale-95 group ${isAdding ? 'bg-green-600 text-white' : 'bg-[#3b2012] text-white hover:bg-[#5c3d2e]'}`}
+                >
+                  <span>{isAdding ? 'تمت الإضافة' : 'إضافة للسلة'}</span>
+                  <i className={`fa-solid ${isAdding ? 'fa-check' : 'fa-bag-shopping'} transition-transform group-hover:-translate-y-1`}></i>
                 </button>
               </div>
             </div>

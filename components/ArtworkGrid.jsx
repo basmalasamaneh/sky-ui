@@ -8,10 +8,12 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useSearch } from '@/contexts/SearchContext';
 import { normalizeWork, categories } from '@/lib/artwork-utils';
 import ArtworkDetailModal from '@/components/ArtworkDetailModal';
+import { useCart } from '@/contexts/CartContext';
 
 export const ArtworkGrid = ({ limit = null, showCategories = true, title = null }) => {
   const { isAuthenticated, user, token } = useAuth();
   const { globalSearchQuery } = useSearch();
+  const { addItem } = useCart();
   const [works, setWorks] = useState([]);
   const [isFetching, setIsFetching] = useState(true);
   const [activeCategory, setActiveCategory] = useState('الكل');
@@ -175,8 +177,17 @@ export const ArtworkGrid = ({ limit = null, showCategories = true, title = null 
                     ) : (
                       <button
                         type="button"
-                        onClick={(e) => e.stopPropagation()}
-                        className="bg-[#f0ece6] dark:bg-black text-[#5c4436] dark:text-[#e8dcc4] hover:bg-[#5c4436] hover:text-white px-4 py-2 rounded-xl text-xs font-bold transition-colors"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          addItem({
+                            id: work.id,
+                            title: work.title,
+                            price: work.price,
+                            image: work.images?.[0] || 'https://images.unsplash.com/photo-1541963463532-d68292c34b19?auto=format&fit=crop&q=80&w=800',
+                            artistName: work.artistName
+                          });
+                        }}
+                        className="bg-[#f0ece6] dark:bg-black text-[#5c4436] dark:text-[#e8dcc4] hover:bg-[#5c4436] hover:text-white px-4 py-2 rounded-xl text-xs font-bold transition-all active:scale-95"
                       >
                         إضافة للسلة
                       </button>

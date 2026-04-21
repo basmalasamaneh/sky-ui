@@ -1,6 +1,6 @@
 "use client";
 
-import React, { createContext, useContext, useState } from 'react';
+import React, { createContext, useContext, useState, useCallback, useMemo } from 'react';
 
 const SearchContext = createContext();
 
@@ -9,37 +9,47 @@ export const SearchProvider = ({ children }) => {
   const [globalSearchQuery, setGlobalSearchQuery] = useState('');
   const [marketplaceSearchQuery, setMarketplaceSearchQuery] = useState('');
 
-  const handleGlobalSearch = (query) => {
+  const handleGlobalSearch = useCallback((query) => {
     setGlobalSearchQuery(query);
-  };
+  }, []);
 
-  const handleMarketplaceSearch = (query) => {
+  const handleMarketplaceSearch = useCallback((query) => {
     setMarketplaceSearchQuery(query);
-  };
+  }, []);
 
-  const clearGlobalSearch = () => {
+  const clearGlobalSearch = useCallback(() => {
     setGlobalSearchQuery('');
-  };
+  }, []);
 
-  const clearMarketplaceSearch = () => {
+  const clearMarketplaceSearch = useCallback(() => {
     setMarketplaceSearchQuery('');
-  };
+  }, []);
 
-  const clearAllSearch = () => {
+  const clearAllSearch = useCallback(() => {
     setGlobalSearchQuery('');
     setMarketplaceSearchQuery('');
-  };
+  }, []);
+
+  const value = useMemo(() => ({
+    globalSearchQuery, 
+    setGlobalSearchQuery: handleGlobalSearch,
+    marketplaceSearchQuery,
+    setMarketplaceSearchQuery: handleMarketplaceSearch,
+    clearGlobalSearch,
+    clearMarketplaceSearch,
+    clearAllSearch,
+  }), [
+    globalSearchQuery, 
+    marketplaceSearchQuery, 
+    handleGlobalSearch, 
+    handleMarketplaceSearch, 
+    clearGlobalSearch, 
+    clearMarketplaceSearch, 
+    clearAllSearch
+  ]);
 
   return (
-    <SearchContext.Provider value={{ 
-      globalSearchQuery, 
-      setGlobalSearchQuery: handleGlobalSearch,
-      marketplaceSearchQuery,
-      setMarketplaceSearchQuery: handleMarketplaceSearch,
-      clearGlobalSearch,
-      clearMarketplaceSearch,
-      clearAllSearch,
-    }}>
+    <SearchContext.Provider value={value}>
       {children}
     </SearchContext.Provider>
   );

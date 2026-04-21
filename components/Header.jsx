@@ -138,6 +138,11 @@ export const Header = () => {
 
                 <Link href="/cart" className="relative hover:text-[#5c4436] dark:text-[#e8dcc4] transition-colors p-2.5">
                   <i className="fa-solid fa-bag-shopping text-lg"></i>
+                  {totalItems > 0 && (
+                    <span className="absolute top-0 right-0 bg-amber-600 text-white text-[10px] font-bold w-5 h-5 flex items-center justify-center rounded-full border-2 border-white dark:border-black animate-in fade-in zoom-in duration-300">
+                      {totalItems}
+                    </span>
+                  )}
                 </Link>
               </div>
 
