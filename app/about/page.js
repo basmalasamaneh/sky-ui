@@ -35,7 +35,7 @@ const creators = [
 
 export default function AboutPage() {
   return (
-    <div className="min-h-screen bg-[#faf9f6] text-[#1a0f0a]" dir="rtl">
+    <div className="min-h-screen bg-[#faf9f6] dark:bg-[#0b0b0b] text-[#1a0f0a] dark:text-[#e8dcc4]" dir="rtl">
       
       {/* Hero Section */}
       <section className="relative py-32 px-6 overflow-hidden bg-brown-gradient text-white text-center">
@@ -64,10 +64,10 @@ export default function AboutPage() {
             viewport={{ once: true }}
           >
             <span className="text-[#8a7264] text-sm font-bold uppercase tracking-widest mb-6 block">مهمتنا</span>
-            <h2 className="text-4xl md:text-6xl font-bold font-art mb-12 text-[#2c1e15]">لماذا أطلقنا منصة أثر؟</h2>
-              <div className="space-y-8 text-xl leading-loose text-gray-700 font-light text-justify md:text-center max-w-4xl mx-auto">
+            <h2 className="text-4xl md:text-6xl font-bold font-art mb-12 text-[#2c1e15] dark:text-[#e8dcc4]">لماذا أطلقنا منصة أثر؟</h2>
+              <div className="space-y-8 text-xl leading-loose text-gray-700 dark:text-[#e8dcc4] font-light text-justify md:text-center max-w-4xl mx-auto">
                 <p>
-                  في قلب كل فلسطيني، تسكن رغبة عارمة في الحفاظ على الجمال وسط التحديات. انطلقت <span className="font-bold text-[#4a3728]">"أثر"</span> لتكون تلك المساحة التي يتنفس فيها الفن الفلسطيني بحرية، بعيداً عن قيود الجغرافيا.
+                  في قلب كل فلسطيني، تسكن رغبة عارمة في الحفاظ على الجمال وسط التحديات. انطلقت <span className="font-bold text-[#4a3728] dark:text-[#e8dcc4]">"أثر"</span> لتكون تلك المساحة التي يتنفس فيها الفن الفلسطيني بحرية، بعيداً عن قيود الجغرافيا.
                 </p>
                 <p>
                   نحن لا نبيع مجرد منتجات؛ نحن نروي قصصاً طُرزت بخيوط الصبر، ونمنحك فرصة لاقتناء قطعة من روح الأرض المباركة. هدفنا هو تمكين المبدع اقتصادياً ومعنوياً، ليبقى صوته الفني مسموعاً عبر القارات.
@@ -78,10 +78,10 @@ export default function AboutPage() {
       </section>
 
       {/* Values Section */}
-      <section className="py-32 px-6 bg-[#f2f0eb]">
+      <section className="py-32 px-6 bg-[#f2f0eb] dark:bg-black">
         <div className="max-w-7xl mx-auto text-center">
           <span className="text-[#8a7264] text-sm font-bold uppercase tracking-widest mb-6 block">القيم الجوهرية</span>
-          <h2 className="text-4xl md:text-6xl font-bold font-art mb-20 text-[#2c1e15]">ما نؤمن به ونلتزم به</h2>
+          <h2 className="text-4xl md:text-6xl font-bold font-art mb-20 text-[#2c1e15] dark:text-[#e8dcc4]">ما نؤمن به ونلتزم به</h2>
           
           <div className="grid md:grid-cols-3 gap-10">
             {[
@@ -107,13 +107,13 @@ export default function AboutPage() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: idx * 0.1 }}
-                className="bg-white p-12 rounded-[40px] shadow-sm border border-gray-100 hover:shadow-2xl transition-all duration-500 group relative overflow-hidden"
+                className="bg-white dark:bg-black p-12 rounded-[40px] shadow-sm border border-gray-100 dark:border-gray-800 dark:border-gray-800 hover:shadow-2xl transition-all duration-500 group relative overflow-hidden"
               >
-                <div className="w-20 h-20 bg-[#faf9f6] rounded-3xl flex items-center justify-center mb-10 mx-auto group-hover:bg-brown-gradient group-hover:text-white transition-all duration-500 transform group-hover:rotate-6">
+                <div className="w-20 h-20 bg-[#faf9f6] dark:bg-[#111111] rounded-3xl flex items-center justify-center mb-10 mx-auto group-hover:bg-brown-gradient group-hover:text-white transition-all duration-500 transform group-hover:rotate-6">
                   <i className={`fa-solid ${value.icon} text-3xl`}></i>
                 </div>
-                <h3 className="text-3xl font-bold font-art mb-6 text-[#1a0f0a]">{value.title}</h3>
-                <p className="text-gray-500 font-light leading-relaxed text-lg">
+                <h3 className="text-3xl font-bold font-art mb-6 text-[#1a0f0a] dark:text-[#e8dcc4]">{value.title}</h3>
+                <p className="text-gray-500 dark:text-[#cfc3b9] font-light leading-relaxed text-lg">
                   {value.desc}
                 </p>
               </motion.div>
@@ -131,8 +131,8 @@ export default function AboutPage() {
             viewport={{ once: true }}
           >
             <span className="text-[#8a7264] text-sm font-bold uppercase tracking-widest mb-6 block">الفريق المؤسس</span>
-            <h2 className="text-4xl md:text-6xl font-bold font-art mb-6 text-[#2c1e15]">العقول التي بنت أثر</h2>
-            <p className="text-lg text-gray-500 font-light max-w-2xl mx-auto leading-relaxed">
+            <h2 className="text-4xl md:text-6xl font-bold font-art mb-6 text-[#2c1e15] dark:text-[#e8dcc4]">العقول التي بنت أثر</h2>
+            <p className="text-lg text-gray-500 dark:text-[#cfc3b9] font-light max-w-2xl mx-auto leading-relaxed">
               ثلاث مبدعات جمعهن حلم واحد؛ بناء الجسر الرقمي الذي يحمل الفن الفلسطيني إلى قلوب العالم.
             </p>
           </motion.div>
@@ -148,7 +148,7 @@ export default function AboutPage() {
               transition={{ delay: idx * 0.15 }}
               className="group"
             >
-              <div className="bg-white rounded-[40px] p-10 shadow-sm border border-gray-100 hover:shadow-2xl transition-all duration-500 text-center relative overflow-hidden">
+              <div className="bg-white dark:bg-black rounded-[40px] p-10 shadow-sm border border-gray-100 dark:border-gray-800 dark:border-gray-800 hover:shadow-2xl transition-all duration-500 text-center relative overflow-hidden">
 
                 {/* Background decoration blob */}
                 <div
@@ -193,7 +193,7 @@ export default function AboutPage() {
                   {creator.englishName}
                 </p>
                 {/* Arabic name */}
-                <h3 className="text-3xl font-bold font-art text-[#1a0f0a] mb-4">
+                <h3 className="text-3xl font-bold font-art text-[#1a0f0a] dark:text-[#e8dcc4] mb-4">
                   {creator.name}
                 </h3>
 

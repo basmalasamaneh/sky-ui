@@ -40,7 +40,7 @@ export const DropdownMenuTrigger = ({ children, asChild, onClick, ...props }) =>
 export const DropdownMenuContent = ({ children, setOpen, align = 'right', className = '' }) => {
   const alignClasses = align === 'start' ? 'left-0' : 'right-0'
   return (
-    <div className={`absolute z-[100] mt-2 ${alignClasses} bg-white border border-gray-100 rounded-2xl shadow-2xl py-2 min-w-[200px] animate-fade-in ${className}`}>
+    <div className={`absolute z-[100] mt-2 ${alignClasses} bg-white dark:bg-black border border-gray-100 dark:border-gray-800 dark:border-gray-800 rounded-2xl shadow-2xl py-2 min-w-[200px] animate-fade-in ${className}`}>
       {React.Children.map(children, child => 
         React.cloneElement(child, { setOpen })
       )}
@@ -54,7 +54,7 @@ export const DropdownMenuItem = ({ children, onClick, setOpen, className = '', .
       if (onClick) onClick()
       if (setOpen) setOpen(false)
     }}
-    className={`px-4 py-3 text-right hover:bg-gray-50 cursor-pointer text-sm font-medium transition-colors ${className}`}
+    className={`px-4 py-3 text-right hover:bg-gray-50 dark:hover:bg-gray-900 dark:bg-gray-900 cursor-pointer text-sm font-medium transition-colors ${className}`}
     {...props}
   >
     {children}
@@ -68,5 +68,5 @@ export const DropdownMenuLabel = ({ children, className = '' }) => (
 )
 
 export const DropdownMenuSeparator = ({ className = '' }) => (
-  <div className={`h-[1px] bg-gray-100 my-1 ${className}`} />
+  <div className={`h-[1px] bg-gray-100 dark:bg-gray-800 my-1 ${className}`} />
 )

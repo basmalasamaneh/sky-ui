@@ -154,10 +154,10 @@ export default function LoginPage() {
 
           {/* العنوان */}
           <div className="mb-10 text-center lg:text-right animate-fade-in">
-            <h1 className="text-5xl text-[#3b2012] mb-4 font-amiri leading-tight">
+            <h1 className="text-5xl text-[#3b2012] dark:text-[#e8dcc4] mb-4 font-amiri leading-tight">
               مرحباً بعودتك إلى <span className="text-[#6b4c3b] font-bold">أثر</span>
             </h1>
-            <p className="text-[#9c7b65] text-lg font-amiri">
+            <p className="text-[#9c7b65] dark:text-[#e8dcc4] text-lg font-amiri">
               قم بتسجيل الدخول لاستكشاف أحدث اللوحات والأعمال الفنية الحصرية.
             </p>
           </div>
@@ -200,7 +200,7 @@ export default function LoginPage() {
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="text-[#9c7b65] hover:text-[#3b2012] transition-colors"
+                  className="text-[#9c7b65] dark:text-[#e8dcc4] hover:text-[#3b2012] dark:text-[#e8dcc4] transition-colors"
                 >
                   {showPassword ? <i className="fa-regular fa-eye-slash"></i> : <i className="fa-regular fa-eye"></i>}
                 </button>
@@ -234,7 +234,7 @@ export default function LoginPage() {
           </form>
 
           {/* رابط إنشاء حساب */}
-          <p className="text-center text-lg text-[#9c7b65] mt-8 font-amiri">
+          <p className="text-center text-lg text-[#9c7b65] dark:text-[#e8dcc4] mt-8 font-amiri">
             ليس لديك حساب بعد؟{' '}
             <Link href="/signup" className="text-[#6b4c3b] font-bold hover:underline">
               أنشئ حساباً جديداً

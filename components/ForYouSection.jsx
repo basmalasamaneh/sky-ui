@@ -66,21 +66,21 @@ export const ForYouSection = () => {
   if (!isLoading && works.length === 0) return null;
 
   return (
-    <section className="py-24 bg-white overflow-hidden" dir="rtl">
+    <section className="py-24 bg-white dark:bg-black overflow-hidden" dir="rtl">
       <div className="container mx-auto px-4">
         <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-6">
           <div className="space-y-4">
             <span className="inline-block px-4 py-1.5 bg-amber-50 text-amber-700 text-xs font-bold rounded-full tracking-widest uppercase">
               لك أنت
             </span>
-            <h2 className="text-4xl md:text-5xl font-black text-[#1a0f0a] font-art leading-tight">
+            <h2 className="text-4xl md:text-5xl font-black text-[#1a0f0a] dark:text-[#e8dcc4] font-art leading-tight">
               قطع مختارة <br />
-              <span className="text-[#9c7b65]">تلائم ذوقك الرفيع</span>
+              <span className="text-[#9c7b65] dark:text-[#e8dcc4]">تلائم ذوقك الرفيع</span>
             </h2>
           </div>
-          <Link href="/products" className="group flex items-center gap-3 text-[#1a0f0a] font-bold hover:text-[#9c7b65] transition-colors">
+          <Link href="/products" className="group flex items-center gap-3 text-[#1a0f0a] dark:text-[#e8dcc4] font-bold hover:text-[#9c7b65] dark:text-[#e8dcc4] transition-colors">
             <span>اكتشف المزيد</span>
-            <div className="w-10 h-10 rounded-full border border-gray-200 flex items-center justify-center group-hover:bg-[#1a0f0a] group-hover:text-white transition-all">
+            <div className="w-10 h-10 rounded-full border border-gray-200 dark:border-gray-700 dark:border-gray-700 flex items-center justify-center group-hover:bg-[#1a0f0a] group-hover:text-white transition-all">
               <i className="fa-solid fa-arrow-left text-xs"></i>
             </div>
           </Link>
@@ -89,7 +89,7 @@ export const ForYouSection = () => {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
           {isLoading ? (
             [1, 2, 3].map(i => (
-              <div key={i} className="h-[500px] bg-gray-50 rounded-[3rem] animate-pulse"></div>
+              <div key={i} className="h-[500px] bg-gray-50 dark:bg-gray-900 rounded-[3rem] animate-pulse"></div>
             ))
           ) : (
             works.map((work, index) => (
@@ -117,7 +117,7 @@ export const ForYouSection = () => {
                 <div className="absolute inset-0 p-10 flex flex-col justify-end text-white text-right">
                   <div className="space-y-4 transform translate-y-8 group-hover:translate-y-0 transition-transform duration-500">
                     <div className="flex items-center gap-3">
-                      <span className="bg-white/20 backdrop-blur-md px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider border border-white/30">
+                      <span className="bg-white dark:bg-black dark:black/20 dark:bg-black/20 backdrop-blur-md px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider border border-white/30">
                         {work.category}
                       </span>
                     </div>
@@ -143,7 +143,7 @@ export const ForYouSection = () => {
                           e.stopPropagation();
                           openArtworkDetails(work);
                         }}
-                        className="bg-white text-[#1a0f0a] px-6 py-3 rounded-2xl font-bold text-sm hover:bg-amber-50 transition-colors shadow-lg"
+                        className="bg-white dark:bg-black text-[#1a0f0a] dark:text-[#e8dcc4] px-6 py-3 rounded-2xl font-bold text-sm hover:bg-amber-50 transition-colors shadow-lg"
                       >
                         تفاصيل العمل
                       </button>
@@ -152,12 +152,12 @@ export const ForYouSection = () => {
                 </div>
 
                 {/* Artist Badge */}
-                <div className="absolute top-8 right-8 flex items-center gap-3 bg-white/10 backdrop-blur-xl p-2 pr-4 rounded-full border border-white/20 opacity-0 group-hover:opacity-100 transition-opacity duration-500">
+                <div className="absolute top-8 right-8 flex items-center gap-3 bg-white dark:bg-black dark:black/10 dark:bg-black/10 backdrop-blur-xl p-2 pr-4 rounded-full border border-white/20 opacity-0 group-hover:opacity-100 transition-opacity duration-500">
                    <div className="text-right">
                       <p className="text-[10px] text-white/60">بأنامل المبدع</p>
                       <p className="text-xs font-bold text-white leading-none">{work.artistName}</p>
                    </div>
-                   <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center text-[#1a0f0a] font-bold text-xs uppercase shadow-inner">
+                   <div className="w-8 h-8 rounded-full bg-white dark:bg-black flex items-center justify-center text-[#1a0f0a] dark:text-[#e8dcc4] font-bold text-xs uppercase shadow-inner">
                       {work.artistName?.charAt(0)}
                    </div>
                 </div>

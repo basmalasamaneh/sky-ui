@@ -5,16 +5,27 @@
 @import url('https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Aref+Ruqaa:wght@400;700&family=Reem+Kufi:wght@400;500;600;700&family=Rakkas&family=Outfit:wght@300;400;600;700&display=swap');
 
 :root {
+  color-scheme: light;
   --foreground-rgb: 0, 0, 0;
   --background-start-rgb: 255, 255, 255;
   --background-end-rgb: 255, 255, 255;
   --primary: #4a3728;
 }
 
+@media (prefers-color-scheme: dark) {
+  :root {
+    color-scheme: dark;
+    --foreground-rgb: 232, 220, 196; /* #e8dcc4 (Light Beige) */
+    --background-start-rgb: 0, 0, 0; /* black */
+    --background-end-rgb: 0, 0, 0;
+    --primary: #c4a993; /* lighter brown */
+  }
+}
+
 body {
-  color: rgb(var(--foreground-rgb));
-  background: white;
   font-family: 'Outfit', sans-serif;
+  color: rgb(var(--foreground-rgb));
+  background: transparent;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }

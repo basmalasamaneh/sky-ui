@@ -99,7 +99,7 @@ export const ArtworkGrid = ({ limit = null, showCategories = true, title = null 
   return (
     <div className="py-10">
       {title && (
-        <h2 className="text-3xl font-bold text-[#3b2012] font-art mb-8 text-center">{title}</h2>
+        <h2 className="text-3xl font-bold text-[#3b2012] dark:text-[#e8dcc4] font-art mb-8 text-center">{title}</h2>
       )}
 
       {showCategories && (
@@ -111,7 +111,7 @@ export const ArtworkGrid = ({ limit = null, showCategories = true, title = null 
               className={`px-6 py-2.5 rounded-full font-bold text-sm transition-all duration-300 shadow-sm ${
                 activeCategory === cat 
                 ? 'bg-brown-gradient text-white scale-105' 
-                : 'bg-white text-[#9c7b65] border border-[#e8dcc4] hover:border-[#6b4c3b] hover:text-[#3b2012]'
+                : 'bg-white dark:bg-black text-[#9c7b65] dark:text-[#e8dcc4] border border-[#e8dcc4] dark:border-gray-800 hover:border-[#6b4c3b] hover:text-[#3b2012] dark:text-[#e8dcc4]'
               }`}
             >
               {cat}
@@ -123,7 +123,7 @@ export const ArtworkGrid = ({ limit = null, showCategories = true, title = null 
       {isFetching ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
           {[1, 2, 3, 4].map(i => (
-            <div key={i} className="bg-white rounded-3xl h-[420px] animate-pulse border border-[#e8dcc4] p-3 flex flex-col">
+            <div key={i} className="bg-white dark:bg-black rounded-3xl h-[420px] animate-pulse border border-[#e8dcc4] dark:border-gray-800 p-3 flex flex-col">
               <div className="w-full h-56 bg-gray-200 rounded-2xl mb-4"></div>
               <div className="px-2 space-y-3">
                 <div className="w-3/4 h-5 bg-gray-200 rounded-full"></div>
@@ -143,7 +143,7 @@ export const ArtworkGrid = ({ limit = null, showCategories = true, title = null 
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ delay: (index % 10) * 0.05 }}
                 onClick={() => openSlider(work)}
-                className="group bg-white rounded-3xl overflow-hidden border border-[#e8dcc4] shadow-[0_4px_20px_-10px_rgba(0,0,0,0.1)] hover:shadow-xl transition-all duration-500 flex flex-col cursor-pointer"
+                className="group bg-white dark:bg-black rounded-3xl overflow-hidden border border-[#e8dcc4] dark:border-gray-800 shadow-[0_4px_20px_-10px_rgba(0,0,0,0.1)] hover:shadow-xl transition-all duration-500 flex flex-col cursor-pointer"
               >
                 <div className="relative h-64 overflow-hidden m-2 rounded-2xl">
                   <Image
@@ -154,13 +154,13 @@ export const ArtworkGrid = ({ limit = null, showCategories = true, title = null 
                   />
                 </div>
                 <div className="p-5 flex flex-col flex-1">
-                  <h3 className="text-lg font-bold text-[#3b2012] mb-4 line-clamp-1">{work.title}</h3>
-                  <div className="mt-auto flex items-center justify-between border-t border-gray-100 pt-4" onClick={(e) => e.stopPropagation()}>
-                    <span className="font-bold text-lg text-[#3b2012]">
+                  <h3 className="text-lg font-bold text-[#3b2012] dark:text-[#e8dcc4] mb-4 line-clamp-1">{work.title}</h3>
+                  <div className="mt-auto flex items-center justify-between border-t border-gray-100 dark:border-gray-800 dark:border-gray-800 pt-4" onClick={(e) => e.stopPropagation()}>
+                    <span className="font-bold text-lg text-[#3b2012] dark:text-[#e8dcc4]">
                       {work.price ? `${work.price} ₪` : 'متاح للعرض'}
                     </span>
                     {isOwnerArtwork(work) ? (
-                      <Link href={`/works/edit/${work.id}`} className="bg-[#f0ece6] text-[#5c4436] hover:bg-[#5c4436] hover:text-white px-4 py-2 rounded-xl text-xs font-bold transition-colors">تعديل العمل</Link>
+                      <Link href={`/works/edit/${work.id}`} className="bg-[#f0ece6] dark:bg-black text-[#5c4436] dark:text-[#e8dcc4] hover:bg-[#5c4436] hover:text-white px-4 py-2 rounded-xl text-xs font-bold transition-colors">تعديل العمل</Link>
                     ) : !isAuthenticated ? (
                       <button
                         type="button"
@@ -168,7 +168,7 @@ export const ArtworkGrid = ({ limit = null, showCategories = true, title = null 
                           e.stopPropagation();
                           openSlider(work);
                         }}
-                        className="bg-[#f0ece6] text-[#5c4436] hover:bg-[#5c4436] hover:text-white px-4 py-2 rounded-xl text-xs font-bold transition-colors"
+                        className="bg-[#f0ece6] dark:bg-black text-[#5c4436] dark:text-[#e8dcc4] hover:bg-[#5c4436] hover:text-white px-4 py-2 rounded-xl text-xs font-bold transition-colors"
                       >
                         تسوق الآن
                       </button>
@@ -176,7 +176,7 @@ export const ArtworkGrid = ({ limit = null, showCategories = true, title = null 
                       <button
                         type="button"
                         onClick={(e) => e.stopPropagation()}
-                        className="bg-[#f0ece6] text-[#5c4436] hover:bg-[#5c4436] hover:text-white px-4 py-2 rounded-xl text-xs font-bold transition-colors"
+                        className="bg-[#f0ece6] dark:bg-black text-[#5c4436] dark:text-[#e8dcc4] hover:bg-[#5c4436] hover:text-white px-4 py-2 rounded-xl text-xs font-bold transition-colors"
                       >
                         إضافة للسلة
                       </button>
@@ -188,10 +188,10 @@ export const ArtworkGrid = ({ limit = null, showCategories = true, title = null 
           </AnimatePresence>
         </div>
       ) : (
-        <div className="flex flex-col items-center justify-center py-20 bg-white rounded-3xl border border-[#e8dcc4] text-center">
+        <div className="flex flex-col items-center justify-center py-20 bg-white dark:bg-black rounded-3xl border border-[#e8dcc4] dark:border-gray-800 text-center">
           <i className="fa-regular fa-folder-open text-6xl text-[#ceb29f] mb-4"></i>
-          <h3 className="text-2xl font-bold text-[#3b2012] font-art mb-2">لا توجد نتائج بحث</h3>
-          <p className="text-[#9c7b65]">حاول البحث بكلمات أخرى أو تصفح فئة مختلفة.</p>
+          <h3 className="text-2xl font-bold text-[#3b2012] dark:text-[#e8dcc4] font-art mb-2">لا توجد نتائج بحث</h3>
+          <p className="text-[#9c7b65] dark:text-[#e8dcc4]">حاول البحث بكلمات أخرى أو تصفح فئة مختلفة.</p>
         </div>
       )}
 

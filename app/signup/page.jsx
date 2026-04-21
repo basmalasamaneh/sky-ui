@@ -180,10 +180,10 @@ export default function SignupPage() {
 
           {/* العنوان */}
           <div className="mb-10 text-center lg:text-right animate-fade-in">
-            <h1 className="text-5xl text-[#3b2012] mb-4 font-amiri leading-tight">
+            <h1 className="text-5xl text-[#3b2012] dark:text-[#e8dcc4] mb-4 font-amiri leading-tight">
               إنضم إلى <span className="text-[#6b4c3b] font-bold">أثر</span>
             </h1>
-            <p className="text-[#9c7b65] text-lg font-amiri">
+            <p className="text-[#9c7b65] dark:text-[#e8dcc4] text-lg font-amiri">
               أنشئ حساباً جديداً للبدء بجمع أفضل اللوحات والأعمال الفنية الحصرية.
             </p>
           </div>
@@ -196,11 +196,11 @@ export default function SignupPage() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* الاسم الأول */}
               <div>
-                <label className="block text-sm font-bold text-[#3b2012] mb-2 font-amiri">
+                <label className="block text-sm font-bold text-[#3b2012] dark:text-[#e8dcc4] mb-2 font-amiri">
                   الاسم الأول
                 </label>
                 <div className="relative">
-                  <span className="absolute right-4 top-1/2 -translate-y-1/2 text-[#9c7b65]">
+                  <span className="absolute right-4 top-1/2 -translate-y-1/2 text-[#9c7b65] dark:text-[#e8dcc4]">
                     <i className="fa-regular fa-user"></i>
                   </span>
                   <input
@@ -210,7 +210,7 @@ export default function SignupPage() {
                     value={formData.firstName}
                     onChange={handleChange}
                     onBlur={handleBlur}
-                    className={`w-full h-14 bg-white border ${errors.firstName ? 'border-red-400 focus:border-red-500' : 'border-[#e0d5c8] focus:border-[#6b4c3b]'} rounded-xl pr-12 pl-4 text-sm text-[#3b2012] placeholder:text-[#c5b0a0] outline-none transition-colors font-amiri shadow-sm`}
+                    className={`w-full h-14 bg-white dark:bg-black border ${errors.firstName ? 'border-red-400 focus:border-red-500' : 'border-[#e0d5c8] focus:border-[#6b4c3b]'} rounded-xl pr-12 pl-4 text-sm text-[#3b2012] dark:text-[#e8dcc4] placeholder:text-[#c5b0a0] outline-none transition-colors font-amiri shadow-sm`}
                   />
                 </div>
                 <div className={`overflow-hidden transition-all duration-300 ease-in-out ${errors.firstName ? 'max-h-10 opacity-100 mt-1.5' : 'max-h-0 opacity-0'}`}>
@@ -220,11 +220,11 @@ export default function SignupPage() {
 
               {/* اسم العائلة */}
               <div>
-                <label className="block text-sm font-bold text-[#3b2012] mb-2 font-amiri">
+                <label className="block text-sm font-bold text-[#3b2012] dark:text-[#e8dcc4] mb-2 font-amiri">
                   اسم العائلة
                 </label>
                 <div className="relative">
-                  <span className="absolute right-4 top-1/2 -translate-y-1/2 text-[#9c7b65]">
+                  <span className="absolute right-4 top-1/2 -translate-y-1/2 text-[#9c7b65] dark:text-[#e8dcc4]">
                     <i className="fa-regular fa-user"></i>
                   </span>
                   <input
@@ -234,7 +234,7 @@ export default function SignupPage() {
                     value={formData.lastName}
                     onChange={handleChange}
                     onBlur={handleBlur}
-                    className={`w-full h-14 bg-white border ${errors.lastName ? 'border-red-400 focus:border-red-500' : 'border-[#e0d5c8] focus:border-[#6b4c3b]'} rounded-xl pr-12 pl-4 text-sm text-[#3b2012] placeholder:text-[#c5b0a0] outline-none transition-colors font-amiri shadow-sm`}
+                    className={`w-full h-14 bg-white dark:bg-black border ${errors.lastName ? 'border-red-400 focus:border-red-500' : 'border-[#e0d5c8] focus:border-[#6b4c3b]'} rounded-xl pr-12 pl-4 text-sm text-[#3b2012] dark:text-[#e8dcc4] placeholder:text-[#c5b0a0] outline-none transition-colors font-amiri shadow-sm`}
                   />
                 </div>
                 <div className={`overflow-hidden transition-all duration-300 ease-in-out ${errors.lastName ? 'max-h-10 opacity-100 mt-1.5' : 'max-h-0 opacity-0'}`}>
@@ -245,11 +245,11 @@ export default function SignupPage() {
 
             {/* البريد الإلكتروني */}
             <div>
-              <label className="block text-sm font-bold text-[#3b2012] mb-2 font-amiri">
+              <label className="block text-sm font-bold text-[#3b2012] dark:text-[#e8dcc4] mb-2 font-amiri">
                 البريد الإلكتروني
               </label>
               <div className="relative">
-                <span className="absolute right-4 top-1/2 -translate-y-1/2 text-[#9c7b65]">
+                <span className="absolute right-4 top-1/2 -translate-y-1/2 text-[#9c7b65] dark:text-[#e8dcc4]">
                   <i className="fa-regular fa-envelope"></i>
                 </span>
                 <input
@@ -260,7 +260,7 @@ export default function SignupPage() {
                   value={formData.email}
                   onChange={handleChange}
                   onBlur={handleBlur}
-                  className={`w-full h-14 bg-white border ${errors.email ? 'border-red-400 focus:border-red-500' : 'border-[#e0d5c8] focus:border-[#6b4c3b]'} rounded-xl pr-12 pl-4 text-sm text-left text-[#3b2012] placeholder:text-[#c5b0a0] outline-none transition-colors font-amiri shadow-sm`}
+                  className={`w-full h-14 bg-white dark:bg-black border ${errors.email ? 'border-red-400 focus:border-red-500' : 'border-[#e0d5c8] focus:border-[#6b4c3b]'} rounded-xl pr-12 pl-4 text-sm text-left text-[#3b2012] dark:text-[#e8dcc4] placeholder:text-[#c5b0a0] outline-none transition-colors font-amiri shadow-sm`}
                 />
               </div>
               <div className={`overflow-hidden transition-all duration-300 ease-in-out ${errors.email ? 'max-h-10 opacity-100 mt-1.5' : 'max-h-0 opacity-0'}`}>
@@ -270,18 +270,18 @@ export default function SignupPage() {
 
             {/* كلمة المرور */}
             <div>
-              <label className="block text-sm font-bold text-[#3b2012] mb-2 font-amiri">
+              <label className="block text-sm font-bold text-[#3b2012] dark:text-[#e8dcc4] mb-2 font-amiri">
                 كلمة المرور
               </label>
               <div className="relative">
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute left-4 top-1/2 -translate-y-1/2 text-[#9c7b65] hover:text-[#3b2012] transition-colors"
+                  className="absolute left-4 top-1/2 -translate-y-1/2 text-[#9c7b65] dark:text-[#e8dcc4] hover:text-[#3b2012] dark:text-[#e8dcc4] transition-colors"
                 >
                   {showPassword ? <i className="fa-regular fa-eye-slash"></i> : <i className="fa-regular fa-eye"></i>}
                 </button>
-                <span className="absolute right-4 top-1/2 -translate-y-1/2 text-[#9c7b65]">
+                <span className="absolute right-4 top-1/2 -translate-y-1/2 text-[#9c7b65] dark:text-[#e8dcc4]">
                   <i className="fa-solid fa-lock"></i>
                 </span>
                 <input
@@ -292,7 +292,7 @@ export default function SignupPage() {
                   value={formData.password}
                   onChange={handleChange}
                   onBlur={handleBlur}
-                  className={`w-full h-14 bg-white border ${errors.password ? 'border-red-400 focus:border-red-500' : 'border-[#e0d5c8] focus:border-[#6b4c3b]'} rounded-xl pr-12 pl-12 text-sm text-left text-[#3b2012] placeholder:text-[#c5b0a0] outline-none transition-colors font-amiri shadow-sm`}
+                  className={`w-full h-14 bg-white dark:bg-black border ${errors.password ? 'border-red-400 focus:border-red-500' : 'border-[#e0d5c8] focus:border-[#6b4c3b]'} rounded-xl pr-12 pl-12 text-sm text-left text-[#3b2012] dark:text-[#e8dcc4] placeholder:text-[#c5b0a0] outline-none transition-colors font-amiri shadow-sm`}
                 />
               </div>
               <div className={`overflow-hidden transition-all duration-300 ease-in-out ${errors.password ? 'max-h-20 opacity-100 mt-1.5' : 'max-h-0 opacity-0'}`}>
@@ -302,18 +302,18 @@ export default function SignupPage() {
 
             {/* تأكيد كلمة المرور */}
             <div>
-              <label className="block text-sm font-bold text-[#3b2012] mb-2 font-amiri">
+              <label className="block text-sm font-bold text-[#3b2012] dark:text-[#e8dcc4] mb-2 font-amiri">
                 تأكيد كلمة المرور
               </label>
               <div className="relative">
                 <button
                   type="button"
                   onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                  className="absolute left-4 top-1/2 -translate-y-1/2 text-[#9c7b65] hover:text-[#3b2012] transition-colors"
+                  className="absolute left-4 top-1/2 -translate-y-1/2 text-[#9c7b65] dark:text-[#e8dcc4] hover:text-[#3b2012] dark:text-[#e8dcc4] transition-colors"
                 >
                   {showConfirmPassword ? <i className="fa-regular fa-eye-slash"></i> : <i className="fa-regular fa-eye"></i>}
                 </button>
-                <span className="absolute right-4 top-1/2 -translate-y-1/2 text-[#9c7b65]">
+                <span className="absolute right-4 top-1/2 -translate-y-1/2 text-[#9c7b65] dark:text-[#e8dcc4]">
                   <i className="fa-solid fa-lock"></i>
                 </span>
                 <input
@@ -324,7 +324,7 @@ export default function SignupPage() {
                   value={formData.confirmPassword}
                   onChange={handleChange}
                   onBlur={handleBlur}
-                  className={`w-full h-14 bg-white border ${errors.confirmPassword ? 'border-red-400 focus:border-red-500' : 'border-[#e0d5c8] focus:border-[#6b4c3b]'} rounded-xl pr-12 pl-12 text-sm text-left text-[#3b2012] placeholder:text-[#c5b0a0] outline-none transition-colors font-amiri shadow-sm`}
+                  className={`w-full h-14 bg-white dark:bg-black border ${errors.confirmPassword ? 'border-red-400 focus:border-red-500' : 'border-[#e0d5c8] focus:border-[#6b4c3b]'} rounded-xl pr-12 pl-12 text-sm text-left text-[#3b2012] dark:text-[#e8dcc4] placeholder:text-[#c5b0a0] outline-none transition-colors font-amiri shadow-sm`}
                 />
               </div>
               <div className={`overflow-hidden transition-all duration-300 ease-in-out ${errors.confirmPassword ? 'max-h-10 opacity-100 mt-1.5' : 'max-h-0 opacity-0'}`}>
@@ -359,7 +359,7 @@ export default function SignupPage() {
           </form>
 
           {/* الرابط لصفحة الدخول */}
-          <p className="text-center text-lg text-[#9c7b65] mt-8 font-amiri">
+          <p className="text-center text-lg text-[#9c7b65] dark:text-[#e8dcc4] mt-8 font-amiri">
             لديك حساب بالفعل؟{' '}
             <Link href="/login" className="text-[#6b4c3b] font-bold hover:underline">
               تسجيل الدخول

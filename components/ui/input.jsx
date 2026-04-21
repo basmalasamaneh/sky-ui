@@ -5,7 +5,7 @@ const Input = React.forwardRef(({ className, type, label, labelExtra, error, ico
     <div className="space-y-2">
       <div className="flex items-center justify-between">
         {label && (
-          <label className="block text-sm font-bold text-[#3b2012] font-amiri">
+          <label className="block text-sm font-bold text-[#3b2012] dark:text-[#e8dcc4] font-amiri">
             {label}
           </label>
         )}
@@ -13,20 +13,20 @@ const Input = React.forwardRef(({ className, type, label, labelExtra, error, ico
       </div>
       <div className="relative">
         {icon && (
-          <span className="absolute right-4 top-1/2 -translate-y-1/2 text-[#9c7b65] z-10 pointer-events-none">
+          <span className="absolute right-4 top-1/2 -translate-y-1/2 text-[#9c7b65] dark:text-[#e8dcc4] z-10 pointer-events-none">
             {icon}
           </span>
         )}
         <input
           type={type}
-          className={`w-full h-14 bg-white border ${
+          className={`w-full h-14 bg-white dark:bg-black border ${
             error ? 'border-red-400 focus:border-red-500' : 'border-[#e0d5c8] focus:border-[#6b4c3b]'
-          } rounded-xl ${icon ? 'pr-12' : 'pr-4'} ${leftIcon ? 'pl-12' : 'pl-4'} text-sm text-[#3b2012] placeholder:text-[#c5b0a0] outline-none transition-colors font-amiri shadow-sm ${className}`}
+          } rounded-xl ${icon ? 'pr-12' : 'pr-4'} ${leftIcon ? 'pl-12' : 'pl-4'} text-sm text-[#3b2012] dark:text-[#e8dcc4] placeholder:text-[#c5b0a0] outline-none transition-colors font-amiri shadow-sm ${className}`}
           ref={ref}
           {...props}
         />
         {leftIcon && (
-          <div className="absolute left-4 top-1/2 -translate-y-1/2 text-[#9c7b65] z-10">
+          <div className="absolute left-4 top-1/2 -translate-y-1/2 text-[#9c7b65] dark:text-[#e8dcc4] z-10">
             {leftIcon}
           </div>
         )}
