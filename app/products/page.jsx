@@ -49,7 +49,7 @@ export default function ProductsPage() {
     setIsLoadingArtworkDetails(true);
 
     try {
-      const res = await fetch(`/api/artworks/${work.id}`, {
+      const res = await fetch(`/api/v1/artworks/${work.id}`, {
         headers: token ? { Authorization: `Bearer ${token}` } : undefined,
       });
 
@@ -105,7 +105,7 @@ export default function ProductsPage() {
         queryParams.append('page', currentPage.toString());
         queryParams.append('limit', limit.toString());
 
-        const res = await fetch(`/api/artworks?${queryParams.toString()}`);
+        const res = await fetch(`/api/v1/artworks?${queryParams.toString()}`);
         const contentType = res.headers.get('content-type') || '';
         const result = contentType.includes('application/json')
           ? await res.json().catch(() => ({}))

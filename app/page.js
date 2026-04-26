@@ -18,7 +18,7 @@ function SearchResults({ query }) {
     const fetchArtists = async () => {
       setIsFetchingArtists(true);
       try {
-        const res = await fetch('/api/artworks?limit=200');
+        const res = await fetch('/api/v1/artworks?limit=200');
         const result = res.ok ? await res.json().catch(() => ({})) : {};
         const rawWorks = result?.data?.artworks ?? [];
         const normalizedWorks = rawWorks.map(normalizeWork);

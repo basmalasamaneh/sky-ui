@@ -248,7 +248,7 @@ export default function ArtistPage({ params }) {
           .map((item) => ({ platform: item.platform, url: String(item.url).trim() })),
       };
 
-      const response = await fetch('/api/users/profile', {
+      const response = await fetch('/api/v1/users/profile', {
         method: 'PATCH',
         headers: {
           Authorization: `Bearer ${token}`,
@@ -318,7 +318,7 @@ export default function ArtistPage({ params }) {
       const formData = new FormData();
       formData.append('image', file);
 
-      const res = await fetch('/api/users/profile/image', {
+      const res = await fetch('/api/v1/users/profile/image', {
         method: 'PATCH',
         headers: { Authorization: `Bearer ${token}` },
         body: formData,
@@ -354,8 +354,8 @@ export default function ArtistPage({ params }) {
         if (token) {
           // Authenticated: fetch full profile + artworks in parallel
           const [profileRes, worksRes] = await Promise.all([
-            fetch(`/api/artists/${artistId}`, { headers: { Authorization: `Bearer ${token}` } }),
-            fetch(`/api/artists/${artistId}/artworks`, { headers: { Authorization: `Bearer ${token}` } }),
+            fetch(`/api/v1/artists/${artistId}`, { headers: { Authorization: `Bearer ${token}` } }),
+            fetch(`/api/v1/artists/${artistId}/artworks`, { headers: { Authorization: `Bearer ${token}` } }),
           ]);
 
           if (profileRes.status === 404) {
@@ -388,7 +388,7 @@ export default function ArtistPage({ params }) {
           setWorks(rawWorks.map(normalizeWork));
         } else {
           // Guest: use the public artworks endpoint which embeds artist info
-          const artworksRes = await fetch('/api/artworks?limit=200');
+          const artworksRes = await fetch('/api/v1/artworks?limit=200');
           const artworksResult = artworksRes.ok ? await artworksRes.json().catch(() => ({})) : {};
           const rawWorks = artworksResult?.data?.artworks ?? [];
           const normalizedWorks = rawWorks.map(normalizeWork);
@@ -428,7 +428,7 @@ export default function ArtistPage({ params }) {
     setIsLoadingArtworkDetails(true);
 
     try {
-      const res = await fetch(`/api/artworks/${work.id}`, {
+      const res = await fetch(`/api/v1/artworks/${work.id}`, {
         headers: token ? { Authorization: `Bearer ${token}` } : undefined,
       });
 

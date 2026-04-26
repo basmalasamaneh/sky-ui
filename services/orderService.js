@@ -1,4 +1,4 @@
-const API_URL = '/api';
+const API_URL = '/api/v1';
 
 export const orderService = {
   async checkout(userId, shippingDetails) {

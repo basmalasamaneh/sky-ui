@@ -20,7 +20,9 @@ function buildForwardHeaders(incomingHeaders) {
 
 async function proxyRequest(req, path) {
   const query = req.nextUrl.search || '';
-  const backendUrl = buildBackendApiUrl(`/api/${path.join('/')}${query}`);
+  // Strip the leading 'v1' segment if present (frontend calls /api/v1/... which gives path=['v1',...])
+  const cleanPath = path[0] === 'v1' ? path.slice(1) : path;
+  const backendUrl = buildBackendApiUrl(`/api/v1/${cleanPath.join('/')}${query}`);
   const method = req.method;
 
   const requestInit = {

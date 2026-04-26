@@ -135,7 +135,7 @@ export default function SettingsPage() {
     const fetchProfile = async () => {
       setIsFetchingProfile(true);
       try {
-        const res = await fetch('/api/users/profile', {
+        const res = await fetch('/api/v1/users/profile', {
           headers: { 'Authorization': `Bearer ${token}` },
         });
         const result = await res.json();
@@ -209,7 +209,7 @@ export default function SettingsPage() {
     }
 
     try {
-      const res = await fetch('/api/users/profile', {
+      const res = await fetch('/api/v1/users/profile', {
         method: 'PATCH',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -262,7 +262,7 @@ export default function SettingsPage() {
     setDeleteMessage('');
 
     try {
-      const response = await fetch('/api/users/delete-account', {
+      const response = await fetch('/api/v1/users/delete-account', {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -297,7 +297,7 @@ export default function SettingsPage() {
       const formData = new FormData();
       formData.append('image', file);
 
-      const response = await fetch('/api/users/profile/image', {
+      const response = await fetch('/api/v1/users/profile/image', {
         method: 'PATCH',
         headers: {
           Authorization: `Bearer ${token}`,

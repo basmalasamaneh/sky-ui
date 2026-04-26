@@ -87,7 +87,7 @@ export default function MyWorksPage() {
     if (newQuantity < 0) return;
 
     try {
-      const res = await fetch(`/api/artworks/${id}`, {
+      const res = await fetch(`/api/v1/artworks/${id}`, {
         method: 'PATCH',
         headers: { 
           'Authorization': `Bearer ${token}`,
@@ -112,7 +112,7 @@ export default function MyWorksPage() {
     e.stopPropagation();
     if (!window.confirm('هل أنت متأكد من رغبتك في حذف هذا العمل؟ لا يمكن التراجع عن هذه الخطوة.')) return;
 
-    fetch(`/api/artworks/${id}`, {
+    fetch(`/api/v1/artworks/${id}`, {
       method: 'DELETE',
       headers: { 'Authorization': `Bearer ${token}` },
     })
@@ -162,7 +162,7 @@ export default function MyWorksPage() {
         queryParams.append('page', currentPage.toString());
         queryParams.append('limit', limit.toString());
 
-        const res = await fetch(`/api/artworks/my-artworks?${queryParams.toString()}`, {
+        const res = await fetch(`/api/v1/artworks/my-artworks?${queryParams.toString()}`, {
           headers: { 'Authorization': `Bearer ${token}` },
         });
 

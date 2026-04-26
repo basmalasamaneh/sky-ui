@@ -44,7 +44,7 @@ export const ArtworkGrid = ({ limit = null, showCategories = true, title = null 
         if (limit) queryParams.append('limit', String(limit));
 
         const query = queryParams.toString();
-        const res = await fetch(`/api/artworks${query ? `?${query}` : ''}`);
+        const res = await fetch(`/api/v1/artworks${query ? `?${query}` : ''}`);
         const contentType = res.headers.get('content-type') || '';
         const result = contentType.includes('application/json')
           ? await res.json().catch(() => ({}))
@@ -71,7 +71,7 @@ export const ArtworkGrid = ({ limit = null, showCategories = true, title = null 
     setIsLoadingArtworkDetails(true);
 
     try {
-      const res = await fetch(`/api/artworks/${work.id}`, {
+      const res = await fetch(`/api/v1/artworks/${work.id}`, {
         headers: token ? { Authorization: `Bearer ${token}` } : undefined,
       });
 

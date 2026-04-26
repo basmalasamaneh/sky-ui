@@ -24,7 +24,7 @@ export async function GET(req) {
     }
 
     try {
-      const backendResponse = await fetch(buildBackendApiUrl('/api/users/profile'), {
+      const backendResponse = await fetch(buildBackendApiUrl('/api/v1/users/profile'), {
         method: 'GET',
         headers: { 'Authorization': authHeader },
       });
@@ -73,7 +73,7 @@ export async function PATCH(req) {
     const body = await req.json();
 
     try {
-      const backendResponse = await fetch(buildBackendApiUrl('/api/users/profile'), {
+      const backendResponse = await fetch(buildBackendApiUrl('/api/v1/users/profile'), {
         method: 'PATCH',
         headers: {
           'Authorization': authHeader,

@@ -195,7 +195,7 @@ export const BecomeArtistModal = ({ isOpen, onClose, user }) => {
 
     setIsSubmitting(true);
     try {
-      const res = await fetch('/api/users/become-artist', {
+      const res = await fetch('/api/v1/users/become-artist', {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',

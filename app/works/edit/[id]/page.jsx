@@ -46,7 +46,7 @@ export default function EditWorkPage() {
       let foundWork = null;
 
       try {
-        const res = await fetch(`/api/artworks/${workId}`, {
+        const res = await fetch(`/api/v1/artworks/${workId}`, {
           headers: { 'Authorization': `Bearer ${token}` }
         });
         const contentType = res.headers.get('content-type') || '';
@@ -200,7 +200,7 @@ export default function EditWorkPage() {
         }
       });
 
-      const res = await fetch(`/api/artworks/${workId}`, {
+      const res = await fetch(`/api/v1/artworks/${workId}`, {
         method: 'PATCH',
         headers: {
           'Authorization': `Bearer ${token}`,

@@ -91,7 +91,7 @@ export default function AddWorkPage() {
         if (img.file) data.append('images', img.file);
       });
 
-      const res = await fetch('/api/artworks', {
+      const res = await fetch('/api/v1/artworks', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,

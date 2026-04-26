@@ -17,6 +17,15 @@ const STATUS_MAP = {
   cancelled: { label: 'ملغي من قبل المشتري', color: 'bg-gray-100 text-gray-500 border-gray-200', icon: 'fa-ban' }
 };
 
+const PARENT_STATUS_MAP = {
+  pending: { label: 'قيد الانتظار', color: 'bg-amber-500 text-white border-amber-600' },
+  processing: { label: 'قيد التجهيز', color: 'bg-indigo-500 text-white border-indigo-600' },
+  partially_shipped: { label: 'تم شحن جزء', color: 'bg-blue-500 text-white border-blue-600' },
+  shipped: { label: 'تم الشحن بالكامل', color: 'bg-purple-500 text-white border-purple-600' },
+  completed: { label: 'مكتمل', color: 'bg-green-500 text-white border-green-600' },
+  cancelled: { label: 'ملغي / مرفوض', color: 'bg-gray-600 text-white border-gray-700' }
+};
+
 export default function OrdersDashboard() {
   const { user } = useAuth();
   const [activeTab, setActiveTab] = useState('purchases');
@@ -24,6 +33,12 @@ export default function OrdersDashboard() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [isArtist, setIsArtist] = useState(false);
+  
+  const [expandedGroups, setExpandedGroups] = useState({});
+  const [expandedSales, setExpandedSales] = useState({});
+
+  const toggleGroup = (id) => setExpandedGroups(p => ({ ...p, [id]: !p[id] }));
+  const toggleSale = (id) => setExpandedSales(p => ({ ...p, [id]: !p[id] }));
 
   useEffect(() => {
     fetchOrders();
@@ -142,20 +157,32 @@ export default function OrdersDashboard() {
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: gIdx * 0.05 }}
-                  className="bg-white dark:bg-black rounded-[3rem] border border-[#e8dcc4]/40 shadow-sm overflow-hidden mb-8"
+                  className="bg-white dark:bg-black rounded-[2.5rem] border border-[#e8dcc4]/40 shadow-md hover:shadow-lg transition-all duration-300 overflow-hidden mb-10"
                 >
                   {/* Master Order Header */}
-                  <div className="bg-[#3b2012] text-white p-6 md:p-8 flex flex-col md:flex-row justify-between items-center gap-4">
-                    <div className="flex items-center gap-6">
+                  <div 
+                    onClick={() => toggleGroup(group.id)}
+                    className="bg-gradient-to-l from-[#2a160b] via-[#3b2012] to-[#2a160b] text-white p-6 md:p-8 flex flex-col md:flex-row justify-between items-center gap-6 relative overflow-hidden cursor-pointer hover:via-[#4a2a18] transition-colors"
+                  >
+                    {/* Decorative subtle pattern */}
+                    <div className="absolute inset-0 opacity-[0.03] bg-[radial-gradient(circle_at_center,_white_1px,_transparent_1px)] bg-[size:20px_20px] pointer-events-none"></div>
+                    <div className="flex items-center gap-6 z-10">
                       <div className="w-14 h-14 bg-white/10 rounded-2xl flex items-center justify-center text-2xl">
                         <i className="fa-solid fa-receipt"></i>
                       </div>
                       <div>
-                        <p className="text-xs text-white/60 uppercase tracking-widest mb-1">طلب رئيسي رقم</p>
+                        <p className="text-xs text-white/60 uppercase tracking-widest mb-1 flex items-center gap-3">
+                          طلب رئيسي رقم
+                          {group.parent_status && (
+                            <span className={`px-3 py-0.5 rounded-full border border-white/20 shadow-sm text-[11px] font-bold tracking-normal ${PARENT_STATUS_MAP[group.parent_status]?.color}`}>
+                              {PARENT_STATUS_MAP[group.parent_status]?.label}
+                            </span>
+                          )}
+                        </p>
                         <h3 className="text-xl font-mono font-bold">#{group.id.slice(0, 8)}</h3>
                       </div>
                     </div>
-                    <div className="flex items-center gap-8 text-center md:text-right">
+                    <div className="flex items-center gap-8 text-center md:text-right z-10">
                       <div>
                         <p className="text-[10px] text-white/60 mb-1">التاريخ</p>
                         <p className="font-bold">{new Date(group.created_at).toLocaleDateString('ar-EG')}</p>
@@ -164,20 +191,31 @@ export default function OrdersDashboard() {
                         <p className="text-[10px] text-white/60 mb-1">إجمالي الدفع</p>
                         <p className="text-xl font-black">{group.total_price} ₪</p>
                       </div>
+                      <div className="text-2xl text-white/50 ml-2">
+                        <i className={`fa-solid fa-chevron-${expandedGroups[group.id] ? 'up' : 'down'} transition-transform`}></i>
+                      </div>
                     </div>
                   </div>
 
                   {/* Child Orders List */}
-                  <div className="p-6 md:p-8 space-y-6">
+                  <AnimatePresence>
+                    {expandedGroups[group.id] && (
+                      <motion.div 
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: 'auto', opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        className="overflow-hidden"
+                      >
+                        <div className="p-6 md:p-8 space-y-6">
                     <p className="text-sm font-bold text-[#9c7b65] border-b border-[#e8dcc4]/20 pb-4 flex items-center gap-2">
                       <i className="fa-solid fa-store text-xs"></i>
-                      {group.orders?.length === 1 
+                      {group.children?.length === 1 
                         ? "يحتوي هذا الطلب على شحنة واحدة من فنان واحد:" 
-                        : `يحتوي هذا الطلب على ${group.orders?.length} شحنات من فنانين مختلفين:`}
+                        : `يحتوي هذا الطلب على ${group.children?.length} شحنات من فنانين مختلفين:`}
                     </p>
                     
-                    {group.orders?.map((order) => (
-                      <div key={order.id} className="bg-[#fdfaf7] dark:bg-black/20 rounded-[2rem] border border-[#e8dcc4]/30 overflow-hidden">
+                    {group.children?.map((order) => (
+                      <div key={order.id} className="bg-gradient-to-br from-[#fdfaf7] to-white dark:from-[#111] dark:to-black rounded-[2rem] border border-[#e8dcc4]/40 overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-300">
                         <div className="p-6 flex flex-col lg:flex-row gap-6">
                           {/* Artist & Status */}
                           <div className="lg:w-1/4 flex flex-col justify-between gap-4">
@@ -201,9 +239,9 @@ export default function OrdersDashboard() {
                           </div>
 
                           {/* Items */}
-                          <div className="lg:w-2/4 flex gap-4 overflow-x-auto no-scrollbar py-1">
+                          <div className="lg:w-2/4 flex gap-4 overflow-x-auto no-scrollbar py-2 px-1">
                             {order.items?.map(item => (
-                              <div key={item.id} className="flex items-center gap-3 bg-white dark:bg-black p-3 rounded-2xl border border-[#e8dcc4]/20 min-w-[220px]">
+                              <div key={item.id} className="flex items-center gap-3 bg-white dark:bg-[#1a1a1a] p-3 rounded-2xl border border-[#e8dcc4]/30 min-w-[240px] hover:border-[#d4c3a3] transition-colors shadow-sm">
                                 <div className="relative w-12 h-12 rounded-lg overflow-hidden shrink-0">
                                   <Image src={item.artwork?.image} alt={item.artwork?.title} fill className="object-cover" />
                                 </div>
@@ -249,7 +287,10 @@ export default function OrdersDashboard() {
                         </div>
                       </div>
                     ))}
-                  </div>
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
                 </motion.div>
               ))
             ) : (
@@ -260,42 +301,48 @@ export default function OrdersDashboard() {
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: idx * 0.05 }}
-                  className={`bg-white dark:bg-black rounded-[2.5rem] border ${activeTab === 'sales' ? 'border-amber-200 shadow-md ring-1 ring-amber-500/10' : 'border-[#e8dcc4]/40 shadow-sm'} overflow-hidden transition-all hover:shadow-lg`}
+                  className={`bg-gradient-to-b from-white to-[#fcfaf8] dark:from-[#111] dark:to-black rounded-[2.5rem] border ${activeTab === 'sales' ? 'border-amber-300 shadow-lg shadow-amber-900/5' : 'border-[#e8dcc4]/50 shadow-md'} overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:shadow-xl`}
                 >
-                  <div className="p-6 md:p-8 flex flex-col md:flex-row gap-8">
-                    {/* Order Details */}
-                    <div className="flex-1 space-y-6">
-                      <div className="flex justify-between items-start">
-                        <div>
-                          {activeTab === 'sales' && (
-                            <div className="flex items-center gap-2 text-[8px] font-black text-amber-600 uppercase tracking-widest mb-2 bg-amber-50 w-fit px-2 py-0.5 rounded-full border border-amber-200">
-                              <i className="fa-solid fa-star"></i>
-                              إدارة مبيعاتك
-                            </div>
-                          )}
-                          <p className="text-[10px] text-gray-400 uppercase tracking-widest mb-1">رقم الطلب</p>
-                          <h3 className="text-lg font-mono font-bold text-[#3b2012] dark:text-[#e8dcc4]">#{order.id.slice(0, 8)}</h3>
-                        </div>
-                        <div className={`px-4 py-2 rounded-full border ${STATUS_MAP[order.status]?.color} text-sm font-bold flex items-center gap-2`}>
-                          <i className={`fa-solid ${STATUS_MAP[order.status]?.icon}`}></i>
-                          {STATUS_MAP[order.status]?.label}
-                        </div>
+                  {/* Sales Compact Header */}
+                  <div 
+                    onClick={() => toggleSale(order.id)}
+                    className="p-5 md:p-6 cursor-pointer flex flex-col md:flex-row justify-between items-center gap-4 hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
+                  >
+                    <div className="flex items-center gap-4 w-full">
+                      <div className="w-12 h-12 rounded-2xl bg-amber-50 dark:bg-amber-900/20 text-amber-600 flex items-center justify-center text-xl shrink-0">
+                        <i className="fa-solid fa-box"></i>
                       </div>
+                      <div className="flex-1">
+                        <div className="flex items-center gap-3 mb-1">
+                          <h3 className="font-bold text-[#3b2012] dark:text-[#e8dcc4]">طلب #{order.id.slice(0, 8)}</h3>
+                          <span className={`px-3 py-0.5 rounded-full border ${STATUS_MAP[order.status]?.color} text-[10px] font-bold`}>
+                            {STATUS_MAP[order.status]?.label}
+                          </span>
+                        </div>
+                        <p className="text-xs text-gray-500 flex gap-3">
+                          <span><i className="fa-regular fa-calendar ml-1"></i>{new Date(order.created_at).toLocaleDateString('ar-EG')}</span>
+                          <span><i className="fa-solid fa-money-bill-wave ml-1"></i>{order.total_price} ₪</span>
+                          <span><i className="fa-solid fa-location-dot ml-1"></i>{order.shipping_city}</span>
+                        </p>
+                      </div>
+                      <div className="text-gray-400 text-xl">
+                        <i className={`fa-solid fa-chevron-${expandedSales[order.id] ? 'up' : 'down'} transition-transform`}></i>
+                      </div>
+                    </div>
+                  </div>
 
-                      <div className="flex flex-wrap gap-4 text-sm text-[#9c7b65] dark:text-[#e8dcc4]">
-                        <div className="flex items-center gap-2">
-                          <i className="fa-solid fa-calendar text-amber-600/50"></i>
-                          {new Date(order.created_at).toLocaleDateString('ar-EG')}
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <i className="fa-solid fa-location-dot text-amber-600/50"></i>
-                          {order.shipping_city}
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <i className="fa-solid fa-money-bill-wave text-amber-600/50"></i>
-                          {order.total_price} ₪
-                        </div>
-                      </div>
+                  {/* Expanded Details */}
+                  <AnimatePresence>
+                    {expandedSales[order.id] && (
+                      <motion.div 
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: 'auto', opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        className="overflow-hidden border-t border-[#e8dcc4]/30"
+                      >
+                        <div className="p-6 md:p-8 flex flex-col md:flex-row gap-8 bg-[#fdfaf7]/50 dark:bg-black/20">
+                          {/* Order Details */}
+                          <div className="flex-1 space-y-6">
 
                       <div className="space-y-4">
                         <p className="text-xs font-bold text-gray-400">المنتجات:</p>
@@ -449,6 +496,9 @@ export default function OrdersDashboard() {
                       )}
                     </div>
                   </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
                 </motion.div>
               ))
             )}

@@ -16,7 +16,7 @@ export default function Hero() {
   useEffect(() => {
     const fetchArtworks = async () => {
       try {
-        const res = await fetch('/api/artworks');
+        const res = await fetch('/api/v1/artworks');
         const result = await res.json();
         
         if (res.ok && result?.data?.artworks?.length > 0) {

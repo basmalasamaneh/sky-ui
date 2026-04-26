@@ -12,7 +12,7 @@ export async function DELETE(req) {
     }
 
     try {
-      const backendResponse = await fetch(buildBackendApiUrl('/api/users/account'), {
+      const backendResponse = await fetch(buildBackendApiUrl('/api/v1/users/account'), {
         method: 'DELETE',
         headers: {
           'Authorization': authHeader,

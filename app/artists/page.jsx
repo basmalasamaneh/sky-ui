@@ -20,7 +20,7 @@ export default function ArtistsDirectoryPage() {
     const fetchArtists = async () => {
       setIsFetching(true);
       try {
-        const artworksRes = await fetch('/api/artworks?limit=200');
+        const artworksRes = await fetch('/api/v1/artworks?limit=200');
         const artworksResult = artworksRes.ok ? await artworksRes.json().catch(() => ({})) : {};
         const rawWorks = artworksResult?.data?.artworks ?? [];
         const normalizedWorks = rawWorks.map(normalizeWork);
@@ -54,7 +54,7 @@ export default function ArtistsDirectoryPage() {
 
         // For authenticated users, also fetch the full artists list for richer data
         if (token) {
-          const artistsRes = await fetch('/api/artists', { headers: { Authorization: `Bearer ${token}` } });
+          const artistsRes = await fetch('/api/v1/artists', { headers: { Authorization: `Bearer ${token}` } });
           const artistsResult = artistsRes.ok ? await artistsRes.json().catch(() => ({})) : {};
           const rawArtists = artistsResult?.data ?? [];
 
