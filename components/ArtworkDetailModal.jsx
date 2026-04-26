@@ -317,11 +317,16 @@ export default function ArtworkDetailModal({ work, isLoadingDetails = false, onC
             /* ─── AUTHENTICATED USER VIEW ─── */
             <div className="space-y-8 animate-fade-in">
               <div className="space-y-2">
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 flex-wrap">
                   <span className="text-[10px] bg-amber-50 text-amber-700 px-3 py-1 rounded-full font-bold uppercase tracking-widest flex items-center gap-1.5">
                     <i className="fa-solid fa-tag text-[8px]"></i>
                     <span>الفئة: {categoryMapping[work.category] || work.category || 'متنوع'}</span>
                   </span>
+                  {work.quantity <= 0 && (
+                    <span className="text-[10px] bg-red-100 text-red-700 px-3 py-1 rounded-full font-black uppercase tracking-widest border border-red-200">
+                      مباع / نفذت الكمية
+                    </span>
+                  )}
                 </div>
                 <h2 className="text-4xl font-bold text-[#3b2012] dark:text-[#e8dcc4] font-art leading-tight">{work.title}</h2>
               </div>
@@ -380,6 +385,7 @@ export default function ArtworkDetailModal({ work, isLoadingDetails = false, onC
                 </div>
                 <button 
                   onClick={() => {
+                    if (work.quantity <= 0) return;
                     setIsAdding(true);
                     addItem({
                       id: work.id,
@@ -390,11 +396,11 @@ export default function ArtworkDetailModal({ work, isLoadingDetails = false, onC
                     });
                     setTimeout(() => setIsAdding(false), 1000);
                   }}
-                  disabled={isAdding}
-                  className={`h-14 px-10 rounded-2xl font-bold flex items-center justify-center gap-3 shadow-xl transition-all active:scale-95 group ${isAdding ? 'bg-green-600 text-white' : 'bg-[#3b2012] text-white hover:bg-[#5c3d2e]'}`}
+                  disabled={isAdding || work.quantity <= 0}
+                  className={`h-14 px-10 rounded-2xl font-bold flex items-center justify-center gap-3 shadow-xl transition-all active:scale-95 group ${work.quantity <= 0 ? 'bg-gray-100 text-gray-400 cursor-not-allowed' : isAdding ? 'bg-green-600 text-white' : 'bg-[#3b2012] text-white hover:bg-[#5c3d2e]'}`}
                 >
-                  <span>{isAdding ? 'تمت الإضافة' : 'إضافة للسلة'}</span>
-                  <i className={`fa-solid ${isAdding ? 'fa-check' : 'fa-bag-shopping'} transition-transform group-hover:-translate-y-1`}></i>
+                  <span>{work.quantity <= 0 ? 'نفذت الكمية' : isAdding ? 'تمت الإضافة' : 'إضافة للسلة'}</span>
+                  <i className={`fa-solid ${work.quantity <= 0 ? 'fa-ban' : isAdding ? 'fa-check' : 'fa-bag-shopping'} transition-transform group-hover:-translate-y-1`}></i>
                 </button>
               </div>
             </div>

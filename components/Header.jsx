@@ -230,6 +230,15 @@ export const Header = () => {
                               )}
                               
                               <Link 
+                                href="/dashboard/orders" 
+                                className="flex items-center gap-3 px-5 py-3 text-gray-700 dark:text-[#e8dcc4] hover:bg-[#fdfaf7] dark:bg-black hover:text-[#3b2012] dark:text-[#e8dcc4] transition-colors text-right font-art"
+                                onClick={() => setUserMenuOpen(false)}
+                              >
+                                <i className="fa-solid fa-box text-[#9c7b65] dark:text-[#e8dcc4]"></i>
+                                <span className="text-sm font-bold">طلباتي</span>
+                              </Link>
+                              
+                              <Link 
                                 href="/settings" 
                                 className="flex items-center gap-3 px-5 py-3 text-gray-700 dark:text-[#e8dcc4] hover:bg-[#fdfaf7] dark:bg-black hover:text-[#3b2012] dark:text-[#e8dcc4] transition-colors text-right font-art"
                                 onClick={() => setUserMenuOpen(false)}
@@ -336,6 +345,9 @@ export const Header = () => {
                               <i className="fa-solid fa-palette text-xl"></i>
                             </Link>
                           )}
+                          <Link href="/dashboard/orders" className="text-[#9c7b65] dark:text-[#e8dcc4] hover:text-[#3b2012] dark:text-[#e8dcc4] transition-colors" onClick={() => setMobileMenuOpen(false)}>
+                            <i className="fa-solid fa-box text-xl"></i>
+                          </Link>
                           <Link href="/settings" className="text-[#9c7b65] dark:text-[#e8dcc4] hover:text-[#3b2012] dark:text-[#e8dcc4] transition-colors" onClick={() => setMobileMenuOpen(false)}>
                             <i className="fa-solid fa-gear text-xl"></i>
                           </Link>

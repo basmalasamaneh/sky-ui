@@ -4,10 +4,10 @@ import React from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useCart } from '@/contexts/CartContext';
+import { useCart, SHIPPING_AREAS } from '@/contexts/CartContext';
 
 export default function CartPage() {
-  const { cartItems, totalPrice, removeItem, updateQuantity } = useCart();
+  const { cartItems, totalPrice, itemsPrice, shippingFee, shippingArea, setShippingArea, removeItem, updateQuantity } = useCart();
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -77,7 +77,9 @@ export default function CartPage() {
                         <span className="text-lg font-bold w-6 text-center">{item.quantity}</span>
                         <button 
                           onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                          className="w-10 h-10 flex items-center justify-center bg-white dark:bg-black rounded-xl text-[#3b2012] dark:text-[#e8dcc4] shadow-sm hover:bg-[#e8dcc4] transition-all"
+                          disabled={item.quantity >= item.stock}
+                          className={`w-10 h-10 flex items-center justify-center bg-white dark:bg-black rounded-xl text-[#3b2012] dark:text-[#e8dcc4] shadow-sm transition-all ${item.quantity >= item.stock ? 'opacity-30 cursor-not-allowed' : 'hover:bg-[#e8dcc4]'}`}
+                          title={item.quantity >= item.stock ? 'وصلت للحد الأقصى المتوفر' : 'زيادة الكمية'}
                         >
                           <i className="fa-solid fa-plus text-xs"></i>
                         </button>
@@ -119,14 +121,35 @@ export default function CartPage() {
             <div className="bg-white dark:bg-black p-8 rounded-[2.5rem] border border-[#e8dcc4]/50 shadow-xl sticky top-32">
               <h2 className="text-2xl font-bold text-[#3b2012] dark:text-[#e8dcc4] mb-8 pb-4 border-b border-[#e8dcc4]/30">ملخص الطلب</h2>
               
+              <div className="mb-8">
+                <label className="block text-sm font-bold text-[#9c7b65] mb-3">منطقة التوصيل</label>
+                <div className="relative">
+                  <select 
+                    value={shippingArea.id}
+                    onChange={(e) => {
+                      const area = SHIPPING_AREAS.find(a => a.id === e.target.value);
+                      setShippingArea(area);
+                    }}
+                    className="w-full h-14 px-5 bg-[#fdfaf7] dark:bg-black border border-[#e8dcc4]/40 rounded-2xl text-[#3b2012] dark:text-[#e8dcc4] appearance-none cursor-pointer focus:ring-2 focus:ring-amber-500/20 transition-all font-bold"
+                  >
+                    {SHIPPING_AREAS.map(area => (
+                      <option key={area.id} value={area.id}>{area.label} ({area.fee} ₪)</option>
+                    ))}
+                  </select>
+                  <div className="absolute left-5 top-1/2 -translate-y-1/2 pointer-events-none text-[#9c7b65]">
+                    <i className="fa-solid fa-chevron-down text-xs"></i>
+                  </div>
+                </div>
+              </div>
+
               <div className="space-y-4 mb-8">
                 <div className="flex justify-between text-lg">
                   <span className="text-[#9c7b65] dark:text-[#e8dcc4]">المجموع الفرعي</span>
-                  <span className="font-bold text-[#3b2012] dark:text-[#e8dcc4]">{totalPrice} ₪</span>
+                  <span className="font-bold text-[#3b2012] dark:text-[#e8dcc4]">{itemsPrice} ₪</span>
                 </div>
                 <div className="flex justify-between text-lg">
-                  <span className="text-[#9c7b65] dark:text-[#e8dcc4]">التوصيل</span>
-                  <span className="text-green-600 font-bold">مجاني</span>
+                  <span className="text-[#9c7b65] dark:text-[#e8dcc4]">رسوم التوصيل ({shippingArea.label})</span>
+                  <span className="text-amber-600 font-bold">{shippingFee} ₪</span>
                 </div>
                 <div className="pt-4 border-t border-[#e8dcc4]/30 flex justify-between items-end">
                   <span className="text-xl font-bold text-[#3b2012] dark:text-[#e8dcc4]">الإجمالي</span>

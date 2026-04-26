@@ -14,6 +14,11 @@ const nextConfig = {
       {
         protocol: 'https',
         hostname: 'ofpuzdpdsambfkophjau.supabase.co',
+        pathname: '/storage/v1/object/public/profiles/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'ofpuzdpdsambfkophjau.supabase.co',
         pathname: '/storage/v1/object/sign/artworks/**',
       },
       {
