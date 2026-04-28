@@ -20,7 +20,9 @@ const Input = React.forwardRef(({ className, type, label, labelExtra, error, ico
         <input
           type={type}
           className={`w-full h-14 bg-white dark:bg-black border ${
-            error ? 'border-red-400 focus:border-red-500' : 'border-[#e0d5c8] focus:border-[#6b4c3b]'
+            error 
+              ? 'border-red-400 focus:border-red-500' 
+              : 'border-[#e0d5c8] dark:border-gray-800 focus:border-[#6b4c3b] dark:focus:border-[#c4a993]'
           } rounded-xl ${icon ? 'pr-12' : 'pr-4'} ${leftIcon ? 'pl-12' : 'pl-4'} text-sm text-[#3b2012] dark:text-[#e8dcc4] placeholder:text-[#c5b0a0] outline-none transition-colors font-amiri shadow-sm ${className}`}
           ref={ref}
           {...props}
