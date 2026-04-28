@@ -52,7 +52,7 @@ export const Header = () => {
           <div className="flex h-16 items-center justify-between">
             
             {/* Logo */}
-            <Link href="/" className="flex items-center gap-4 group">
+            <Link href="/" className="flex items-center gap-4 group shrink-0">
               <div className="relative w-12 h-12 transition-transform group-hover:scale-110 duration-300">
                 <Image 
                   src="/images/logo.png" 
@@ -75,7 +75,7 @@ export const Header = () => {
             </Link>
 
             {/* Nav Pill / Search Bar Hub */}
-            <div className="flex-1 max-w-xl mx-8 relative flex justify-center">
+            <div className="flex-1 max-w-xl mx-2 md:mx-8 relative flex justify-center">
               <AnimatePresence mode="wait">
                 {!isSearchVisible || !canUseGlobalSearch ? (
                   <motion.nav 
@@ -125,7 +125,7 @@ export const Header = () => {
             </div>
 
             {/* Actions */}
-            <div className="flex items-center gap-5">
+            <div className="flex items-center gap-2 md:gap-5 shrink-0">
               <div className="flex items-center gap-2 text-gray-400">
                 {canUseGlobalSearch && (
                   <button 
@@ -285,7 +285,7 @@ export const Header = () => {
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: 'auto' }}
               exit={{ opacity: 0, height: 0 }}
-              className="lg:hidden bg-white dark:bg-black border-t border-gray-100 dark:border-gray-800 dark:border-gray-800 overflow-hidden"
+              className="lg:hidden bg-white dark:bg-black border-t border-gray-100 dark:border-gray-800 overflow-y-auto max-h-[calc(100vh-64px)]"
             >
               <div className="flex flex-col p-6 gap-2">
                 <Link href="/" className="py-5 px-4 text-xl font-bold text-gray-800 dark:text-[#e8dcc4] rounded-xl hover:bg-gray-50 dark:hover:bg-gray-900 dark:bg-gray-900 text-right font-art">الرئيسية</Link>

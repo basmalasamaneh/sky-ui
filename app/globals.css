@@ -2,7 +2,7 @@
 @import "tailwindcss/components";
 @import "tailwindcss/utilities";
 
-@import url('https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Aref+Ruqaa:wght@400;700&family=Reem+Kufi:wght@400;500;600;700&family=Rakkas&family=Outfit:wght@300;400;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&family=Amiri:wght@400;700&family=Aref+Ruqaa:wght@400;700&family=Reem+Kufi:wght@400;500;600;700&family=Rakkas&family=Outfit:wght@300;400;600;700&display=swap');
 
 :root {
   color-scheme: light;
@@ -23,11 +23,15 @@
 }
 
 body {
-  font-family: 'Outfit', sans-serif;
+  font-family: 'IBM Plex Sans Arabic', 'Outfit', sans-serif;
   color: rgb(var(--foreground-rgb));
   background: transparent;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+.font-ibm {
+  font-family: 'IBM Plex Sans Arabic', sans-serif;
 }
 
 .font-amiri {

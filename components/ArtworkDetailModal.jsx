@@ -200,7 +200,7 @@ export default function ArtworkDetailModal({ work, isLoadingDetails = false, onC
                   <i className="fa-solid fa-align-right text-amber-600 text-sm"></i>
                   عن العمل الفني
                 </h4>
-                <p className="text-[#9c7b65] dark:text-[#e8dcc4] text-lg leading-relaxed font-amiri">{work.description}</p>
+                <p className="text-[#9c7b65] dark:text-[#e8dcc4] text-lg leading-relaxed">{work.description}</p>
                 <p className="text-[10px] text-gray-400 font-bold bg-gray-50 dark:bg-gray-900 inline-block px-3 py-1 rounded-md">
                   تاريخ النشر: {work.createdAt ? new Date(work.createdAt).toLocaleDateString('ar-EG', { year: 'numeric', month: 'long', day: 'numeric' }) : 'غير متوفر'}
                 </p>
@@ -290,7 +290,7 @@ export default function ArtworkDetailModal({ work, isLoadingDetails = false, onC
                   <i className="fa-solid fa-align-right text-amber-600 text-sm"></i>
                   عن العمل الفني
                 </h4>
-                <p className="text-[#9c7b65] dark:text-[#e8dcc4] text-lg leading-relaxed font-amiri">{work.description}</p>
+                <p className="text-[#9c7b65] dark:text-[#e8dcc4] text-lg leading-relaxed">{work.description}</p>
                 <p className="text-[10px] text-gray-400 font-bold bg-gray-50 dark:bg-gray-900 inline-block px-3 py-1 rounded-md">
                   تاريخ النشر: {work.createdAt ? new Date(work.createdAt).toLocaleDateString('ar-EG', { year: 'numeric', month: 'long', day: 'numeric' }) : 'غير متوفر'}
                 </p>
@@ -373,7 +373,7 @@ export default function ArtworkDetailModal({ work, isLoadingDetails = false, onC
                   <i className="fa-solid fa-align-right text-amber-600 text-sm"></i>
                   عن العمل الفني
                 </h4>
-                <p className="text-[#9c7b65] dark:text-[#e8dcc4] text-lg leading-relaxed font-amiri">{work.description}</p>
+                <p className="text-[#9c7b65] dark:text-[#e8dcc4] text-lg leading-relaxed">{work.description}</p>
               </div>
 
               <div className="pt-8 border-t border-gray-100 dark:border-gray-800 dark:border-gray-800 flex items-center justify-between">

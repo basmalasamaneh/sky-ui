@@ -148,21 +148,33 @@ export const ArtworkGrid = ({ limit = null, showCategories = true, title = null 
                 className="group bg-white dark:bg-black rounded-3xl overflow-hidden border border-[#e8dcc4] dark:border-gray-800 shadow-[0_4px_20px_-10px_rgba(0,0,0,0.1)] hover:shadow-xl transition-all duration-500 flex flex-col cursor-pointer"
               >
                 <div className="relative h-64 overflow-hidden m-2 rounded-2xl">
-                  <Image
-                    src={work.images?.[work.mainImageIndex || 0] || 'https://images.unsplash.com/photo-1541963463532-d68292c34b19?auto=format&fit=crop&q=80&w=800'}
-                    alt={work.title}
-                    fill
-                    className="object-cover transition-transform duration-700 group-hover:scale-110"
-                  />
+                    <Image
+                      src={work.images?.[work.mainImageIndex || 0] || 'https://images.unsplash.com/photo-1541963463532-d68292c34b19?auto=format&fit=crop&q=80&w=800'}
+                      alt={work.title}
+                      fill
+                      className={`object-cover transition-transform duration-700 group-hover:scale-110 ${work.quantity <= 0 ? 'grayscale brightness-75' : ''}`}
+                    />
                 </div>
                 <div className="p-5 flex flex-col flex-1">
                   <h3 className="text-lg font-bold text-[#3b2012] dark:text-[#e8dcc4] mb-4 line-clamp-1">{work.title}</h3>
                   <div className="mt-auto flex items-center justify-between border-t border-gray-100 dark:border-gray-800 dark:border-gray-800 pt-4" onClick={(e) => e.stopPropagation()}>
-                    <span className="font-bold text-lg text-[#3b2012] dark:text-[#e8dcc4]">
-                      {work.price ? `${work.price} ₪` : 'متاح للعرض'}
-                    </span>
+                    <div className="flex flex-col">
+                      <span className={`font-bold text-lg ${work.quantity <= 0 ? 'text-gray-400 line-through' : 'text-[#3b2012] dark:text-[#e8dcc4]'}`}>
+                        {work.price ? `${work.price} ₪` : 'متاح للعرض'}
+                      </span>
+                      {work.quantity <= 0 && (
+                        <span className="text-[10px] text-red-500 font-black uppercase">مباع</span>
+                      )}
+                    </div>
                     {isOwnerArtwork(work) ? (
                       <Link href={`/works/edit/${work.id}`} className="bg-[#f0ece6] dark:bg-black text-[#5c4436] dark:text-[#e8dcc4] hover:bg-[#5c4436] hover:text-white px-4 py-2 rounded-xl text-xs font-bold transition-colors">تعديل العمل</Link>
+                    ) : work.quantity <= 0 ? (
+                      <button
+                        disabled
+                        className="bg-gray-100 text-gray-400 px-4 py-2 rounded-xl text-xs font-bold cursor-not-allowed"
+                      >
+                        نفذت الكمية
+                      </button>
                     ) : !isAuthenticated ? (
                       <button
                         type="button"

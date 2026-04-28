@@ -96,7 +96,7 @@ export default function ArtistsDirectoryPage() {
             <i className="fa-solid fa-paintbrush"></i>
           </div>
           <h1 className="text-4xl md:text-5xl font-bold text-[#3b2012] dark:text-[#e8dcc4] mb-4">فنانونا المبدعون</h1>
-          <p className="text-[#9c7b65] dark:text-[#e8dcc4] font-amiri text-lg">
+          <p className="text-[#9c7b65] dark:text-[#e8dcc4] text-lg">
             اكتشف نخبة من الفنانين الموهوبين وتعرّف على أعمالهم وإبداعاتهم التي تترك أثراً في عالم الفن.
           </p>
 
@@ -108,7 +108,7 @@ export default function ArtistsDirectoryPage() {
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="ابحث عن فنان..."
-              className="w-full h-12 bg-white dark:bg-[#1a0f0a] border border-[#e8dcc4] dark:border-[#3e2f27] rounded-2xl pr-12 pl-4 text-[#3b2012] dark:text-[#e8dcc4] placeholder:text-[#ceb29f] focus:outline-none focus:ring-2 focus:ring-[#5c4436]/20 focus:border-[#5c4436] transition-all font-amiri"
+              className="w-full h-12 bg-white dark:bg-[#1a0f0a] border border-[#e8dcc4] dark:border-[#3e2f27] rounded-2xl pr-12 pl-4 text-[#3b2012] dark:text-[#e8dcc4] placeholder:text-[#ceb29f] focus:outline-none focus:ring-2 focus:ring-[#5c4436]/20 focus:border-[#5c4436] transition-all"
             />
             {searchQuery && (
               <button
@@ -150,7 +150,7 @@ export default function ArtistsDirectoryPage() {
           <div className="text-center py-20 bg-white dark:bg-black rounded-[2rem] border border-[#e8dcc4] dark:border-gray-800 shadow-sm">
             <i className="fa-solid fa-user-magnifying-glass text-6xl text-gray-300 mb-4"></i>
             <h2 className="text-2xl font-bold text-[#3b2012] dark:text-[#e8dcc4] mb-2">لا توجد نتائج</h2>
-            <p className="text-[#9c7b65] dark:text-[#e8dcc4] font-amiri">لم نجد أي فنان يطابق &quot;{searchQuery}&quot;</p>
+            <p className="text-[#9c7b65] dark:text-[#e8dcc4]">لم نجد أي فنان يطابق &quot;{searchQuery}&quot;</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -212,3 +212,4 @@ export default function ArtistsDirectoryPage() {
     </div>
   );
 }
+

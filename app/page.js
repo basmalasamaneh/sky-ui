@@ -104,7 +104,7 @@ function SearchResults({ query }) {
                       {artist.name}
                       <i className="fa-solid fa-circle-check text-[#1d9bf0] text-[9px]"></i>
                     </p>
-                    <p className="text-xs text-[#9c7b65] dark:text-[#c4a993] font-amiri">
+                    <p className="text-xs text-[#9c7b65] dark:text-[#c4a993]">
                       <i className="fa-solid fa-palette ml-1 text-amber-500 text-[10px]"></i>
                       {artist.worksCount} أعمال
                     </p>
@@ -149,3 +149,4 @@ export default function Home() {
     </main>
   );
 }
+

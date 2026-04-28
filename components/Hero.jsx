@@ -20,7 +20,10 @@ export default function Hero() {
         const result = await res.json();
         
         if (res.ok && result?.data?.artworks?.length > 0) {
-          setArtworks(result.data.artworks.map(normalizeWork));
+          const availableArtworks = result.data.artworks
+            .map(normalizeWork)
+            .filter(work => work.quantity > 0);
+          setArtworks(availableArtworks);
         }
       } catch (error) {
         console.error('Failed to fetch Hero artworks:', error);

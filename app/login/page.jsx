@@ -154,10 +154,10 @@ export default function LoginPage() {
 
           {/* العنوان */}
           <div className="mb-10 text-center lg:text-right animate-fade-in">
-            <h1 className="text-5xl text-[#3b2012] dark:text-[#e8dcc4] mb-4 font-amiri leading-tight">
+            <h1 className="text-5xl text-[#3b2012] dark:text-[#e8dcc4] mb-4 leading-tight">
               مرحباً بعودتك إلى <span className="text-[#6b4c3b] dark:text-[#c4a993] font-bold">أثر</span>
             </h1>
-            <p className="text-[#9c7b65] dark:text-[#e8dcc4]/80 text-lg font-amiri">
+            <p className="text-[#9c7b65] dark:text-[#e8dcc4]/80 text-lg">
               قم بتسجيل الدخول لاستكشاف أحدث اللوحات والأعمال الفنية الحصرية.
             </p>
           </div>
@@ -185,7 +185,7 @@ export default function LoginPage() {
               type={showPassword ? 'text' : 'password'}
               label="كلمة المرور"
               labelExtra={
-                <Link href="/forgot-password" size="sm" className="text-sm text-[#6b4c3b] dark:text-[#c4a993] hover:font-bold hover:underline transition-all font-amiri">
+                <Link href="/forgot-password" size="sm" className="text-sm text-[#6b4c3b] dark:text-[#c4a993] hover:font-bold hover:underline transition-all">
                   هل نسيت كلمة المرور؟
                 </Link>
               }
@@ -209,7 +209,7 @@ export default function LoginPage() {
 
             {/* رسالة الخطأ العامة */}
             {loginError && (
-              <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-900/50 text-red-600 dark:text-red-400 px-4 py-3 rounded-xl flex items-center gap-3 animate-shake font-amiri">
+              <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-900/50 text-red-600 dark:text-red-400 px-4 py-3 rounded-xl flex items-center gap-3 animate-shake">
                 <i className="fa-solid fa-circle-exclamation"></i>
                 <span className="text-sm font-bold">{loginError}</span>
               </div>
@@ -219,7 +219,7 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={!isFormValid || isLoading}
-              className={`w-full h-14 flex justify-center items-center font-bold text-xl rounded-xl transition-all font-amiri shadow-md mt-6
+              className={`w-full h-14 flex justify-center items-center font-bold text-xl rounded-xl transition-all shadow-md mt-6
                 ${(isFormValid && !isLoading)
                   ? 'bg-[#3b2012] dark:bg-[#c4a993] text-white dark:text-black hover:bg-[#5c3d2e] dark:hover:bg-[#d6c5b5] cursor-pointer'
                   : 'bg-[#bcaaa0] dark:bg-[#4a3728] text-gray-100 dark:text-gray-400 cursor-not-allowed'
@@ -234,7 +234,7 @@ export default function LoginPage() {
           </form>
 
           {/* رابط إنشاء حساب */}
-          <p className="text-center text-lg text-[#9c7b65] dark:text-[#e8dcc4] mt-8 font-amiri">
+          <p className="text-center text-lg text-[#9c7b65] dark:text-[#e8dcc4] mt-8">
             ليس لديك حساب بعد؟{' '}
             <Link href="/signup" className="text-[#6b4c3b] dark:text-[#c4a993] font-bold hover:underline">
               أنشئ حساباً جديداً
@@ -258,3 +258,4 @@ export default function LoginPage() {
     </div>
   );
 }
+

@@ -5,7 +5,7 @@ const Input = React.forwardRef(({ className, type, label, labelExtra, error, ico
     <div className="space-y-2">
       <div className="flex items-center justify-between">
         {label && (
-          <label className="block text-sm font-bold text-[#3b2012] dark:text-[#e8dcc4] font-amiri">
+          <label className="block text-sm font-bold text-[#3b2012] dark:text-[#e8dcc4]">
             {label}
           </label>
         )}
@@ -23,7 +23,7 @@ const Input = React.forwardRef(({ className, type, label, labelExtra, error, ico
             error 
               ? 'border-red-400 focus:border-red-500' 
               : 'border-[#e0d5c8] dark:border-gray-800 focus:border-[#6b4c3b] dark:focus:border-[#c4a993]'
-          } rounded-xl ${icon ? 'pr-12' : 'pr-4'} ${leftIcon ? 'pl-12' : 'pl-4'} text-sm text-[#3b2012] dark:text-[#e8dcc4] placeholder:text-[#c5b0a0] outline-none transition-colors font-amiri shadow-sm ${className}`}
+          } rounded-xl ${icon ? 'pr-12' : 'pr-4'} ${leftIcon ? 'pl-12' : 'pl-4'} text-sm text-[#3b2012] dark:text-[#e8dcc4] placeholder:text-[#c5b0a0] outline-none transition-colors shadow-sm ${className}`}
           ref={ref}
           {...props}
         />
@@ -34,7 +34,7 @@ const Input = React.forwardRef(({ className, type, label, labelExtra, error, ico
         )}
       </div>
       {error && (
-        <p className="text-xs text-red-500 font-bold font-amiri mt-1 animate-fadeIn">{error}</p>
+        <p className="text-xs text-red-500 font-bold mt-1 animate-fadeIn">{error}</p>
       )}
     </div>
   );

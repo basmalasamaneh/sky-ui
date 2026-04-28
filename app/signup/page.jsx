@@ -180,10 +180,10 @@ export default function SignupPage() {
 
           {/* العنوان */}
           <div className="mb-10 text-center lg:text-right animate-fade-in">
-            <h1 className="text-5xl text-[#3b2012] dark:text-[#e8dcc4] mb-4 font-amiri leading-tight">
+            <h1 className="text-5xl text-[#3b2012] dark:text-[#e8dcc4] mb-4 leading-tight">
               إنضم إلى <span className="text-[#6b4c3b] dark:text-[#c4a993] font-bold">أثر</span>
             </h1>
-            <p className="text-[#9c7b65] dark:text-[#e8dcc4]/80 text-lg font-amiri">
+            <p className="text-[#9c7b65] dark:text-[#e8dcc4]/80 text-lg">
               أنشئ حساباً جديداً للبدء بجمع أفضل اللوحات والأعمال الفنية الحصرية.
             </p>
           </div>
@@ -196,7 +196,7 @@ export default function SignupPage() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* الاسم الأول */}
               <div>
-                <label className="block text-sm font-bold text-[#3b2012] dark:text-[#e8dcc4] mb-2 font-amiri">
+                <label className="block text-sm font-bold text-[#3b2012] dark:text-[#e8dcc4] mb-2">
                   الاسم الأول
                 </label>
                 <div className="relative">
@@ -210,17 +210,17 @@ export default function SignupPage() {
                     value={formData.firstName}
                     onChange={handleChange}
                     onBlur={handleBlur}
-                    className={`w-full h-14 bg-white dark:bg-black border ${errors.firstName ? 'border-red-400 focus:border-red-500' : 'border-[#e0d5c8] focus:border-[#6b4c3b]'} rounded-xl pr-12 pl-4 text-sm text-[#3b2012] dark:text-[#e8dcc4] placeholder:text-[#c5b0a0] outline-none transition-colors font-amiri shadow-sm`}
+                    className={`w-full h-14 bg-white dark:bg-black border ${errors.firstName ? 'border-red-400 focus:border-red-500' : 'border-[#e0d5c8] focus:border-[#6b4c3b]'} rounded-xl pr-12 pl-4 text-sm text-[#3b2012] dark:text-[#e8dcc4] placeholder:text-[#c5b0a0] outline-none transition-colors shadow-sm`}
                   />
                 </div>
                 <div className={`overflow-hidden transition-all duration-300 ease-in-out ${errors.firstName ? 'max-h-10 opacity-100 mt-1.5' : 'max-h-0 opacity-0'}`}>
-                  <p className="text-xs text-red-500 font-bold font-amiri">{errors.firstName}</p>
+                  <p className="text-xs text-red-500 font-bold">{errors.firstName}</p>
                 </div>
               </div>
 
               {/* اسم العائلة */}
               <div>
-                <label className="block text-sm font-bold text-[#3b2012] dark:text-[#e8dcc4] mb-2 font-amiri">
+                <label className="block text-sm font-bold text-[#3b2012] dark:text-[#e8dcc4] mb-2">
                   اسم العائلة
                 </label>
                 <div className="relative">
@@ -234,18 +234,18 @@ export default function SignupPage() {
                     value={formData.lastName}
                     onChange={handleChange}
                     onBlur={handleBlur}
-                    className={`w-full h-14 bg-white dark:bg-black border ${errors.lastName ? 'border-red-400 focus:border-red-500' : 'border-[#e0d5c8] focus:border-[#6b4c3b]'} rounded-xl pr-12 pl-4 text-sm text-[#3b2012] dark:text-[#e8dcc4] placeholder:text-[#c5b0a0] outline-none transition-colors font-amiri shadow-sm`}
+                    className={`w-full h-14 bg-white dark:bg-black border ${errors.lastName ? 'border-red-400 focus:border-red-500' : 'border-[#e0d5c8] focus:border-[#6b4c3b]'} rounded-xl pr-12 pl-4 text-sm text-[#3b2012] dark:text-[#e8dcc4] placeholder:text-[#c5b0a0] outline-none transition-colors shadow-sm`}
                   />
                 </div>
                 <div className={`overflow-hidden transition-all duration-300 ease-in-out ${errors.lastName ? 'max-h-10 opacity-100 mt-1.5' : 'max-h-0 opacity-0'}`}>
-                  <p className="text-xs text-red-500 font-bold font-amiri">{errors.lastName}</p>
+                  <p className="text-xs text-red-500 font-bold">{errors.lastName}</p>
                 </div>
               </div>
             </div>
 
             {/* البريد الإلكتروني */}
             <div>
-              <label className="block text-sm font-bold text-[#3b2012] dark:text-[#e8dcc4] mb-2 font-amiri">
+              <label className="block text-sm font-bold text-[#3b2012] dark:text-[#e8dcc4] mb-2">
                 البريد الإلكتروني
               </label>
               <div className="relative">
@@ -260,17 +260,17 @@ export default function SignupPage() {
                   value={formData.email}
                   onChange={handleChange}
                   onBlur={handleBlur}
-                  className={`w-full h-14 bg-white dark:bg-black border ${errors.email ? 'border-red-400 focus:border-red-500' : 'border-[#e0d5c8] focus:border-[#6b4c3b]'} rounded-xl pr-12 pl-4 text-sm text-left text-[#3b2012] dark:text-[#e8dcc4] placeholder:text-[#c5b0a0] outline-none transition-colors font-amiri shadow-sm`}
+                  className={`w-full h-14 bg-white dark:bg-black border ${errors.email ? 'border-red-400 focus:border-red-500' : 'border-[#e0d5c8] focus:border-[#6b4c3b]'} rounded-xl pr-12 pl-4 text-sm text-left text-[#3b2012] dark:text-[#e8dcc4] placeholder:text-[#c5b0a0] outline-none transition-colors shadow-sm`}
                 />
               </div>
               <div className={`overflow-hidden transition-all duration-300 ease-in-out ${errors.email ? 'max-h-10 opacity-100 mt-1.5' : 'max-h-0 opacity-0'}`}>
-                <p className="text-xs text-red-500 font-bold font-amiri">{errors.email}</p>
+                <p className="text-xs text-red-500 font-bold">{errors.email}</p>
               </div>
             </div>
 
             {/* كلمة المرور */}
             <div>
-              <label className="block text-sm font-bold text-[#3b2012] dark:text-[#e8dcc4] mb-2 font-amiri">
+              <label className="block text-sm font-bold text-[#3b2012] dark:text-[#e8dcc4] mb-2">
                 كلمة المرور
               </label>
               <div className="relative">
@@ -292,17 +292,17 @@ export default function SignupPage() {
                   value={formData.password}
                   onChange={handleChange}
                   onBlur={handleBlur}
-                  className={`w-full h-14 bg-white dark:bg-black border ${errors.password ? 'border-red-400 focus:border-red-500' : 'border-[#e0d5c8] focus:border-[#6b4c3b]'} rounded-xl pr-12 pl-12 text-sm text-left text-[#3b2012] dark:text-[#e8dcc4] placeholder:text-[#c5b0a0] outline-none transition-colors font-amiri shadow-sm`}
+                  className={`w-full h-14 bg-white dark:bg-black border ${errors.password ? 'border-red-400 focus:border-red-500' : 'border-[#e0d5c8] focus:border-[#6b4c3b]'} rounded-xl pr-12 pl-12 text-sm text-left text-[#3b2012] dark:text-[#e8dcc4] placeholder:text-[#c5b0a0] outline-none transition-colors shadow-sm`}
                 />
               </div>
               <div className={`overflow-hidden transition-all duration-300 ease-in-out ${errors.password ? 'max-h-20 opacity-100 mt-1.5' : 'max-h-0 opacity-0'}`}>
-                <p className="text-xs text-red-500 font-bold font-amiri">{errors.password}</p>
+                <p className="text-xs text-red-500 font-bold">{errors.password}</p>
               </div>
             </div>
 
             {/* تأكيد كلمة المرور */}
             <div>
-              <label className="block text-sm font-bold text-[#3b2012] dark:text-[#e8dcc4] mb-2 font-amiri">
+              <label className="block text-sm font-bold text-[#3b2012] dark:text-[#e8dcc4] mb-2">
                 تأكيد كلمة المرور
               </label>
               <div className="relative">
@@ -324,17 +324,17 @@ export default function SignupPage() {
                   value={formData.confirmPassword}
                   onChange={handleChange}
                   onBlur={handleBlur}
-                  className={`w-full h-14 bg-white dark:bg-black border ${errors.confirmPassword ? 'border-red-400 focus:border-red-500' : 'border-[#e0d5c8] focus:border-[#6b4c3b]'} rounded-xl pr-12 pl-12 text-sm text-left text-[#3b2012] dark:text-[#e8dcc4] placeholder:text-[#c5b0a0] outline-none transition-colors font-amiri shadow-sm`}
+                  className={`w-full h-14 bg-white dark:bg-black border ${errors.confirmPassword ? 'border-red-400 focus:border-red-500' : 'border-[#e0d5c8] focus:border-[#6b4c3b]'} rounded-xl pr-12 pl-12 text-sm text-left text-[#3b2012] dark:text-[#e8dcc4] placeholder:text-[#c5b0a0] outline-none transition-colors shadow-sm`}
                 />
               </div>
               <div className={`overflow-hidden transition-all duration-300 ease-in-out ${errors.confirmPassword ? 'max-h-10 opacity-100 mt-1.5' : 'max-h-0 opacity-0'}`}>
-                <p className="text-xs text-red-500 font-bold font-amiri">{errors.confirmPassword}</p>
+                <p className="text-xs text-red-500 font-bold">{errors.confirmPassword}</p>
               </div>
             </div>
 
             {/* رسالة الخطأ العامة */}
             {serverError && (
-              <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-900/50 text-red-600 dark:text-red-400 px-4 py-3 rounded-xl flex items-center gap-3 animate-shake font-amiri">
+              <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-900/50 text-red-600 dark:text-red-400 px-4 py-3 rounded-xl flex items-center gap-3 animate-shake">
                 <i className="fa-solid fa-circle-exclamation"></i>
                 <span className="text-sm font-bold">{serverError}</span>
               </div>
@@ -344,7 +344,7 @@ export default function SignupPage() {
             <button
               type="submit"
               disabled={!isFormValid || isLoading}
-              className={`w-full h-14 flex justify-center items-center font-bold text-xl rounded-xl transition-all font-amiri shadow-md mt-6
+              className={`w-full h-14 flex justify-center items-center font-bold text-xl rounded-xl transition-all shadow-md mt-6
                 ${(isFormValid && !isLoading)
                   ? 'bg-[#3b2012] dark:bg-[#c4a993] text-white dark:text-black hover:bg-[#5c3d2e] dark:hover:bg-[#d6c5b5] cursor-pointer'
                   : 'bg-[#bcaaa0] dark:bg-[#4a3728] text-gray-100 dark:text-gray-400 cursor-not-allowed'
@@ -359,7 +359,7 @@ export default function SignupPage() {
           </form>
 
           {/* الرابط لصفحة الدخول */}
-          <p className="text-center text-lg text-[#9c7b65] dark:text-[#e8dcc4] mt-8 font-amiri">
+          <p className="text-center text-lg text-[#9c7b65] dark:text-[#e8dcc4] mt-8">
             لديك حساب بالفعل؟{' '}
             <Link href="/login" className="text-[#6b4c3b] dark:text-[#c4a993] font-bold hover:underline">
               تسجيل الدخول
@@ -383,3 +383,4 @@ export default function SignupPage() {
     </div>
   );
 }
+

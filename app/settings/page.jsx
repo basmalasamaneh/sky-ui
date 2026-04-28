@@ -344,7 +344,7 @@ export default function SettingsPage() {
   const isArtist = user?.role === 'artist';
 
   return (
-    <div className="min-h-screen bg-[#fdfaf7] dark:bg-black py-20 px-4 md:px-8 font-amiri" dir="rtl">
+    <div className="min-h-screen bg-[#fdfaf7] dark:bg-black py-20 px-4 md:px-8" dir="rtl">
       <div className="max-w-4xl mx-auto">
         
         {/* Header Section */}

@@ -23,7 +23,7 @@ export default function CartPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#fdfaf7] dark:bg-black font-art" dir="rtl">
+    <div className="min-h-screen bg-[#fdfaf7] dark:bg-black" dir="rtl">
       <main className="container mx-auto px-4 pt-12 pb-20">
         <header className="mb-12">
           <h1 className="text-4xl md:text-5xl font-bold text-[#3b2012] dark:text-[#e8dcc4] mb-4">سلة المقتنيات</h1>

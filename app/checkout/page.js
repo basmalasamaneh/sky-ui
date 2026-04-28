@@ -120,7 +120,7 @@ export default function CheckoutPage() {
 
   if (isOrdered) {
     return (
-      <div className="min-h-screen bg-[#fdfaf7] dark:bg-black font-art flex items-center justify-center p-4" dir="rtl">
+      <div className="min-h-screen bg-[#fdfaf7] dark:bg-black flex items-center justify-center p-4" dir="rtl">
         <motion.div 
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
@@ -143,7 +143,7 @@ export default function CheckoutPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#fdfaf7] dark:bg-black font-art" dir="rtl">
+    <div className="min-h-screen bg-[#fdfaf7] dark:bg-black" dir="rtl">
       <main className="container mx-auto px-4 pt-12 pb-20">
         <div className="max-w-6xl mx-auto">
           <header className="mb-12 text-center md:text-right">

@@ -213,7 +213,7 @@ export default function MyWorksPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#fdfaf7] dark:bg-black py-28 px-4 md:px-8 font-amiri" dir="rtl">
+    <div className="min-h-screen bg-[#fdfaf7] dark:bg-black py-28 px-4 md:px-8" dir="rtl">
       <div className="max-w-7xl mx-auto">
         
         {/* قسم الترويسة (Header Section) */}
@@ -432,7 +432,7 @@ export default function MyWorksPage() {
             className="flex flex-col items-center justify-center py-24 px-6 bg-white dark:bg-black rounded-[3rem] border border-[#e8dcc4] dark:border-gray-800 text-center shadow-lg"
           >
             {fetchError && (
-              <div className="w-full mb-8 bg-red-50 border border-red-200 text-red-700 px-5 py-4 rounded-2xl flex items-center gap-3 text-sm font-bold font-amiri">
+              <div className="w-full mb-8 bg-red-50 border border-red-200 text-red-700 px-5 py-4 rounded-2xl flex items-center gap-3 text-sm font-bold">
                 <i className="fa-solid fa-circle-exclamation text-red-500"></i>
                 {fetchError}
               </div>
@@ -444,7 +444,7 @@ export default function MyWorksPage() {
                </div>
             </div>
             <h3 className="text-3xl font-bold text-[#3b2012] dark:text-[#e8dcc4] mb-4 font-art">لم تقم بإضافة أي أعمال بعد</h3>
-            <p className="text-[#9c7b65] dark:text-[#e8dcc4] text-lg max-w-md mb-10 leading-relaxed font-amiri">
+            <p className="text-[#9c7b65] dark:text-[#e8dcc4] text-lg max-w-md mb-10 leading-relaxed">
               معرضك الفني جاهز! ابدأ بمشاركة إبداعاتك مع العالم ودع الجميع يرى بصمتك الفنية الفريدة على منصة أثر.
             </p>
             <Link 
@@ -591,7 +591,7 @@ export default function MyWorksPage() {
                          <i className="fa-solid fa-align-right text-amber-600 text-sm"></i>
                          عن العمل الفني
                       </h4>
-                      <p className="text-[#9c7b65] dark:text-[#e8dcc4] text-lg leading-relaxed font-amiri">
+                      <p className="text-[#9c7b65] dark:text-[#e8dcc4] text-lg leading-relaxed">
                         {activeSliderWork.description}
                       </p>
                       <p className="text-[10px] text-gray-400 font-bold bg-gray-50 dark:bg-gray-900 inline-block px-3 py-1 rounded-md">
@@ -626,3 +626,4 @@ export default function MyWorksPage() {
     </div>
   );
 }
+

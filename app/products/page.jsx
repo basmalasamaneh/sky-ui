@@ -148,7 +148,7 @@ export default function ProductsPage() {
   const isOwnerArtwork = (work) => Boolean(user?.id && work?.artist_id && user.id === work.artist_id);
 
   return (
-    <div className="min-h-screen bg-[#fdfaf7] dark:bg-black font-amiri" dir="rtl">
+    <div className="min-h-screen bg-[#fdfaf7] dark:bg-black" dir="rtl">
       <Header />
       
       <div className="pt-32 pb-20 px-4 md:px-8 max-w-7xl mx-auto">
@@ -376,3 +376,4 @@ export default function ProductsPage() {
     </div>
   );
 }
+

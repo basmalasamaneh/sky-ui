@@ -290,7 +290,7 @@ export const BecomeArtistModal = ({ isOpen, onClose, user }) => {
                 <i className="fa-solid fa-palette"></i>
               </div>
               <h2 className="text-3xl font-bold text-[#3b2012] dark:text-[#e8dcc4] font-art mb-2">انضم كفنان</h2>
-              <p className="text-[#9c7b65] dark:text-[#e8dcc4] font-amiri">شارك إبداعك مع العالم واترك أثراً فريداً</p>
+              <p className="text-[#9c7b65] dark:text-[#e8dcc4]">شارك إبداعك مع العالم واترك أثراً فريداً</p>
             </div>
 
             {isSuccess ? (
@@ -306,11 +306,11 @@ export const BecomeArtistModal = ({ isOpen, onClose, user }) => {
                   أصبحت فناناً الآن!
                   <i className="fa-solid fa-palette text-amber-500"></i>
                 </h3>
-                <p className="text-[#9c7b65] dark:text-[#e8dcc4] font-amiri text-center">تم تحديث حسابك بنجاح، يمكنك الآن البدء بإضافة أعمالك.</p>
+                <p className="text-[#9c7b65] dark:text-[#e8dcc4] text-center">تم تحديث حسابك بنجاح، يمكنك الآن البدء بإضافة أعمالك.</p>
               </motion.div>
             ) : (
               <form onSubmit={handleSubmit} className="space-y-4">
-                <p className="text-center text-sm text-[#9c7b65] dark:text-[#e8dcc4] font-amiri mb-4">قم بتعبئة بياناتك للبدء في رحلتك الفنية</p>
+                <p className="text-center text-sm text-[#9c7b65] dark:text-[#e8dcc4] mb-4">قم بتعبئة بياناتك للبدء في رحلتك الفنية</p>
                 
 
                 {/* Artist Name */}
@@ -350,7 +350,7 @@ export const BecomeArtistModal = ({ isOpen, onClose, user }) => {
                       required
                       rows="3"
                       placeholder="أخبرنا قليلاً عن شغفك وأسلوبك الفني..."
-                      className={`w-full bg-[#fdfaf7] dark:bg-black border ${errors.bio ? 'border-red-400' : 'border-[#e8dcc4] dark:border-gray-800'} rounded-2xl pr-12 pl-4 py-3 focus:ring-2 focus:ring-[#5c4436]/20 focus:border-[#5c4436] outline-none transition-all placeholder:text-gray-400 resize-none font-amiri`}
+                      className={`w-full bg-[#fdfaf7] dark:bg-black border ${errors.bio ? 'border-red-400' : 'border-[#e8dcc4] dark:border-gray-800'} rounded-2xl pr-12 pl-4 py-3 focus:ring-2 focus:ring-[#5c4436]/20 focus:border-[#5c4436] outline-none transition-all placeholder:text-gray-400 resize-none`}
                     />
                   </div>
                   {errors.bio && <p className="text-red-500 text-xs mt-1 mr-2">{errors.bio}</p>}
