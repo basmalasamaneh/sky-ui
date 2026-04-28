@@ -119,6 +119,11 @@ export default function LoginPage() {
         const result = await response.json();
 
         if (!response.ok) {
+          if (result.notVerified) {
+            router.push(`/verify-email?email=${encodeURIComponent(formData.email)}`);
+            return;
+          }
+
           if (result.errors && Array.isArray(result.errors)) {
             const fieldErrors = {};
             result.errors.forEach((error) => {

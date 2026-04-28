@@ -7,6 +7,7 @@ import Image from 'next/image';
 
 export default function SignupPage() {
   const router = useRouter();
+  
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
@@ -147,8 +148,8 @@ export default function SignupPage() {
         const result = await response.json();
 
         if (response.ok) {
-          // Account created — send to login page without auto-signing in
-          router.push('/login');
+          // Account created — send to verification page
+          router.push(`/verify-email?email=${encodeURIComponent(formData.email)}`);
         } else {
           // Handle field-specific errors from backend validation
           if (result.errors && Array.isArray(result.errors)) {
