@@ -92,6 +92,13 @@ export function CartProvider({ children }) {
   }, [cartItems, user, authLoading, isLoading])
 
   const addItem = async (item) => {
+    // Check if item already exists in cart
+    const isExisting = cartItems.some(i => i.artworkId === item.id || i.id === item.id);
+    if (isExisting) {
+      setError('هذا العمل موجود بالفعل في سلتك');
+      return;
+    }
+
     if (user && cartId) {
       const res = await cartService.addItem(cartId, item.id, 1)
       if (res.status === 'success') {
@@ -112,13 +119,7 @@ export function CartProvider({ children }) {
           setError(res.message || 'فشل إضافة المنتج')
         }
     } else if (!user) {
-      setCartItems(prev => {
-        const existingItem = prev.find(i => i.id === item.id)
-        if (existingItem) {
-          return prev.map(i => i.id === item.id ? { ...i, quantity: (i.quantity || 1) + 1 } : i)
-        }
-        return [...prev, { ...item, quantity: 1 }]
-      })
+      setCartItems(prev => [...prev, { ...item, artworkId: item.id, quantity: 1 }])
       setSuccess('تمت الإضافة للسلة بنجاح')
     }
   }
@@ -196,24 +197,35 @@ export function CartProvider({ children }) {
       <AnimatePresence>
         {error && (
           <motion.div
-            initial={{ opacity: 0, y: 50, scale: 0.9 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.9 }}
-            className="fixed bottom-10 left-1/2 -translate-x-1/2 z-[9999] bg-[#3b2012] text-[#e8dcc4] px-6 py-4 rounded-2xl shadow-2xl border border-red-500/50 flex items-center gap-3 font-bold"
+            key="error-toast"
+            initial={{ opacity: 0, y: 100, x: '-50%' }}
+            animate={{ 
+              opacity: 1, 
+              y: 0, 
+              x: ['-50%', '-52%', '-48%', '-51%', '-49%', '-50%'],
+              transition: { x: { duration: 0.4, times: [0, 0.2, 0.4, 0.6, 0.8, 1] } }
+            }}
+            exit={{ opacity: 0, scale: 0.9, y: 20 }}
+            className="fixed bottom-12 left-1/2 z-[99999] bg-white dark:bg-[#111] text-red-600 px-8 py-5 rounded-[2rem] shadow-[0_20px_50px_rgba(0,0,0,0.2)] border-2 border-red-100 dark:border-red-900/30 flex items-center gap-4 font-bold min-w-[320px] justify-center"
           >
-            <i className="fa-solid fa-triangle-exclamation text-red-500 text-xl"></i>
-            {error}
+            <div className="w-10 h-10 bg-red-50 dark:bg-red-900/20 rounded-full flex items-center justify-center shrink-0">
+              <i className="fa-solid fa-circle-exclamation text-xl"></i>
+            </div>
+            <span className="text-lg">{error}</span>
           </motion.div>
         )}
         {success && (
           <motion.div
-            initial={{ opacity: 0, y: 50, scale: 0.9 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.9 }}
-            className="fixed bottom-10 left-1/2 -translate-x-1/2 z-[9999] bg-[#3b2012] text-[#e8dcc4] px-6 py-4 rounded-2xl shadow-2xl border border-green-500/50 flex items-center gap-3 font-bold"
+            key="success-toast"
+            initial={{ opacity: 0, y: 100, x: '-50%' }}
+            animate={{ opacity: 1, y: 0, x: '-50%' }}
+            exit={{ opacity: 0, scale: 0.9, y: 20 }}
+            className="fixed bottom-12 left-1/2 z-[99999] bg-white dark:bg-[#111] text-green-600 px-8 py-5 rounded-[2rem] shadow-[0_20px_50px_rgba(0,0,0,0.2)] border-2 border-green-100 dark:border-green-900/30 flex items-center gap-4 font-bold min-w-[320px] justify-center"
           >
-            <i className="fa-solid fa-circle-check text-green-500 text-xl"></i>
-            {success}
+            <div className="w-10 h-10 bg-green-50 dark:bg-green-900/20 rounded-full flex items-center justify-center shrink-0">
+              <i className="fa-solid fa-circle-check text-xl"></i>
+            </div>
+            <span className="text-lg">{success}</span>
           </motion.div>
         )}
       </AnimatePresence>
