@@ -12,7 +12,7 @@ import ArtworkDetailModal from '@/components/ArtworkDetailModal';
 export default function ArtistPage({ params }) {
   const resolvedParams = use(params);
   const artistId = resolvedParams.id;
-  const { token, isAuthenticated, user, login } = useAuth();
+  const { token, isAuthenticated, user, login, isLoading: isAuthLoading } = useAuth();
   const router = useRouter();
 
   const [artistData, setArtistData] = useState(null);
@@ -348,71 +348,50 @@ export default function ArtistPage({ params }) {
 
   useEffect(() => {
     const fetchArtistDataAndWorks = async () => {
+      // Don't fetch until we know if the user is logged in or not
+      if (isAuthLoading) return;
+
       setIsFetching(true);
       setNotFound(false);
       try {
-        if (token) {
-          // Authenticated: fetch full profile + artworks in parallel
-          const [profileRes, worksRes] = await Promise.all([
-            fetch(`/api/v1/artists/${artistId}`, { headers: { Authorization: `Bearer ${token}` } }),
-            fetch(`/api/v1/artists/${artistId}/artworks`, { headers: { Authorization: `Bearer ${token}` } }),
-          ]);
+        // Fetch profile and artworks in parallel using the direct endpoints (now public)
+        const [profileRes, worksRes] = await Promise.all([
+          fetch(`/api/v1/artists/${artistId}`, { 
+            headers: token ? { Authorization: `Bearer ${token}` } : {} 
+          }),
+          fetch(`/api/v1/artists/${artistId}/artworks`, { 
+            headers: token ? { Authorization: `Bearer ${token}` } : {} 
+          }),
+        ]);
 
-          if (profileRes.status === 404) {
-            setNotFound(true);
-            return;
-          }
-
-          const profileResult = profileRes.ok ? await profileRes.json().catch(() => ({})) : {};
-          const worksResult = worksRes.ok ? await worksRes.json().catch(() => ({})) : {};
-
-          const artist = profileResult?.data;
-          if (artist) {
-            const displayName =
-              artist.artist_name ||
-              [artist.first_name, artist.last_name].filter(Boolean).join(' ') ||
-              'غير متوفر';
-            setArtistData({
-              id: artist.id,
-              name: displayName,
-              location: artist.location || null,
-              phone: artist.phone || null,
-              bio: artist.bio || null,
-              socialMedia: parseSocialMedia(artist.social_media),
-              artistSince: artist.artist_since || null,
-              avatar: artist.profile_image || `https://ui-avatars.com/api/?name=${encodeURIComponent(displayName)}&background=5c4436&color=fff&size=200&font-size=0.4&bold=true`,
-            });
-          }
-
-          const rawWorks = worksResult?.data?.artworks ?? [];
-          setWorks(rawWorks.map(normalizeWork));
-        } else {
-          // Guest: use the public artworks endpoint which embeds artist info
-          const artworksRes = await fetch('/api/v1/artworks?limit=200');
-          const artworksResult = artworksRes.ok ? await artworksRes.json().catch(() => ({})) : {};
-          const rawWorks = artworksResult?.data?.artworks ?? [];
-          const normalizedWorks = rawWorks.map(normalizeWork);
-          const artistWorks = normalizedWorks.filter((w) => String(w.artist_id) === String(artistId));
-
-          if (artistWorks.length === 0) {
-            setNotFound(true);
-            return;
-          }
-
-          const firstWork = artistWorks[0];
-          const displayName = firstWork.artistName || 'غير متوفر';
-          setArtistData({
-            id: artistId,
-            name: displayName,
-            location: firstWork.artistLocation || null,
-            phone: firstWork.artistPhone || null,
-            bio: firstWork.artistBio || null,
-            socialMedia: firstWork.artistSocialMedia || [],
-            artistSince: null,
-            avatar: firstWork.artistAvatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(displayName)}&background=5c4436&color=fff&size=200&font-size=0.4&bold=true`,
-          });
-          setWorks(artistWorks);
+        if (profileRes.status === 404) {
+          setNotFound(true);
+          return;
         }
+
+        const profileResult = profileRes.ok ? await profileRes.json().catch(() => ({})) : {};
+        const worksResult = worksRes.ok ? await worksRes.json().catch(() => ({})) : {};
+
+        const artist = profileResult?.data;
+        if (artist) {
+          const displayName =
+            artist.artist_name ||
+            [artist.first_name, artist.last_name].filter(Boolean).join(' ') ||
+            'غير متوفر';
+          setArtistData({
+            id: artist.id,
+            name: displayName,
+            location: artist.location || null,
+            phone: artist.phone || null,
+            bio: artist.bio || null,
+            socialMedia: parseSocialMedia(artist.social_media),
+            artistSince: artist.artist_since || null,
+            avatar: artist.profile_image || `https://ui-avatars.com/api/?name=${encodeURIComponent(displayName)}&background=5c4436&color=fff&size=200&font-size=0.4&bold=true`,
+          });
+        }
+
+        const rawWorks = worksResult?.data?.artworks ?? [];
+        setWorks(rawWorks.map(normalizeWork));
       } catch (e) {
         console.error('Failed to fetch artist details:', e);
       } finally {
@@ -421,7 +400,7 @@ export default function ArtistPage({ params }) {
     };
 
     fetchArtistDataAndWorks();
-  }, [artistId, token]);
+  }, [artistId, token, isAuthLoading]);
 
   const openSlider = async (work) => {
     setActiveSliderWork(work);

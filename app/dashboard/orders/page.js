@@ -8,22 +8,22 @@ import Image from 'next/image';
 import Link from 'next/link';
 
 const STATUS_MAP = {
-  pending: { label: 'بانتظار الموافقة', color: 'bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-900/10 dark:text-amber-400 dark:border-amber-900/30', icon: 'fa-clock' },
-  approved: { label: 'تم القبول', color: 'bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-900/10 dark:text-blue-400 dark:border-blue-900/30', icon: 'fa-check-circle' },
-  rejected: { label: 'مرفوض', color: 'bg-red-50 text-red-700 border-red-200 dark:bg-red-900/10 dark:text-red-400 dark:border-red-900/30', icon: 'fa-circle-xmark' },
-  preparing: { label: 'قيد التجهيز', color: 'bg-indigo-50 text-indigo-700 border-indigo-200 dark:bg-indigo-900/10 dark:text-indigo-400 dark:border-indigo-900/30', icon: 'fa-box-open' },
-  shipped: { label: 'تم الشحن', color: 'bg-purple-50 text-purple-700 border-purple-200 dark:bg-purple-900/10 dark:text-purple-400 dark:border-purple-900/30', icon: 'fa-truck' },
-  delivered: { label: 'تم التسليم', color: 'bg-green-50 text-green-700 border-green-200 dark:bg-green-900/10 dark:text-green-400 dark:border-green-900/30', icon: 'fa-house-circle-check' },
-  cancelled: { label: 'ملغي', color: 'bg-gray-50 text-gray-500 border-gray-200 dark:bg-gray-800/30 dark:text-gray-400 dark:border-gray-800', icon: 'fa-ban' }
+  pending: { label: 'بانتظار الموافقة', color: 'bg-amber-100 text-amber-800 border-amber-300 dark:bg-amber-900/20 dark:text-amber-400 dark:border-amber-900/50', icon: 'fa-clock' },
+  approved: { label: 'تم القبول', color: 'bg-blue-100 text-blue-800 border-blue-300 dark:bg-blue-900/20 dark:text-blue-400 dark:border-blue-900/50', icon: 'fa-check-circle' },
+  rejected: { label: 'مرفوض', color: 'bg-red-100 text-red-800 border-red-300 dark:bg-red-900/20 dark:text-red-400 dark:border-red-900/50', icon: 'fa-circle-xmark' },
+  preparing: { label: 'قيد التجهيز', color: 'bg-indigo-100 text-indigo-800 border-indigo-300 dark:bg-indigo-900/20 dark:text-indigo-400 dark:border-indigo-900/50', icon: 'fa-box-open' },
+  shipped: { label: 'تم الشحن', color: 'bg-purple-100 text-purple-800 border-purple-300 dark:bg-purple-900/20 dark:text-purple-400 dark:border-purple-900/50', icon: 'fa-truck' },
+  delivered: { label: 'تم التسليم', color: 'bg-green-100 text-green-800 border-green-300 dark:bg-green-900/20 dark:text-green-400 dark:border-green-900/50', icon: 'fa-house-circle-check' },
+  cancelled: { label: 'ملغي', color: 'bg-gray-100 text-gray-600 border-gray-300 dark:bg-gray-800/50 dark:text-gray-400 dark:border-gray-800', icon: 'fa-ban' }
 };
 
 const PARENT_STATUS_MAP = {
-  pending: { label: 'قيد الانتظار', color: 'bg-amber-500 text-white shadow-amber-500/20' },
-  processing: { label: 'قيد التجهيز', color: 'bg-indigo-500 text-white shadow-indigo-500/20' },
-  partially_shipped: { label: 'تم شحن جزء', color: 'bg-blue-500 text-white shadow-blue-500/20' },
-  shipped: { label: 'تم الشحن', color: 'bg-purple-500 text-white shadow-purple-500/20' },
-  completed: { label: 'مكتمل', color: 'bg-green-500 text-white shadow-green-500/20' },
-  cancelled: { label: 'ملغي', color: 'bg-gray-500 text-white shadow-gray-500/20' }
+  pending: { label: 'قيد الانتظار', color: 'bg-amber-600 text-white shadow-lg shadow-amber-600/20' },
+  processing: { label: 'قيد التجهيز', color: 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/20' },
+  partially_shipped: { label: 'تم شحن جزء', color: 'bg-blue-600 text-white shadow-lg shadow-blue-600/20' },
+  shipped: { label: 'تم الشحن', color: 'bg-purple-600 text-white shadow-lg shadow-purple-600/20' },
+  completed: { label: 'مكتمل', color: 'bg-green-600 text-white shadow-lg shadow-green-600/20' },
+  cancelled: { label: 'ملغي', color: 'bg-gray-600 text-white shadow-lg shadow-gray-600/20' }
 };
 
 export default function OrdersDashboard() {
@@ -33,7 +33,7 @@ export default function OrdersDashboard() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [isArtist, setIsArtist] = useState(false);
-  
+
   const [expandedGroups, setExpandedGroups] = useState({});
   const [expandedSales, setExpandedSales] = useState({});
 
@@ -50,7 +50,7 @@ export default function OrdersDashboard() {
       const res = await orderService.getMyOrders(user.id);
       if (res.status === 'success') {
         setOrders(res.data);
-        setIsArtist(res.data.sales.length > 0 || localStorage.getItem('role') === 'artist');
+        setIsArtist(res.data.sales.length > 0 || user?.role === 'artist');
       } else {
         setError(res.message);
       }
@@ -92,8 +92,8 @@ export default function OrdersDashboard() {
             {isArtist ? 'لوحة تحكم الفنان' : 'طلباتي'}
           </h1>
           <p className="text-[#9c7b65] dark:text-[#e8dcc4]/80 text-lg">
-            {isArtist 
-              ? 'أهلاً بك مجدداً، تابع مبيعاتك الفنية وطلباتك الشرائية في مكان واحد' 
+            {isArtist
+              ? 'أهلاً بك مجدداً، تابع مبيعاتك الفنية وطلباتك الشرائية في مكان واحد'
               : 'تابع حالة مشترياتك الفنية من مختلف الفنانين في أثر'}
           </p>
         </header>
@@ -101,14 +101,14 @@ export default function OrdersDashboard() {
         {isArtist && (
           <div className="flex flex-col md:flex-row gap-6 mb-12 items-center justify-between">
             <div className="flex gap-2 bg-white dark:bg-[#111] p-1.5 rounded-2xl border border-[#e8dcc4]/30 dark:border-gray-800 shadow-sm w-full md:w-fit">
-              <button 
+              <button
                 onClick={() => setActiveTab('purchases')}
                 className={`flex-1 md:flex-none px-10 py-3.5 rounded-xl font-bold transition-all flex items-center justify-center gap-2 ${activeTab === 'purchases' ? 'bg-[#3b2012] dark:bg-[#c4a993] text-white dark:text-black shadow-lg' : 'text-[#9c7b65] hover:bg-[#fdfaf7] dark:hover:bg-black/40'}`}
               >
                 <i className="fa-solid fa-cart-shopping text-sm"></i>
                 مشترياتي
               </button>
-              <button 
+              <button
                 onClick={() => setActiveTab('sales')}
                 className={`flex-1 md:flex-none px-10 py-3.5 rounded-xl font-bold transition-all flex items-center justify-center gap-2 ${activeTab === 'sales' ? 'bg-amber-600 dark:bg-amber-500 text-white shadow-lg' : 'text-[#9c7b65] hover:bg-[#fdfaf7] dark:hover:bg-black/40'}`}
               >
@@ -116,7 +116,7 @@ export default function OrdersDashboard() {
                 مبيعاتي
               </button>
             </div>
-            
+
             <div className="flex items-center gap-8 bg-white dark:bg-[#111] px-8 py-4 rounded-3xl border border-[#e8dcc4]/30 dark:border-gray-800 shadow-sm">
               <div className="text-center">
                 <p className="text-[10px] text-gray-400 uppercase tracking-widest mb-1">إجمالي المبيعات</p>
@@ -136,7 +136,7 @@ export default function OrdersDashboard() {
         <div className="space-y-8">
           <AnimatePresence mode="wait">
             {currentOrders.length === 0 ? (
-              <motion.div 
+              <motion.div
                 key="empty"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -158,7 +158,7 @@ export default function OrdersDashboard() {
             ) : activeTab === 'purchases' ? (
               // Buyer View
               currentOrders.map((group, gIdx) => (
-                <motion.div 
+                <motion.div
                   key={group.id}
                   initial={{ opacity: 0, y: 30 }}
                   animate={{ opacity: 1, y: 0 }}
@@ -166,20 +166,20 @@ export default function OrdersDashboard() {
                   className="bg-white dark:bg-[#111] rounded-[3rem] border border-[#e8dcc4]/40 dark:border-gray-800 shadow-xl overflow-hidden mb-12"
                 >
                   {/* Parent Order Header */}
-                  <div 
+                  <div
                     onClick={() => toggleGroup(group.id)}
-                    className="bg-[#3b2012] dark:bg-[#1a1a1a] text-white p-8 md:p-10 flex flex-col lg:flex-row justify-between items-center gap-8 relative cursor-pointer group"
+                    className="bg-[#e9dcd0] dark:bg-[#1a1a1a] text-[#3b2012] dark:text-white p-8 md:p-10 flex flex-col lg:flex-row justify-between items-center gap-8 relative cursor-pointer group"
                   >
-                    <div className="absolute inset-0 bg-brown-gradient opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                    <div className="absolute inset-0 bg-brown-gradient opacity-0 dark:group-hover:opacity-100 transition-opacity duration-500"></div>
                     <div className="flex items-center gap-8 z-10 w-full lg:w-auto">
-                      <div className="w-16 h-16 bg-white/10 rounded-2xl flex items-center justify-center text-3xl shadow-inner">
+                      <div className="w-16 h-16 bg-white dark:bg-white/10 rounded-2xl flex items-center justify-center text-3xl shadow-sm dark:shadow-inner border border-[#e8dcc4]/50 dark:border-none">
                         <i className="fa-solid fa-receipt"></i>
                       </div>
                       <div className="flex-1">
                         <div className="flex items-center gap-4 mb-2">
-                          <p className="text-[10px] text-white/50 uppercase tracking-[0.2em] font-bold">طلب رئيسي</p>
+                          <p className="text-[10px] text-[#9c7b65] dark:text-white/50 uppercase tracking-[0.2em] font-bold">طلب رئيسي</p>
                           {group.parent_status && (
-                            <span className={`px-4 py-1 rounded-full text-[10px] font-black uppercase tracking-wider shadow-lg ${PARENT_STATUS_MAP[group.parent_status]?.color}`}>
+                            <span className={`px-5 py-1.5 rounded-full text-xs font-bold uppercase tracking-wide border shadow-sm ${PARENT_STATUS_MAP[group.parent_status]?.color}`}>
                               {PARENT_STATUS_MAP[group.parent_status]?.label}
                             </span>
                           )}
@@ -189,14 +189,14 @@ export default function OrdersDashboard() {
                     </div>
                     <div className="flex items-center gap-10 md:gap-14 z-10 w-full lg:w-auto justify-between lg:justify-end">
                       <div className="text-center lg:text-right">
-                        <p className="text-[10px] text-white/50 mb-1 uppercase tracking-widest font-bold">التاريخ</p>
+                        <p className="text-[10px] text-[#9c7b65] dark:text-white/50 mb-1 uppercase tracking-widest font-bold">التاريخ</p>
                         <p className="text-lg font-bold">{new Date(group.created_at).toLocaleDateString('ar-EG', { day: 'numeric', month: 'long', year: 'numeric' })}</p>
                       </div>
                       <div className="text-center lg:text-right">
-                        <p className="text-[10px] text-white/50 mb-1 uppercase tracking-widest font-bold">إجمالي الدفع</p>
+                        <p className="text-[10px] text-[#9c7b65] dark:text-white/50 mb-1 uppercase tracking-widest font-bold">إجمالي الدفع</p>
                         <p className="text-3xl font-black">{group.total_price} ₪</p>
                       </div>
-                      <div className={`text-2xl text-white/40 group-hover:text-white transition-all transform ${expandedGroups[group.id] ? 'rotate-180' : ''}`}>
+                      <div className={`text-2xl text-[#9c7b65] dark:text-white/40 group-hover:text-[#3b2012] dark:group-hover:text-white transition-all transform ${expandedGroups[group.id] ? 'rotate-180' : ''}`}>
                         <i className="fa-solid fa-chevron-down"></i>
                       </div>
                     </div>
@@ -204,7 +204,7 @@ export default function OrdersDashboard() {
 
                   <AnimatePresence>
                     {expandedGroups[group.id] && (
-                      <motion.div 
+                      <motion.div
                         initial={{ height: 0, opacity: 0 }}
                         animate={{ height: 'auto', opacity: 1 }}
                         exit={{ height: 0, opacity: 0 }}
@@ -215,11 +215,11 @@ export default function OrdersDashboard() {
                             <div className="w-8 h-8 bg-white dark:bg-[#111] rounded-full flex items-center justify-center text-xs shadow-sm border border-[#e8dcc4]/20 dark:border-gray-800">
                               <i className="fa-solid fa-truck-fast"></i>
                             </div>
-                            {group.children?.length === 1 
-                              ? "شحنة واحدة من فنان واحد" 
+                            {group.children?.length === 1
+                              ? "شحنة واحدة من فنان واحد"
                               : `يحتوي الطلب على ${group.children?.length} شحنات منفصلة:`}
                           </div>
-                          
+
                           <div className="grid grid-cols-1 gap-8">
                             {group.children?.map((order) => (
                               <div key={order.id} className="bg-white dark:bg-[#111] rounded-[2.5rem] border border-[#e8dcc4]/30 dark:border-gray-800 overflow-hidden shadow-sm hover:shadow-md transition-all">
@@ -239,8 +239,8 @@ export default function OrdersDashboard() {
                                         <p className="text-lg font-bold text-[#3b2012] dark:text-[#e8dcc4]">{order.artist?.artist_name || order.artist?.first_name}</p>
                                       </div>
                                     </div>
-                                    <div className={`px-5 py-2 rounded-full border ${STATUS_MAP[order.status]?.color} text-[11px] font-black flex items-center gap-3 shadow-sm`}>
-                                      <i className={`fa-solid ${STATUS_MAP[order.status]?.icon}`}></i>
+                                    <div className={`px-6 py-2.5 rounded-full border ${STATUS_MAP[order.status]?.color} text-xs font-bold flex items-center gap-3 shadow-md`}>
+                                      <i className={`fa-solid ${STATUS_MAP[order.status]?.icon} text-sm`}></i>
                                       {STATUS_MAP[order.status]?.label}
                                     </div>
                                   </div>
@@ -267,17 +267,17 @@ export default function OrdersDashboard() {
                                         <p className="text-[10px] text-gray-400 mb-1 uppercase font-bold tracking-widest">إجمالي الشحنة</p>
                                         <p className="text-2xl font-black text-[#3b2012] dark:text-[#e8dcc4]">{order.total_price} ₪</p>
                                       </div>
-                                      
+
                                       <div className="space-y-3">
                                         {order.status === 'shipped' ? (
-                                          <button 
+                                          <button
                                             onClick={(e) => { e.stopPropagation(); handleStatusUpdate(order.id, 'delivered'); }}
                                             className="w-full py-4 bg-green-600 dark:bg-green-700 text-white rounded-2xl text-xs font-bold hover:scale-105 active:scale-95 transition-all shadow-xl shadow-green-600/20"
                                           >
                                             تأكيد الاستلام
                                           </button>
                                         ) : !['shipped', 'delivered', 'rejected', 'cancelled'].includes(order.status) ? (
-                                          <button 
+                                          <button
                                             onClick={(e) => {
                                               e.stopPropagation();
                                               if (window.confirm('هل أنت متأكد من رغبتك في إلغاء هذه الشحنة؟')) {
@@ -310,14 +310,14 @@ export default function OrdersDashboard() {
             ) : (
               // Artist View (Sales)
               currentOrders.map((order, idx) => (
-                <motion.div 
+                <motion.div
                   key={order.id}
                   initial={{ opacity: 0, x: 20 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: idx * 0.05 }}
                   className="bg-white dark:bg-[#111] rounded-[2.5rem] border border-[#e8dcc4]/40 dark:border-gray-800 shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden"
                 >
-                  <div 
+                  <div
                     onClick={() => toggleSale(order.id)}
                     className="p-8 cursor-pointer flex flex-col md:flex-row justify-between items-center gap-6 group hover:bg-[#fdfaf7] dark:hover:bg-white/5 transition-colors"
                   >
@@ -328,14 +328,14 @@ export default function OrdersDashboard() {
                       <div className="flex-1">
                         <div className="flex flex-wrap items-center gap-3 mb-1.5">
                           <h3 className="text-xl font-bold text-[#3b2012] dark:text-[#e8dcc4]">طلب #{order.id.slice(0, 8)}</h3>
-                          <span className={`px-4 py-1 rounded-full border ${STATUS_MAP[order.status]?.color} text-[10px] font-black uppercase tracking-wider shadow-sm`}>
+                          <span className={`px-6 py-2 rounded-full border ${STATUS_MAP[order.status]?.color} text-xs font-bold uppercase tracking-wide shadow-md`}>
                             {STATUS_MAP[order.status]?.label}
                           </span>
                         </div>
                         <div className="flex flex-wrap gap-x-6 gap-y-2 text-xs font-bold text-gray-500">
                           <span className="flex items-center gap-2"><i className="fa-regular fa-calendar text-amber-600"></i>{new Date(order.created_at).toLocaleDateString('ar-EG')}</span>
                           <span className="flex items-center gap-2"><i className="fa-solid fa-money-bill-wave text-green-600"></i>{order.total_price} ₪</span>
-                          <span className="flex items-center gap-2"><i className="fa-solid fa-location-dot text-red-500"></i>{order.shipping_city}</span>
+                          <span className="flex items-center gap-2 truncate max-w-[150px]" title={order.shipping_city}><i className="fa-solid fa-location-dot text-red-500"></i>{order.shipping_city}</span>
                         </div>
                       </div>
                     </div>
@@ -348,7 +348,7 @@ export default function OrdersDashboard() {
 
                   <AnimatePresence>
                     {expandedSales[order.id] && (
-                      <motion.div 
+                      <motion.div
                         initial={{ height: 0, opacity: 0 }}
                         animate={{ height: 'auto', opacity: 1 }}
                         exit={{ height: 0, opacity: 0 }}
@@ -400,7 +400,7 @@ export default function OrdersDashboard() {
                                 </div>
                                 <div className="pt-6 border-t border-amber-200/50 dark:border-amber-900/20">
                                   <p className="text-[10px] text-amber-800/60 mb-2 uppercase tracking-widest">عنوان الشحن</p>
-                                  <p className="text-sm text-[#3b2012] dark:text-[#e8dcc4] leading-relaxed font-bold">
+                                  <p className="text-sm text-[#3b2012] dark:text-[#e8dcc4] leading-relaxed font-bold break-all">
                                     <i className="fa-solid fa-map-marker-alt text-red-500 ml-2"></i>
                                     {order.shipping_city}، {order.shipping_address}
                                   </p>
@@ -417,14 +417,14 @@ export default function OrdersDashboard() {
                                     <p className="text-[10px] text-amber-700 dark:text-amber-400 font-black">قرارك مطلوب لمعالجة هذا الطلب</p>
                                   </div>
                                   <div className="grid grid-cols-2 gap-4">
-                                    <button 
+                                    <button
                                       onClick={() => handleStatusUpdate(order.id, 'approved')}
                                       className="py-4 bg-green-600 hover:bg-green-700 text-white rounded-2xl text-xs font-black shadow-lg shadow-green-600/20 flex items-center justify-center gap-3 transition-all hover:scale-105"
                                     >
                                       <i className="fa-solid fa-check"></i>
                                       قبول
                                     </button>
-                                    <button 
+                                    <button
                                       onClick={() => handleStatusUpdate(order.id, 'rejected')}
                                       className="py-4 bg-white dark:bg-black text-red-600 border-2 border-red-50 dark:border-red-900/20 hover:bg-red-50 dark:hover:bg-red-900/10 rounded-2xl text-xs font-black transition-all"
                                     >
@@ -442,7 +442,7 @@ export default function OrdersDashboard() {
                                     )}
                                   </div>
                                   <div className="relative">
-                                    <select 
+                                    <select
                                       value={order.status}
                                       onChange={(e) => handleStatusUpdate(order.id, e.target.value)}
                                       disabled={['delivered', 'rejected', 'cancelled'].includes(order.status)}

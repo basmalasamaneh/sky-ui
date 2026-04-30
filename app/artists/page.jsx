@@ -161,7 +161,7 @@ export default function ArtistsDirectoryPage() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: i * 0.1 }}
               >
-                <Link 
+                <Link
                   href={`/artists/${artist.id}`}
                   className="block bg-white dark:bg-black rounded-3xl p-6 shadow-sm border border-[#e8dcc4] dark:border-gray-800 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 group"
                 >
@@ -195,7 +195,7 @@ export default function ArtistsDirectoryPage() {
                         <i className="fa-solid fa-image text-gray-300 text-2xl"></i>
                       </div>
                     )}
-                    
+
                     {/* Fill empty slots with generic placeholders so design doesn't break */}
                     {Array.from({ length: Math.max(0, 3 - artist.previewImages.length) }).map((_, idx) => (
                       <div key={`empty-${idx}`} className="h-24 flex-1 rounded-xl bg-[#fdfaf7] dark:bg-black border border-[#e8dcc4]/50 flex items-center justify-center">
