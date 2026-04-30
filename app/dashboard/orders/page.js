@@ -61,6 +61,12 @@ export default function OrdersDashboard() {
     }
   };
 
+  const [confirmModal, setConfirmModal] = useState({ show: false, orderId: null, status: null, message: '' });
+
+  const triggerConfirm = (orderId, status, message) => {
+    setConfirmModal({ show: true, orderId, status, message });
+  };
+
   const handleStatusUpdate = async (orderId, newStatus) => {
     try {
       const res = await orderService.updateStatus(orderId, newStatus);
@@ -120,13 +126,15 @@ export default function OrdersDashboard() {
             <div className="flex items-center gap-8 bg-white dark:bg-[#111] px-8 py-4 rounded-3xl border border-[#e8dcc4]/30 dark:border-gray-800 shadow-sm">
               <div className="text-center">
                 <p className="text-[10px] text-gray-400 uppercase tracking-widest mb-1">إجمالي المبيعات</p>
-                <p className="text-2xl font-black text-amber-600">{orders.sales.length}</p>
+                <p className="text-2xl font-black text-amber-600">
+                  {orders.sales.filter(o => o.status === 'delivered').length}
+                </p>
               </div>
               <div className="w-px h-10 bg-[#e8dcc4]/30 dark:bg-gray-800"></div>
               <div className="text-center">
                 <p className="text-[10px] text-gray-400 uppercase tracking-widest mb-1">طلبات نشطة</p>
                 <p className="text-2xl font-black text-[#3b2012] dark:text-[#e8dcc4]">
-                  {orders.sales.filter(o => !['delivered', 'rejected'].includes(o.status)).length}
+                  {orders.sales.filter(o => !['delivered', 'rejected', 'cancelled'].includes(o.status)).length}
                 </p>
               </div>
             </div>
@@ -280,9 +288,7 @@ export default function OrdersDashboard() {
                                           <button
                                             onClick={(e) => {
                                               e.stopPropagation();
-                                              if (window.confirm('هل أنت متأكد من رغبتك في إلغاء هذه الشحنة؟')) {
-                                                handleStatusUpdate(order.id, 'cancelled')
-                                              }
+                                              triggerConfirm(order.id, 'cancelled', 'هل أنت متأكد من رغبتك في إلغاء هذه الشحنة؟ لا يمكن التراجع عن هذا الإجراء.');
                                             }}
                                             className="w-full py-3.5 border-2 border-red-50 dark:border-red-900/10 text-red-500 rounded-2xl text-[11px] font-bold hover:bg-red-50 dark:hover:bg-red-900/10 transition-all"
                                           >
@@ -418,14 +424,14 @@ export default function OrdersDashboard() {
                                   </div>
                                   <div className="grid grid-cols-2 gap-4">
                                     <button
-                                      onClick={() => handleStatusUpdate(order.id, 'approved')}
+                                      onClick={() => triggerConfirm(order.id, 'approved', 'هل أنت متأكد من قبول هذا الطلب؟ سيتم إشعار المشتري بذلك.')}
                                       className="py-4 bg-green-600 hover:bg-green-700 text-white rounded-2xl text-xs font-black shadow-lg shadow-green-600/20 flex items-center justify-center gap-3 transition-all hover:scale-105"
                                     >
                                       <i className="fa-solid fa-check"></i>
                                       قبول
                                     </button>
                                     <button
-                                      onClick={() => handleStatusUpdate(order.id, 'rejected')}
+                                      onClick={() => triggerConfirm(order.id, 'rejected', 'هل أنت متأكد من رفض هذا الطلب؟')}
                                       className="py-4 bg-white dark:bg-black text-red-600 border-2 border-red-50 dark:border-red-900/20 hover:bg-red-50 dark:hover:bg-red-900/10 rounded-2xl text-xs font-black transition-all"
                                     >
                                       <i className="fa-solid fa-xmark"></i>
@@ -444,7 +450,7 @@ export default function OrdersDashboard() {
                                   <div className="relative">
                                     <select
                                       value={order.status}
-                                      onChange={(e) => handleStatusUpdate(order.id, e.target.value)}
+                                      onChange={(e) => triggerConfirm(order.id, e.target.value, `هل أنت متأكد من تغيير حالة الطلب إلى "${STATUS_MAP[e.target.value]?.label}"؟`)}
                                       disabled={['delivered', 'rejected', 'cancelled'].includes(order.status)}
                                       className="w-full p-4 bg-white dark:bg-black border-2 border-[#e8dcc4] dark:border-gray-800 rounded-2xl text-xs font-black focus:ring-4 focus:ring-amber-500/10 focus:border-amber-500 outline-none appearance-none transition-all disabled:opacity-50 disabled:bg-gray-50 dark:disabled:bg-gray-900/20"
                                     >
@@ -471,6 +477,52 @@ export default function OrdersDashboard() {
           </AnimatePresence>
         </div>
       </div>
+
+      {/* Custom Confirmation Modal */}
+      <AnimatePresence>
+        {confirmModal.show && (
+          <div className="fixed inset-0 z-[1000] flex items-center justify-center p-4">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setConfirmModal({ ...confirmModal, show: false })}
+              className="absolute inset-0 bg-[#3b2012]/40 backdrop-blur-sm"
+            />
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0, y: 20 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.9, opacity: 0, y: 20 }}
+              className="bg-white dark:bg-[#111] w-full max-w-md rounded-[2.5rem] p-10 shadow-2xl relative z-10 text-center border border-[#e8dcc4]/30 dark:border-gray-800"
+            >
+              <div className="w-20 h-20 bg-amber-50 dark:bg-amber-900/20 rounded-full flex items-center justify-center mx-auto mb-8 text-amber-600 shadow-inner">
+                <i className="fa-solid fa-circle-question text-4xl"></i>
+              </div>
+              <h3 className="text-2xl font-bold text-[#3b2012] dark:text-[#e8dcc4] mb-4 font-art">تأكيد الإجراء</h3>
+              <p className="text-[#9c7b65] dark:text-[#e8dcc4]/70 text-lg mb-10 leading-relaxed">
+                {confirmModal.message}
+              </p>
+              <div className="flex flex-col sm:flex-row gap-4">
+                <button
+                  onClick={() => {
+                    handleStatusUpdate(confirmModal.orderId, confirmModal.status);
+                    setConfirmModal({ ...confirmModal, show: false });
+                  }}
+                  className="flex-1 py-4 bg-[#3b2012] dark:bg-amber-600 text-white rounded-2xl font-bold shadow-lg hover:scale-105 active:scale-95 transition-all"
+                >
+                  نعم، متأكد
+                </button>
+                <button
+                  onClick={() => setConfirmModal({ ...confirmModal, show: false })}
+                  className="flex-1 py-4 bg-gray-100 dark:bg-gray-800 text-[#3b2012] dark:text-[#e8dcc4] rounded-2xl font-bold hover:bg-gray-200 dark:hover:bg-gray-700 transition-all"
+                >
+                  تراجع
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

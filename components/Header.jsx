@@ -26,7 +26,7 @@ export const Header = () => {
   const [isBecomeArtistModalOpen, setIsBecomeArtistModalOpen] = useState(false);
   
   const isArtist = user?.role === 'artist';
-  const isGlobalSearchDisabledRoute = pathname === '/about' || pathname === '/works/my' || pathname === '/products' || pathname.startsWith('/artists');
+  const isGlobalSearchDisabledRoute = pathname !== '/';
   const canUseGlobalSearch = !isGlobalSearchDisabledRoute;
   const userFirstName = user?.firstName || user?.first_name || 'مستخدم';
   const displayName = isArtist ? (user?.artistName || user?.artist_name || userFirstName) : userFirstName;

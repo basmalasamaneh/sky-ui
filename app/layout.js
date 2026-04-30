@@ -6,9 +6,9 @@ import { CartProvider } from '../contexts/CartContext'
 import { SearchProvider } from '../contexts/SearchContext'
 
 export const metadata = {
-  title: 'متجر أثر | فنانو فلسطين',
-  description: '',
-  keywords: [''],
+  title: 'PalVet | نظام إدارة الحيوانات الأليفة',
+  description: 'المنصة الشاملة للعناية بحيوانك الأليف والخدمات البيطرية في فلسطين',
+  keywords: ['PalVet', 'حيوانات أليفة', 'بيطرة', 'فلسطين', 'عيادات بيطرية'],
 }
 
 export default function RootLayout({ children }) {

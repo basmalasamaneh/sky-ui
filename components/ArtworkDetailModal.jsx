@@ -384,17 +384,20 @@ export default function ArtworkDetailModal({ work, isLoadingDetails = false, onC
                   </p>
                 </div>
                 <button 
-                  onClick={() => {
+                  onClick={async () => {
                     if (work.quantity <= 0) return;
-                    setIsAdding(true);
-                    addItem({
+                    const success = await addItem({
                       id: work.id,
                       title: work.title,
                       price: work.price,
                       image: work.images?.[0] || fallbackImage,
                       artistName: work.artistName
                     });
-                    setTimeout(() => setIsAdding(false), 1000);
+                    
+                    if (success) {
+                      setIsAdding(true);
+                      setTimeout(() => setIsAdding(false), 2000);
+                    }
                   }}
                   disabled={isAdding || work.quantity <= 0}
                   className={`h-14 px-10 rounded-2xl font-bold flex items-center justify-center gap-3 shadow-xl transition-all active:scale-95 group ${work.quantity <= 0 ? 'bg-gray-100 text-gray-400 cursor-not-allowed' : isAdding ? 'bg-green-600 text-white' : 'bg-[#3b2012] text-white hover:bg-[#5c3d2e]'}`}

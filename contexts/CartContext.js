@@ -18,9 +18,10 @@ export function CartProvider({ children }) {
   const [shippingArea, setShippingArea] = useState(SHIPPING_AREAS[0])
   const [error, setError] = useState(null)
   const [success, setSuccess] = useState(null)
+  const [info, setInfo] = useState(null)
   const { user } = useAuth()
 
-  // Auto-clear error after 3s
+  // Auto-clear notifications
   useEffect(() => {
     if (error) {
       const timer = setTimeout(() => setError(null), 3000)
@@ -34,6 +35,13 @@ export function CartProvider({ children }) {
       return () => clearTimeout(timer)
     }
   }, [success])
+
+  useEffect(() => {
+    if (info) {
+      const timer = setTimeout(() => setInfo(null), 3000)
+      return () => clearTimeout(timer)
+    }
+  }, [info])
 
   // Load cart from API if logged in, otherwise localStorage
   useEffect(() => {
@@ -64,35 +72,53 @@ export function CartProvider({ children }) {
   }, [user])
 
   const addItem = async (item) => {
+    // التحقق مما إذا كان المنتج موجوداً بالفعل في السلة
+    // نستخدم String() لضمان مطابقة المعرفات حتى لو اختلف نوعها (رقم vs نص)
+    // ونفحص artworkId (للمسجلين) و id (للضيوف)
+    const isAlreadyInCart = cartItems.some(i =>
+      String(i.artworkId || i.id) === String(item.id)
+    );
+
+    if (isAlreadyInCart) {
+      setInfo('هذا المنتج موجود بالفعل في سلتك');
+      return false;
+    }
+
     if (user && cartId) {
       const res = await cartService.addItem(cartId, item.id, 1)
       if (res.status === 'success') {
         // Refresh cart from server
         const fullCart = await cartService.getCart(cartId)
-          setCartItems(fullCart.data.items.map(i => ({
-            id: i.id,
-            artworkId: i.artwork.id,
-            title: i.artwork.title,
-            price: i.artwork.price,
-            quantity: i.quantity,
-            stock: i.artwork.quantity,
-            image: i.artwork.images?.find(img => img.is_featured)?.url || i.artwork.images?.[0]?.url || 'placeholder.jpg',
-            artistName: i.artwork.users?.artist_name || 'فنان'
-          })))
-          setSuccess('تمت الإضافة للسلة بنجاح')
-        } else {
-          setError(res.message || 'فشل إضافة المنتج')
-        }
+        setCartItems(fullCart.data.items.map(i => ({
+          id: i.id,
+          artworkId: i.artwork.id,
+          title: i.artwork.title,
+          price: i.artwork.price,
+          quantity: i.quantity,
+          stock: i.artwork.quantity,
+          image: i.artwork.images?.find(img => img.is_featured)?.url || i.artwork.images?.[0]?.url || 'placeholder.jpg',
+          artistName: i.artwork.users?.artist_name || 'فنان'
+        })))
+        setSuccess('تمت الإضافة للسلة بنجاح')
+        return true;
+      } else {
+        setError(res.message || 'فشل إضافة المنتج')
+        return false;
+      }
     } else if (!user) {
       setCartItems(prev => {
         const existingItem = prev.find(i => i.id === item.id)
         if (existingItem) {
-          return prev.map(i => i.id === item.id ? { ...i, quantity: (i.quantity || 1) + 1 } : i)
+          return prev;
         }
-        return [...prev, { ...item, quantity: 1 }]
+        const newCart = [...prev, { ...item, quantity: 1 }];
+        localStorage.setItem('sky-cart', JSON.stringify(newCart));
+        return newCart;
       })
       setSuccess('تمت الإضافة للسلة بنجاح')
+      return true;
     }
+    return false;
   }
 
   const removeItem = async (id) => {
@@ -109,7 +135,7 @@ export function CartProvider({ children }) {
       removeItem(id);
       return;
     }
-    
+
     if (user && cartId) {
       try {
         const res = await cartService.updateQuantity(cartId, id, quantity);
@@ -145,10 +171,10 @@ export function CartProvider({ children }) {
   const totalPrice = itemsPrice + shippingFee
 
   return (
-    <CartContext.Provider value={{ 
+    <CartContext.Provider value={{
       user,
-      cartItems, 
-      totalItems, 
+      cartItems,
+      totalItems,
       totalPrice,
       itemsPrice,
       shippingFee,
@@ -156,13 +182,14 @@ export function CartProvider({ children }) {
       setShippingArea,
       error,
       setError,
-      addItem, 
-      removeItem, 
-      updateQuantity, 
-      clearCart 
+      setInfo,
+      addItem,
+      removeItem,
+      updateQuantity,
+      clearCart
     }}>
       {children}
-      
+
       {/* Toast Notification */}
       <AnimatePresence>
         {error && (
@@ -185,6 +212,17 @@ export function CartProvider({ children }) {
           >
             <i className="fa-solid fa-circle-check text-green-500 text-xl"></i>
             {success}
+          </motion.div>
+        )}
+        {info && (
+          <motion.div
+            initial={{ opacity: 0, y: 50, scale: 0.9 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.9 }}
+            className="fixed bottom-10 left-1/2 -translate-x-1/2 z-[9999] bg-[#3b2012] text-[#e8dcc4] px-6 py-4 rounded-2xl shadow-2xl border border-amber-500/50 flex items-center gap-3 font-bold"
+          >
+            <i className="fa-solid fa-circle-info text-amber-500 text-xl"></i>
+            {info}
           </motion.div>
         )}
       </AnimatePresence>
