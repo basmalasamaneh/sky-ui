@@ -24,10 +24,10 @@ export const Header = () => {
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [isSearchVisible, setIsSearchVisible] = useState(false);
   const [isBecomeArtistModalOpen, setIsBecomeArtistModalOpen] = useState(false);
-  
+
   const isArtist = user?.role === 'artist';
-  const isGlobalSearchDisabledRoute = pathname === '/about' || pathname === '/works/my' || pathname === '/products' || pathname.startsWith('/artists');
-  const canUseGlobalSearch = !isGlobalSearchDisabledRoute;
+  const isGlobalSearchDisabledRoute = pathname !== '/';
+  const canUseGlobalSearch = pathname === '/';
   const userFirstName = user?.firstName || user?.first_name || 'مستخدم';
   const displayName = isArtist ? (user?.artistName || user?.artist_name || userFirstName) : userFirstName;
   const userInitial = displayName?.charAt(0).toUpperCase() || 'م';
@@ -50,20 +50,20 @@ export const Header = () => {
       <header id="main-header" className="fixed top-0 z-50 w-full border-b bg-white dark:bg-black/95 backdrop-blur-md shadow-sm" dir="rtl">
         <div className="container mx-auto px-4">
           <div className="flex h-16 items-center justify-between">
-            
+
             {/* Logo */}
             <Link href="/" className="flex items-center gap-4 group shrink-0">
               <div className="relative w-12 h-12 transition-transform group-hover:scale-110 duration-300">
-                <Image 
-                  src="/images/logo.png" 
-                  alt="Logo Athar" 
-                  fill 
+                <Image
+                  src="/images/logo.png"
+                  alt="Logo Athar"
+                  fill
                   className="object-contain dark:hidden"
                 />
-                <Image 
-                  src="/images/icon-dark.png" 
-                  alt="Logo Athar" 
-                  fill 
+                <Image
+                  src="/images/icon-dark.png"
+                  alt="Logo Athar"
+                  fill
                   className="object-contain hidden dark:block"
                 />
               </div>
@@ -78,12 +78,12 @@ export const Header = () => {
             <div className="flex-1 max-w-xl mx-2 md:mx-8 relative flex justify-center">
               <AnimatePresence mode="wait">
                 {!isSearchVisible || !canUseGlobalSearch ? (
-                  <motion.nav 
+                  <motion.nav
                     key="nav"
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -10 }}
-                    className="hidden lg:flex items-center gap-10 bg-[#fafafa]/80 dark:bg-black/80 px-12 py-3 rounded-full border border-gray-100 dark:border-gray-800 dark:border-gray-800/50 shadow-inner" 
+                    className="hidden lg:flex items-center gap-10 bg-[#fafafa]/80 dark:bg-black/80 px-12 py-3 rounded-full border border-gray-100 dark:border-gray-800 dark:border-gray-800/50 shadow-inner"
                     dir="rtl"
                   >
                     <Link href="/" className="text-[16px] font-bold text-gray-700 dark:text-[#e8dcc4] hover:text-[#5c4436] dark:text-[#e8dcc4] transition-all hover:scale-105 duration-300 font-art">الرئيسية</Link>
@@ -92,7 +92,7 @@ export const Header = () => {
                     <Link href="/about" className="text-[16px] font-bold text-gray-700 dark:text-[#e8dcc4] hover:text-[#5c4436] dark:text-[#e8dcc4] transition-all hover:scale-105 duration-300 font-art">عن أثر</Link>
                   </motion.nav>
                 ) : (
-                  <motion.div 
+                  <motion.div
                     key="search"
                     initial={{ width: 0, opacity: 0 }}
                     animate={{ width: "100%", opacity: 1 }}
@@ -101,9 +101,9 @@ export const Header = () => {
                   >
                     <div className="relative w-full flex items-center bg-[#f2f0eb] dark:bg-black border border-[#d2cfc7] dark:border-gray-800 rounded-full px-5 shadow-inner gap-3">
                       <i className="fa-solid fa-magnifying-glass text-[#9c7b65] dark:text-[#e8dcc4] text-sm shrink-0"></i>
-                      <input 
+                      <input
                         autoFocus
-                        type="text" 
+                        type="text"
                         placeholder="ابحث عن فنان، عمل ..."
                         value={globalSearchQuery}
                         onChange={(e) => setGlobalSearchQuery(e.target.value)}
@@ -128,7 +128,7 @@ export const Header = () => {
             <div className="flex items-center gap-2 md:gap-5 shrink-0">
               <div className="flex items-center gap-2 text-gray-400">
                 {canUseGlobalSearch && (
-                  <button 
+                  <button
                     onClick={() => setIsSearchVisible(!isSearchVisible)}
                     className={`hover:text-[#5c4436] dark:text-[#e8dcc4] transition-all p-2.5 rounded-full ${isSearchVisible ? 'bg-brown-gradient text-white' : 'hover:bg-gray-100 dark:hover:bg-gray-800 dark:bg-gray-800'}`}
                   >
@@ -161,7 +161,7 @@ export const Header = () => {
                 ) : (
                   <div className="flex items-center gap-4">
                     {!isArtist && (
-                      <button 
+                      <button
                         onClick={() => setIsBecomeArtistModalOpen(true)}
                         className="bg-[#f0ece6] dark:bg-black text-[#5c4436] dark:text-[#e8dcc4] hover:bg-[#5c4436] hover:text-white text-[13px] font-bold px-5 py-2.5 rounded-full transition-all duration-300 font-art flex items-center gap-2 border border-[#5c4436]/10"
                       >
@@ -169,9 +169,9 @@ export const Header = () => {
                         <span>انضم كفنان</span>
                       </button>
                     )}
-                    
+
                     <div className="relative">
-                      <button 
+                      <button
                         onClick={() => setUserMenuOpen(!userMenuOpen)}
                         className="flex items-center gap-3 bg-white dark:bg-black px-3 py-1.5 rounded-full border-2 border-[#e8dcc4] dark:border-gray-800 shadow-sm hover:shadow-md hover:border-[#6b4c3b] transition-all duration-300 group"
                       >
@@ -208,8 +208,8 @@ export const Header = () => {
                               className="absolute left-0 mt-3 w-48 bg-white dark:bg-black rounded-2xl shadow-xl border border-[#e8dcc4]/50 z-20 overflow-hidden py-2"
                             >
                               {isArtist && (
-                                <Link 
-                                  href={`/artists/${user?.id}`} 
+                                <Link
+                                  href={`/artists/${user?.id}`}
                                   className="flex items-center gap-3 px-5 py-3 text-gray-700 dark:text-[#e8dcc4] hover:bg-[#fdfaf7] dark:bg-black hover:text-[#3b2012] dark:text-[#e8dcc4] transition-colors text-right font-art"
                                   onClick={() => setUserMenuOpen(false)}
                                 >
@@ -219,8 +219,8 @@ export const Header = () => {
                               )}
 
                               {isArtist && (
-                                <Link 
-                                  href="/works/my" 
+                                <Link
+                                  href="/works/my"
                                   className="flex items-center gap-3 px-5 py-3 text-gray-700 dark:text-[#e8dcc4] hover:bg-[#fdfaf7] dark:bg-black hover:text-[#3b2012] dark:text-[#e8dcc4] transition-colors text-right font-art"
                                   onClick={() => setUserMenuOpen(false)}
                                 >
@@ -228,28 +228,28 @@ export const Header = () => {
                                   <span className="text-sm font-bold">أعمالي الفنية</span>
                                 </Link>
                               )}
-                              
-                              <Link 
-                                href="/dashboard/orders" 
+
+                              <Link
+                                href="/dashboard/orders"
                                 className="flex items-center gap-3 px-5 py-3 text-gray-700 dark:text-[#e8dcc4] hover:bg-[#fdfaf7] dark:bg-black hover:text-[#3b2012] dark:text-[#e8dcc4] transition-colors text-right font-art"
                                 onClick={() => setUserMenuOpen(false)}
                               >
                                 <i className="fa-solid fa-box text-[#9c7b65] dark:text-[#e8dcc4]"></i>
                                 <span className="text-sm font-bold">طلباتي</span>
                               </Link>
-                              
-                              <Link 
-                                href="/settings" 
+
+                              <Link
+                                href="/settings"
                                 className="flex items-center gap-3 px-5 py-3 text-gray-700 dark:text-[#e8dcc4] hover:bg-[#fdfaf7] dark:bg-black hover:text-[#3b2012] dark:text-[#e8dcc4] transition-colors text-right font-art"
                                 onClick={() => setUserMenuOpen(false)}
                               >
                                 <i className="fa-solid fa-gear text-[#9c7b65] dark:text-[#e8dcc4]"></i>
                                 <span className="text-sm font-bold">الإعدادات</span>
                               </Link>
-                              
+
                               <div className="h-px bg-gray-100 dark:bg-gray-800 my-1 mx-4"></div>
-                              
-                              <button 
+
+                              <button
                                 onClick={() => {
                                   logout();
                                   setUserMenuOpen(false);
@@ -268,8 +268,8 @@ export const Header = () => {
                 )}
               </div>
 
-              <button 
-                className="lg:hidden text-gray-600 p-2" 
+              <button
+                className="lg:hidden text-gray-600 p-2"
                 onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               >
                 {mobileMenuOpen ? <i className="fa-solid fa-xmark text-2xl"></i> : <i className="fa-solid fa-bars-staggered text-2xl"></i>}
@@ -281,7 +281,7 @@ export const Header = () => {
         {/* Mobile Drawer */}
         <AnimatePresence>
           {mobileMenuOpen && (
-            <motion.div 
+            <motion.div
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: 'auto' }}
               exit={{ opacity: 0, height: 0 }}
@@ -301,7 +301,7 @@ export const Header = () => {
                   ) : (
                     <div className="flex flex-col gap-3" dir="rtl">
                       {!isArtist && (
-                        <button 
+                        <button
                           onClick={() => {
                             setIsBecomeArtistModalOpen(true);
                             setMobileMenuOpen(false);
@@ -312,7 +312,7 @@ export const Header = () => {
                           <span>انضم كفنان</span>
                         </button>
                       )}
-                      
+
                       <div className="flex items-center justify-between bg-[#fdfaf7] dark:bg-black p-5 rounded-2xl border border-[#e8dcc4]/50 shadow-sm">
                         <div className="flex items-center gap-4">
                           <div className="w-12 h-12 bg-brown-gradient rounded-full flex items-center justify-center text-white text-xl font-bold shadow-md border-2 border-white overflow-hidden">
@@ -353,7 +353,7 @@ export const Header = () => {
                           </Link>
                         </div>
                       </div>
-                      <button 
+                      <button
                         onClick={() => {
                           logout();
                           setMobileMenuOpen(false);
@@ -372,9 +372,9 @@ export const Header = () => {
         </AnimatePresence>
       </header>
 
-      <BecomeArtistModal 
-        isOpen={isBecomeArtistModalOpen} 
-        onClose={() => setIsBecomeArtistModalOpen(false)} 
+      <BecomeArtistModal
+        isOpen={isBecomeArtistModalOpen}
+        onClose={() => setIsBecomeArtistModalOpen(false)}
         user={user}
       />
     </>
