@@ -31,8 +31,8 @@ export default function OrdersDashboard() {
   const [activeTab, setActiveTab] = useState('purchases');
   const [orders, setOrders] = useState({ purchases: [], sales: [] });
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
   const [isArtist, setIsArtist] = useState(false);
+  const [confirmModal, setConfirmModal] = useState({ isOpen: false, orderId: null, status: null, title: '', message: '' });
 
   const [expandedGroups, setExpandedGroups] = useState({});
   const [expandedSales, setExpandedSales] = useState({});
@@ -62,10 +62,30 @@ export default function OrdersDashboard() {
   };
 
   const handleStatusUpdate = async (orderId, newStatus) => {
+    // If it's a destructive action, show confirmation first
+    if (newStatus === 'cancelled' || newStatus === 'rejected') {
+      const isCancellation = newStatus === 'cancelled';
+      setConfirmModal({
+        isOpen: true,
+        orderId,
+        status: newStatus,
+        title: isCancellation ? 'تأكيد إلغاء الطلب' : 'تأكيد رفض الطلب',
+        message: isCancellation 
+          ? 'هل أنت متأكد من رغبتك في إلغاء هذه الشحنة؟ لن تتمكن من التراجع عن هذا القرار لاحقاً.'
+          : 'هل أنت متأكد من رغبتك في رفض هذا الطلب؟ سيتم إخطار المشتري بقرارك.'
+      });
+      return;
+    }
+
+    executeStatusUpdate(orderId, newStatus);
+  };
+
+  const executeStatusUpdate = async (orderId, newStatus) => {
     try {
       const res = await orderService.updateStatus(orderId, newStatus);
       if (res.status === 'success') {
         fetchOrders();
+        setConfirmModal({ isOpen: false, orderId: null, status: null, title: '', message: '' });
       } else {
         alert(res.message);
       }
@@ -85,7 +105,8 @@ export default function OrdersDashboard() {
   const currentOrders = activeTab === 'purchases' ? orders.purchases : orders.sales;
 
   return (
-    <div className="min-h-screen bg-[#fdfaf7] dark:bg-black pt-12 pb-20" dir="rtl">
+    <>
+      <div className="min-h-screen bg-[#fdfaf7] dark:bg-black pt-12 pb-20" dir="rtl">
       <div className="container mx-auto px-4 max-w-6xl">
         <header className="mb-12 text-center md:text-right">
           <h1 className="text-4xl md:text-5xl font-bold text-[#3b2012] dark:text-[#e8dcc4] mb-3 font-art">
@@ -117,19 +138,23 @@ export default function OrdersDashboard() {
               </button>
             </div>
 
-            <div className="flex items-center gap-8 bg-white dark:bg-[#111] px-8 py-4 rounded-3xl border border-[#e8dcc4]/30 dark:border-gray-800 shadow-sm">
-              <div className="text-center">
-                <p className="text-[10px] text-gray-400 uppercase tracking-widest mb-1">إجمالي المبيعات</p>
-                <p className="text-2xl font-black text-amber-600">{orders.sales.length}</p>
+            {activeTab === 'sales' && (
+              <div className="flex items-center gap-8 bg-white dark:bg-[#111] px-8 py-4 rounded-3xl border border-[#e8dcc4]/30 dark:border-gray-800 shadow-sm">
+                <div className="text-center">
+                  <p className="text-[10px] text-gray-400 uppercase tracking-widest mb-1">إجمالي المبيعات</p>
+                  <p className="text-2xl font-black text-amber-600">
+                    {orders.sales.filter(o => ['delivered', 'completed'].includes(o.status)).length}
+                  </p>
+                </div>
+                <div className="w-px h-10 bg-[#e8dcc4]/30 dark:bg-gray-800"></div>
+                <div className="text-center">
+                  <p className="text-[10px] text-gray-400 uppercase tracking-widest mb-1">طلبات نشطة</p>
+                  <p className="text-2xl font-black text-[#3b2012] dark:text-[#e8dcc4]">
+                    {orders.sales.filter(o => !['delivered', 'completed', 'rejected', 'cancelled'].includes(o.status)).length}
+                  </p>
+                </div>
               </div>
-              <div className="w-px h-10 bg-[#e8dcc4]/30 dark:bg-gray-800"></div>
-              <div className="text-center">
-                <p className="text-[10px] text-gray-400 uppercase tracking-widest mb-1">طلبات نشطة</p>
-                <p className="text-2xl font-black text-[#3b2012] dark:text-[#e8dcc4]">
-                  {orders.sales.filter(o => !['delivered', 'rejected'].includes(o.status)).length}
-                </p>
-              </div>
-            </div>
+            )}
           </div>
         )}
 
@@ -280,9 +305,7 @@ export default function OrdersDashboard() {
                                           <button
                                             onClick={(e) => {
                                               e.stopPropagation();
-                                              if (window.confirm('هل أنت متأكد من رغبتك في إلغاء هذه الشحنة؟')) {
-                                                handleStatusUpdate(order.id, 'cancelled')
-                                              }
+                                              handleStatusUpdate(order.id, 'cancelled');
                                             }}
                                             className="w-full py-3.5 border-2 border-red-50 dark:border-red-900/10 text-red-500 rounded-2xl text-[11px] font-bold hover:bg-red-50 dark:hover:bg-red-900/10 transition-all"
                                           >
@@ -472,5 +495,49 @@ export default function OrdersDashboard() {
         </div>
       </div>
     </div>
+
+    {/* Confirmation Modal */}
+    <AnimatePresence>
+      {confirmModal.isOpen && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setConfirmModal({ ...confirmModal, isOpen: false })}
+            className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+          />
+          <motion.div 
+            initial={{ opacity: 0, scale: 0.9, y: 20 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.9, y: 20 }}
+            className="relative bg-white dark:bg-[#111] w-full max-w-md rounded-[2.5rem] p-10 shadow-2xl border border-[#e8dcc4]/30 dark:border-gray-800 text-center"
+          >
+            <div className="w-20 h-20 bg-red-50 dark:bg-red-900/10 rounded-3xl flex items-center justify-center text-red-500 text-3xl mx-auto mb-6">
+              <i className="fa-solid fa-triangle-exclamation"></i>
+            </div>
+            <h3 className="text-2xl font-bold text-[#3b2012] dark:text-[#e8dcc4] mb-4 font-art">{confirmModal.title}</h3>
+            <p className="text-[#9c7b65] dark:text-[#e8dcc4]/60 mb-10 leading-relaxed font-bold">
+              {confirmModal.message}
+            </p>
+            <div className="flex flex-col gap-3">
+              <button
+                onClick={() => executeStatusUpdate(confirmModal.orderId, confirmModal.status)}
+                className="w-full py-4 bg-red-600 hover:bg-red-700 text-white rounded-2xl font-bold shadow-lg shadow-red-600/20 transition-all active:scale-95"
+              >
+                {confirmModal.status === 'cancelled' ? 'إلغاء الطلب الآن' : 'رفض الطلب الآن'}
+              </button>
+              <button
+                onClick={() => setConfirmModal({ ...confirmModal, isOpen: false })}
+                className="w-full py-4 bg-[#fdfaf7] dark:bg-black text-[#9c7b65] dark:text-[#e8dcc4] rounded-2xl font-bold border border-[#e8dcc4]/30 dark:border-gray-800 transition-all hover:bg-[#e8dcc4]/20"
+              >
+                تراجع
+              </button>
+            </div>
+          </motion.div>
+        </div>
+      )}
+    </AnimatePresence>
+    </>
   );
 }

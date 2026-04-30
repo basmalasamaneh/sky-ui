@@ -7,7 +7,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useCart, SHIPPING_AREAS } from '@/contexts/CartContext';
 
 export default function CartPage() {
-  const { cartItems, totalPrice, itemsPrice, shippingFee, shippingArea, setShippingArea, removeItem, updateQuantity } = useCart();
+  const { cartItems, totalPrice, itemsPrice, shippingFee, shippingArea, setShippingArea, removeItem, updateQuantity, isLoading } = useCart();
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -34,8 +34,20 @@ export default function CartPage() {
           {/* Cart Items List */}
           <div className="lg:col-span-2 space-y-6">
             <AnimatePresence mode="popLayout">
-              {cartItems.length > 0 ? (
+              {isLoading ? (
                 <motion.div 
+                  key="loading"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  className="py-20 text-center space-y-4"
+                >
+                  <div className="w-12 h-12 border-4 border-[#3b2012]/10 border-t-[#3b2012] rounded-full animate-spin mx-auto"></div>
+                  <p className="text-[#9c7b65] font-bold">جاري تحميل السلة...</p>
+                </motion.div>
+              ) : cartItems.length > 0 ? (
+                <motion.div 
+                  key="items"
                   variants={containerVariants}
                   initial="hidden"
                   animate="visible"
@@ -97,8 +109,10 @@ export default function CartPage() {
                 </motion.div>
               ) : (
                 <motion.div 
+                  key="empty"
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
                   className="py-20 text-center space-y-6"
                 >
                   <div className="w-32 h-32 bg-[#f0ece6] dark:bg-black rounded-full flex items-center justify-center mx-auto text-[#e8dcc4] text-5xl">

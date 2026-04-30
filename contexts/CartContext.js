@@ -18,7 +18,8 @@ export function CartProvider({ children }) {
   const [shippingArea, setShippingArea] = useState(SHIPPING_AREAS[0])
   const [error, setError] = useState(null)
   const [success, setSuccess] = useState(null)
-  const { user } = useAuth()
+  const [isLoading, setIsLoading] = useState(true)
+  const { user, isLoading: authLoading } = useAuth()
 
   // Auto-clear error after 3s
   useEffect(() => {
@@ -38,30 +39,57 @@ export function CartProvider({ children }) {
   // Load cart from API if logged in, otherwise localStorage
   useEffect(() => {
     const fetchCart = async () => {
-      if (user) {
-        const res = await cartService.getCartByUserId(user.id)
-        if (res.status === 'success') {
-          setCartId(res.data.cartId)
-          // Map backend items to frontend format
-          const items = res.data.items.map(item => ({
-            id: item.id,
-            artworkId: item.artwork.id,
-            title: item.artwork.title,
-            price: item.artwork.price,
-            quantity: item.quantity,
-            stock: item.artwork.quantity,
-            image: item.artwork.images?.find(img => img.is_featured)?.url || item.artwork.images?.[0]?.url || 'placeholder.jpg',
-            artistName: item.artwork.users?.artist_name || 'فنان'
-          }))
-          setCartItems(items)
+      // Don't do anything until we know the user's auth status
+      if (authLoading) return
+
+      setIsLoading(true)
+      try {
+        if (user) {
+          const res = await cartService.getCartByUserId(user.id)
+          if (res?.status === 'success' && res.data) {
+            setCartId(res.data.cartId)
+            const items = (res.data.items || []).map(item => {
+              const artwork = item.artwork || {}
+              return {
+                id: item.id || Math.random().toString(),
+                artworkId: artwork.id,
+                title: artwork.title || 'عمل فني',
+                price: artwork.price || 0,
+                quantity: item.quantity || 1,
+                stock: artwork.quantity || 0,
+                image: artwork.images?.find(img => img.is_featured)?.url || artwork.images?.[0]?.url || '/images/placeholder.jpg',
+                artistName: artwork.users?.artist_name || artwork.users?.first_name || 'فنان'
+              }
+            })
+            setCartItems(items)
+          }
+        } else {
+          const savedCart = localStorage.getItem('sky-cart')
+          if (savedCart) {
+            try {
+              setCartItems(JSON.parse(savedCart))
+            } catch (e) {
+              console.error('Failed to parse saved cart', e)
+              setCartItems([])
+            }
+          }
         }
-      } else {
-        const savedCart = localStorage.getItem('sky-cart')
-        if (savedCart) setCartItems(JSON.parse(savedCart))
+      } catch (err) {
+        console.error('Error fetching cart:', err)
+      } finally {
+        setIsLoading(false)
       }
     }
     fetchCart()
-  }, [user])
+  }, [user, authLoading])
+
+  // Persist guest cart to localStorage
+  useEffect(() => {
+    // ONLY save if we are NOT loading and NOT logged in
+    if (!authLoading && !isLoading && !user) {
+      localStorage.setItem('sky-cart', JSON.stringify(cartItems))
+    }
+  }, [cartItems, user, authLoading, isLoading])
 
   const addItem = async (item) => {
     if (user && cartId) {
@@ -156,6 +184,7 @@ export function CartProvider({ children }) {
       setShippingArea,
       error,
       setError,
+      isLoading,
       addItem, 
       removeItem, 
       updateQuantity, 

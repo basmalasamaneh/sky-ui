@@ -22,13 +22,13 @@ export default function ProductsPage() {
   } = useSearch();
   const [works, setWorks] = useState([]);
   const [isFetching, setIsFetching] = useState(true);
-  
+
   // Slider states
   const [activeSliderWork, setActiveSliderWork] = useState(null);
   const [isLoadingArtworkDetails, setIsLoadingArtworkDetails] = useState(false);
 
   const [activeCategory, setActiveCategory] = useState('الكل');
-  
+
   // Pagination states
   const [currentPage, setCurrentPage] = useState(1);
   const [totalCount, setTotalCount] = useState(0);
@@ -110,7 +110,7 @@ export default function ProductsPage() {
         const result = contentType.includes('application/json')
           ? await res.json().catch(() => ({}))
           : {};
-        
+
         if (!res.ok) {
           console.error('Failed to fetch works:', res.status, result?.message);
           setWorks([]);
@@ -150,7 +150,7 @@ export default function ProductsPage() {
   return (
     <div className="min-h-screen bg-[#fdfaf7] dark:bg-black" dir="rtl">
       <Header />
-      
+
       <div className="pt-32 pb-20 px-4 md:px-8 max-w-7xl mx-auto">
         <div className="text-center mb-16">
           <h1 className="text-4xl md:text-5xl font-bold text-[#3b2012] dark:text-[#e8dcc4] font-art mb-4">معرض أثر</h1>
@@ -188,11 +188,10 @@ export default function ProductsPage() {
             <button
               key={cat}
               onClick={() => setActiveCategory(cat)}
-              className={`px-6 py-2.5 rounded-full font-bold text-sm transition-all duration-300 shadow-sm ${
-                activeCategory === cat 
-                ? 'bg-brown-gradient text-white scale-105' 
-                : 'bg-white dark:bg-black text-[#9c7b65] dark:text-[#e8dcc4] border border-[#e8dcc4] dark:border-gray-800 hover:border-[#6b4c3b] hover:text-[#3b2012] dark:text-[#e8dcc4]'
-              }`}
+              className={`px-6 py-2.5 rounded-full font-bold text-sm transition-all duration-300 shadow-sm ${activeCategory === cat
+                  ? 'bg-brown-gradient text-white scale-105'
+                  : 'bg-white dark:bg-black text-[#9c7b65] dark:text-[#e8dcc4] border border-[#e8dcc4] dark:border-gray-800 hover:border-[#6b4c3b] hover:text-[#3b2012] dark:text-[#e8dcc4]'
+                }`}
             >
               {cat}
             </button>
@@ -227,56 +226,56 @@ export default function ProductsPage() {
                     onClick={() => openSlider(work)}
                     className="group bg-white dark:bg-black rounded-3xl overflow-hidden border border-[#e8dcc4] dark:border-gray-800 shadow-[0_4px_20px_-10px_rgba(0,0,0,0.1)] hover:shadow-xl transition-all duration-500 flex flex-col cursor-pointer"
                   >
-                      <div 
-                        className="relative h-64 overflow-hidden m-2 rounded-2xl"
-                      >
-                        <Image
-                          src={work.images?.[work.mainImageIndex || 0] || 'https://images.unsplash.com/photo-1541963463532-d68292c34b19?auto=format&fit=crop&q=80&w=800'}
-                          alt={work.title}
-                          fill
-                          className={`object-cover transition-transform duration-700 group-hover:scale-110 ${work.quantity <= 0 ? 'grayscale opacity-60' : ''}`}
-                        />
+                    <div
+                      className="relative h-64 overflow-hidden m-2 rounded-2xl"
+                    >
+                      <Image
+                        src={work.images?.[work.mainImageIndex || 0] || 'https://images.unsplash.com/photo-1541963463532-d68292c34b19?auto=format&fit=crop&q=80&w=800'}
+                        alt={work.title}
+                        fill
+                        className={`object-cover transition-transform duration-700 group-hover:scale-110 ${work.quantity <= 0 ? 'grayscale opacity-60' : ''}`}
+                      />
 
-                        {work.quantity <= 0 && (
-                          <div className="absolute top-4 right-4 bg-red-600 text-white px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest shadow-xl z-10">
-                            نفذت الكمية
-                          </div>
-                        )}
+                      {work.quantity <= 0 && (
+                        <div className="absolute top-4 right-4 bg-red-600 text-white px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest shadow-xl z-10">
+                          نفذت الكمية
+                        </div>
+                      )}
 
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-4">
-                          <div className="self-end bg-white dark:bg-black dark:black/20 dark:bg-black/20 backdrop-blur-md border border-white/30 text-white w-10 h-10 rounded-full flex items-center justify-center hover:bg-white dark:bg-black hover:text-[#3b2012] dark:text-[#e8dcc4] transition-colors mb-2">
-                            <i className="fa-solid fa-expand text-sm"></i>
-                          </div>
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-4">
+                        <div className="self-end bg-white dark:bg-black dark:black/20 dark:bg-black/20 backdrop-blur-md border border-white/30 text-white w-10 h-10 rounded-full flex items-center justify-center hover:bg-white dark:bg-black hover:text-[#3b2012] dark:text-[#e8dcc4] transition-colors mb-2">
+                          <i className="fa-solid fa-expand text-sm"></i>
                         </div>
                       </div>
+                    </div>
 
-                      <div className="p-5 flex flex-col flex-1">
-                        <h3 className={`text-lg font-bold text-[#3b2012] dark:text-[#e8dcc4] mb-4 line-clamp-1 ${work.quantity <= 0 ? 'opacity-50' : ''}`}>{work.title}</h3>
-                        
-                        <div className="mt-auto flex items-center justify-between border-t border-gray-100 dark:border-gray-800 dark:border-gray-800 pt-4" onClick={(e) => e.stopPropagation()}>
-                          <span className={`font-bold text-lg text-[#3b2012] dark:text-[#e8dcc4] ${work.quantity <= 0 ? 'opacity-50 line-through' : ''}`}>
-                            {work.price ? `${work.price} ₪` : 'متاح للعرض'}
-                          </span>
-                          {isOwnerArtwork(work) ? (
-                            <Link
-                              href={`/works/edit/${work.id}`}
-                              className="bg-[#f0ece6] dark:bg-black text-[#5c4436] dark:text-[#e8dcc4] hover:bg-[#5c4436] hover:text-white px-4 py-2 rounded-xl text-xs font-bold transition-colors"
-                            >
-                              تعديل العمل
-                            </Link>
-                          ) : !isAuthenticated ? (
-                            <button
-                              type="button"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                openSlider(work);
-                              }}
-                              className="bg-[#f0ece6] dark:bg-black text-[#5c4436] dark:text-[#e8dcc4] hover:bg-[#5c4436] hover:text-white px-4 py-2 rounded-xl text-xs font-bold transition-colors"
-                            >
-                              تسوق الآن
-                            </button>
-                          ) : (
-                            <button
+                    <div className="p-5 flex flex-col flex-1">
+                      <h3 className={`text-lg font-bold text-[#3b2012] dark:text-[#e8dcc4] mb-4 line-clamp-1 ${work.quantity <= 0 ? 'opacity-50' : ''}`}>{work.title}</h3>
+
+                      <div className="mt-auto flex items-center justify-between border-t border-gray-100 dark:border-gray-800 dark:border-gray-800 pt-4" onClick={(e) => e.stopPropagation()}>
+                        <span className={`font-bold text-lg text-[#3b2012] dark:text-[#e8dcc4] ${work.quantity <= 0 ? 'opacity-50 line-through' : ''}`}>
+                          {work.price ? `${work.price} ₪` : 'متاح للعرض'}
+                        </span>
+                        {isOwnerArtwork(work) ? (
+                          <Link
+                            href={`/works/edit/${work.id}`}
+                            className="bg-[#f0ece6] dark:bg-black text-[#5c4436] dark:text-[#e8dcc4] hover:bg-[#5c4436] hover:text-white px-4 py-2 rounded-xl text-xs font-bold transition-colors"
+                          >
+                            تعديل العمل
+                          </Link>
+                        ) : !isAuthenticated ? (
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              openSlider(work);
+                            }}
+                            className="bg-[#f0ece6] dark:bg-black text-[#5c4436] dark:text-[#e8dcc4] hover:bg-[#5c4436] hover:text-white px-4 py-2 rounded-xl text-xs font-bold transition-colors"
+                          >
+                            تسوق الآن
+                          </button>
+                        ) : (
+                          <button
                             type="button"
                             disabled={work.quantity <= 0}
                             onClick={(e) => {
@@ -293,9 +292,9 @@ export default function ProductsPage() {
                           >
                             {work.quantity <= 0 ? 'مباع' : 'إضافة للسلة'}
                           </button>
-                          )}
-                        </div>
+                        )}
                       </div>
+                    </div>
                   </motion.div>
                 ))}
               </AnimatePresence>
@@ -311,25 +310,24 @@ export default function ProductsPage() {
                 >
                   <i className="fa-solid fa-chevron-right"></i>
                 </button>
-                
+
                 <div className="flex items-center gap-2">
                   {[...Array(totalPages)].map((_, i) => {
                     const pageNum = i + 1;
                     // Show current page, and maybe some context around it
                     if (
-                      pageNum === 1 || 
-                      pageNum === totalPages || 
+                      pageNum === 1 ||
+                      pageNum === totalPages ||
                       (pageNum >= currentPage - 1 && pageNum <= currentPage + 1)
                     ) {
                       return (
                         <button
                           key={pageNum}
                           onClick={() => handlePageChange(pageNum)}
-                          className={`w-10 h-10 rounded-xl font-bold transition-all ${
-                            currentPage === pageNum
+                          className={`w-10 h-10 rounded-xl font-bold transition-all ${currentPage === pageNum
                               ? 'bg-[#3b2012] text-white shadow-lg scale-110'
                               : 'bg-white dark:bg-black border border-[#e8dcc4] dark:border-gray-800 text-[#9c7b65] dark:text-[#e8dcc4] hover:border-[#6b4c3b] hover:text-[#3b2012] dark:text-[#e8dcc4]'
-                          }`}
+                            }`}
                         >
                           {pageNum}
                         </button>
