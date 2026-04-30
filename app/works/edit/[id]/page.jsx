@@ -46,7 +46,7 @@ export default function EditWorkPage() {
       let foundWork = null;
 
       try {
-        const res = await fetch(`/api/artworks/${workId}`, {
+        const res = await fetch(`/api/v1/artworks/${workId}`, {
           headers: { 'Authorization': `Bearer ${token}` }
         });
         const contentType = res.headers.get('content-type') || '';
@@ -200,7 +200,7 @@ export default function EditWorkPage() {
         }
       });
 
-      const res = await fetch(`/api/artworks/${workId}`, {
+      const res = await fetch(`/api/v1/artworks/${workId}`, {
         method: 'PATCH',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -237,7 +237,7 @@ export default function EditWorkPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#fdfaf7] dark:bg-black py-28 px-4 md:px-8 font-amiri" dir="rtl">
+    <div className="min-h-screen bg-[#fdfaf7] dark:bg-black py-28 px-4 md:px-8" dir="rtl">
       <div className="max-w-4xl mx-auto">
         <Link 
           href="/works/my"
@@ -279,7 +279,7 @@ export default function EditWorkPage() {
                 <div className="relative">
                   <textarea 
                     name="description" required value={formData.description} maxLength={500} onChange={handleInputChange} rows="5"
-                    className="w-full bg-[#fdfaf7] dark:bg-black border border-[#e8dcc4] dark:border-gray-800 rounded-2xl px-5 py-4 text-[#3b2012] dark:text-[#e8dcc4] outline-none focus:ring-2 focus:ring-[#5c4436]/20 focus:border-[#5c4436] transition-all resize-none font-amiri"
+                    className="w-full bg-[#fdfaf7] dark:bg-black border border-[#e8dcc4] dark:border-gray-800 rounded-2xl px-5 py-4 text-[#3b2012] dark:text-[#e8dcc4] outline-none focus:ring-2 focus:ring-[#5c4436]/20 focus:border-[#5c4436] transition-all resize-none"
                   />
                 </div>
               </div>

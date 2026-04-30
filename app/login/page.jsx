@@ -105,7 +105,7 @@ export default function LoginPage() {
       setIsLoading(true);
 
       try {
-        const response = await fetch('/api/auth/login', {
+        const response = await fetch('/api/v1/auth/login', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -119,6 +119,11 @@ export default function LoginPage() {
         const result = await response.json();
 
         if (!response.ok) {
+          if (result.notVerified) {
+            router.push(`/verify-email?email=${encodeURIComponent(formData.email)}`);
+            return;
+          }
+
           if (result.errors && Array.isArray(result.errors)) {
             const fieldErrors = {};
             result.errors.forEach((error) => {
@@ -149,15 +154,15 @@ export default function LoginPage() {
     <div className="min-h-screen grid grid-cols-1 lg:grid-cols-2" dir="rtl">
 
       {/* الفورم - يمين */}
-      <div className="flex items-center justify-center bg-[#f5f0eb] px-8 py-16 lg:order-1 pt-24">
+      <div className="flex items-center justify-center bg-[#f5f0eb] dark:bg-black px-8 py-16 lg:order-1 pt-24">
         <div className="w-full max-w-md">
 
           {/* العنوان */}
           <div className="mb-10 text-center lg:text-right animate-fade-in">
-            <h1 className="text-5xl text-[#3b2012] dark:text-[#e8dcc4] mb-4 font-amiri leading-tight">
-              مرحباً بعودتك إلى <span className="text-[#6b4c3b] font-bold">أثر</span>
+            <h1 className="text-5xl text-[#3b2012] dark:text-[#e8dcc4] mb-4 leading-tight">
+              مرحباً بعودتك إلى <span className="text-[#6b4c3b] dark:text-[#c4a993] font-bold">أثر</span>
             </h1>
-            <p className="text-[#9c7b65] dark:text-[#e8dcc4] text-lg font-amiri">
+            <p className="text-[#9c7b65] dark:text-[#e8dcc4]/80 text-lg">
               قم بتسجيل الدخول لاستكشاف أحدث اللوحات والأعمال الفنية الحصرية.
             </p>
           </div>
@@ -170,7 +175,7 @@ export default function LoginPage() {
               name="email"
               type="email"
               label="البريد الإلكتروني"
-              placeholder="batool@gmail.com"
+              placeholder="name@example.com"
               dir="ltr"
               value={formData.email}
               onChange={handleChange}
@@ -185,7 +190,7 @@ export default function LoginPage() {
               type={showPassword ? 'text' : 'password'}
               label="كلمة المرور"
               labelExtra={
-                <Link href="/forgot-password" size="sm" className="text-sm text-[#6b4c3b] hover:font-bold hover:underline transition-all font-amiri">
+                <Link href="/forgot-password" size="sm" className="text-sm text-[#6b4c3b] dark:text-[#c4a993] hover:font-bold hover:underline transition-all">
                   هل نسيت كلمة المرور؟
                 </Link>
               }
@@ -200,7 +205,7 @@ export default function LoginPage() {
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="text-[#9c7b65] dark:text-[#e8dcc4] hover:text-[#3b2012] dark:text-[#e8dcc4] transition-colors"
+                  className="text-[#9c7b65] dark:text-[#e8dcc4] hover:text-[#3b2012] dark:hover:text-[#e8dcc4] transition-colors"
                 >
                   {showPassword ? <i className="fa-regular fa-eye-slash"></i> : <i className="fa-regular fa-eye"></i>}
                 </button>
@@ -209,7 +214,7 @@ export default function LoginPage() {
 
             {/* رسالة الخطأ العامة */}
             {loginError && (
-              <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-xl flex items-center gap-3 animate-shake font-amiri">
+              <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-900/50 text-red-600 dark:text-red-400 px-4 py-3 rounded-xl flex items-center gap-3 animate-shake">
                 <i className="fa-solid fa-circle-exclamation"></i>
                 <span className="text-sm font-bold">{loginError}</span>
               </div>
@@ -219,10 +224,10 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={!isFormValid || isLoading}
-              className={`w-full h-14 flex justify-center items-center font-bold text-xl rounded-xl transition-all font-amiri shadow-md mt-6
+              className={`w-full h-14 flex justify-center items-center font-bold text-xl rounded-xl transition-all shadow-md mt-6
                 ${(isFormValid && !isLoading)
-                  ? 'bg-[#3b2012] text-white hover:bg-[#5c3d2e] cursor-pointer'
-                  : 'bg-[#bcaaa0] text-gray-100 cursor-not-allowed'
+                  ? 'bg-[#3b2012] dark:bg-[#c4a993] text-white dark:text-black hover:bg-[#5c3d2e] dark:hover:bg-[#d6c5b5] cursor-pointer'
+                  : 'bg-[#bcaaa0] dark:bg-[#4a3728] text-gray-100 dark:text-gray-400 cursor-not-allowed'
                 }`}
             >
               {isLoading ? (
@@ -234,9 +239,9 @@ export default function LoginPage() {
           </form>
 
           {/* رابط إنشاء حساب */}
-          <p className="text-center text-lg text-[#9c7b65] dark:text-[#e8dcc4] mt-8 font-amiri">
+          <p className="text-center text-lg text-[#9c7b65] dark:text-[#e8dcc4] mt-8">
             ليس لديك حساب بعد؟{' '}
-            <Link href="/signup" className="text-[#6b4c3b] font-bold hover:underline">
+            <Link href="/signup" className="text-[#6b4c3b] dark:text-[#c4a993] font-bold hover:underline">
               أنشئ حساباً جديداً
             </Link>
           </p>
@@ -245,16 +250,17 @@ export default function LoginPage() {
       </div>
 
       {/* الصورة - يسار */}
-      <div className="relative hidden lg:block border-r border-[#e0d5c8]/50 lg:order-2">
+      <div className="relative hidden lg:block border-r border-[#e0d5c8]/50 dark:border-gray-800 lg:order-2">
         <Image
           src="/images/login-art.png"
           alt="فن أثر"
           fill
           className="object-cover"
         />
-        <div className="absolute inset-0 bg-black/10"></div>
+        <div className="absolute inset-0 bg-black/10 dark:bg-black/40"></div>
       </div>
 
     </div>
   );
 }
+

@@ -26,7 +26,7 @@ export async function PATCH(req) {
     const formData = await req.formData();
 
     try {
-      const backendResponse = await fetch(buildBackendApiUrl('/api/users/profile/image'), {
+      const backendResponse = await fetch(buildBackendApiUrl('/api/v1/users/profile/image'), {
         method: 'PATCH',
         headers: {
           Authorization: authHeader,

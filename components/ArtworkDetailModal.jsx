@@ -5,11 +5,14 @@ import { motion, AnimatePresence } from 'framer-motion';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useAuth } from '@/contexts/AuthContext';
+import { useCart } from '@/contexts/CartContext';
 import { categoryMapping } from '@/lib/artwork-utils';
 
 export default function ArtworkDetailModal({ work, isLoadingDetails = false, onClose }) {
   const { isAuthenticated, user } = useAuth();
+  const { addItem } = useCart();
   const [currentSlideIndex, setCurrentSlideIndex] = useState(0);
+  const [isAdding, setIsAdding] = useState(false);
 
   // Reset slide index when a new artwork is opened
   useEffect(() => {
@@ -197,7 +200,7 @@ export default function ArtworkDetailModal({ work, isLoadingDetails = false, onC
                   <i className="fa-solid fa-align-right text-amber-600 text-sm"></i>
                   عن العمل الفني
                 </h4>
-                <p className="text-[#9c7b65] dark:text-[#e8dcc4] text-lg leading-relaxed font-amiri">{work.description}</p>
+                <p className="text-[#9c7b65] dark:text-[#e8dcc4] text-lg leading-relaxed">{work.description}</p>
                 <p className="text-[10px] text-gray-400 font-bold bg-gray-50 dark:bg-gray-900 inline-block px-3 py-1 rounded-md">
                   تاريخ النشر: {work.createdAt ? new Date(work.createdAt).toLocaleDateString('ar-EG', { year: 'numeric', month: 'long', day: 'numeric' }) : 'غير متوفر'}
                 </p>
@@ -287,7 +290,7 @@ export default function ArtworkDetailModal({ work, isLoadingDetails = false, onC
                   <i className="fa-solid fa-align-right text-amber-600 text-sm"></i>
                   عن العمل الفني
                 </h4>
-                <p className="text-[#9c7b65] dark:text-[#e8dcc4] text-lg leading-relaxed font-amiri">{work.description}</p>
+                <p className="text-[#9c7b65] dark:text-[#e8dcc4] text-lg leading-relaxed">{work.description}</p>
                 <p className="text-[10px] text-gray-400 font-bold bg-gray-50 dark:bg-gray-900 inline-block px-3 py-1 rounded-md">
                   تاريخ النشر: {work.createdAt ? new Date(work.createdAt).toLocaleDateString('ar-EG', { year: 'numeric', month: 'long', day: 'numeric' }) : 'غير متوفر'}
                 </p>
@@ -314,11 +317,16 @@ export default function ArtworkDetailModal({ work, isLoadingDetails = false, onC
             /* ─── AUTHENTICATED USER VIEW ─── */
             <div className="space-y-8 animate-fade-in">
               <div className="space-y-2">
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 flex-wrap">
                   <span className="text-[10px] bg-amber-50 text-amber-700 px-3 py-1 rounded-full font-bold uppercase tracking-widest flex items-center gap-1.5">
                     <i className="fa-solid fa-tag text-[8px]"></i>
                     <span>الفئة: {categoryMapping[work.category] || work.category || 'متنوع'}</span>
                   </span>
+                  {work.quantity <= 0 && (
+                    <span className="text-[10px] bg-red-100 text-red-700 px-3 py-1 rounded-full font-black uppercase tracking-widest border border-red-200">
+                      مباع / نفذت الكمية
+                    </span>
+                  )}
                 </div>
                 <h2 className="text-4xl font-bold text-[#3b2012] dark:text-[#e8dcc4] font-art leading-tight">{work.title}</h2>
               </div>
@@ -365,7 +373,7 @@ export default function ArtworkDetailModal({ work, isLoadingDetails = false, onC
                   <i className="fa-solid fa-align-right text-amber-600 text-sm"></i>
                   عن العمل الفني
                 </h4>
-                <p className="text-[#9c7b65] dark:text-[#e8dcc4] text-lg leading-relaxed font-amiri">{work.description}</p>
+                <p className="text-[#9c7b65] dark:text-[#e8dcc4] text-lg leading-relaxed">{work.description}</p>
               </div>
 
               <div className="pt-8 border-t border-gray-100 dark:border-gray-800 dark:border-gray-800 flex items-center justify-between">
@@ -375,9 +383,24 @@ export default function ArtworkDetailModal({ work, isLoadingDetails = false, onC
                     {work.price ? `${work.price} ₪` : 'حسب الطلب'}
                   </p>
                 </div>
-                <button className="h-14 px-10 bg-[#3b2012] text-white rounded-2xl font-bold flex items-center justify-center gap-3 shadow-xl hover:bg-[#5c3d2e] transition-all active:scale-95 group">
-                  <span>إضافة للسلة</span>
-                  <i className="fa-solid fa-bag-shopping transition-transform group-hover:-translate-y-1"></i>
+                <button 
+                  onClick={() => {
+                    if (work.quantity <= 0) return;
+                    setIsAdding(true);
+                    addItem({
+                      id: work.id,
+                      title: work.title,
+                      price: work.price,
+                      image: work.images?.[0] || fallbackImage,
+                      artistName: work.artistName
+                    });
+                    setTimeout(() => setIsAdding(false), 1000);
+                  }}
+                  disabled={isAdding || work.quantity <= 0}
+                  className={`h-14 px-10 rounded-2xl font-bold flex items-center justify-center gap-3 shadow-xl transition-all active:scale-95 group ${work.quantity <= 0 ? 'bg-gray-100 text-gray-400 cursor-not-allowed' : isAdding ? 'bg-green-600 text-white' : 'bg-[#3b2012] text-white hover:bg-[#5c3d2e]'}`}
+                >
+                  <span>{work.quantity <= 0 ? 'نفذت الكمية' : isAdding ? 'تمت الإضافة' : 'إضافة للسلة'}</span>
+                  <i className={`fa-solid ${work.quantity <= 0 ? 'fa-ban' : isAdding ? 'fa-check' : 'fa-bag-shopping'} transition-transform group-hover:-translate-y-1`}></i>
                 </button>
               </div>
             </div>

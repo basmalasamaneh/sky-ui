@@ -12,7 +12,7 @@ import ArtworkDetailModal from '@/components/ArtworkDetailModal';
 export default function ArtistPage({ params }) {
   const resolvedParams = use(params);
   const artistId = resolvedParams.id;
-  const { token, isAuthenticated, user, login } = useAuth();
+  const { token, isAuthenticated, user, login, isLoading: isAuthLoading } = useAuth();
   const router = useRouter();
 
   const [artistData, setArtistData] = useState(null);
@@ -248,7 +248,7 @@ export default function ArtistPage({ params }) {
           .map((item) => ({ platform: item.platform, url: String(item.url).trim() })),
       };
 
-      const response = await fetch('/api/users/profile', {
+      const response = await fetch('/api/v1/users/profile', {
         method: 'PATCH',
         headers: {
           Authorization: `Bearer ${token}`,
@@ -318,7 +318,7 @@ export default function ArtistPage({ params }) {
       const formData = new FormData();
       formData.append('image', file);
 
-      const res = await fetch('/api/users/profile/image', {
+      const res = await fetch('/api/v1/users/profile/image', {
         method: 'PATCH',
         headers: { Authorization: `Bearer ${token}` },
         body: formData,
@@ -348,71 +348,50 @@ export default function ArtistPage({ params }) {
 
   useEffect(() => {
     const fetchArtistDataAndWorks = async () => {
+      // Don't fetch until we know if the user is logged in or not
+      if (isAuthLoading) return;
+
       setIsFetching(true);
       setNotFound(false);
       try {
-        if (token) {
-          // Authenticated: fetch full profile + artworks in parallel
-          const [profileRes, worksRes] = await Promise.all([
-            fetch(`/api/artists/${artistId}`, { headers: { Authorization: `Bearer ${token}` } }),
-            fetch(`/api/artists/${artistId}/artworks`, { headers: { Authorization: `Bearer ${token}` } }),
-          ]);
+        // Fetch profile and artworks in parallel using the direct endpoints (now public)
+        const [profileRes, worksRes] = await Promise.all([
+          fetch(`/api/v1/artists/${artistId}`, { 
+            headers: token ? { Authorization: `Bearer ${token}` } : {} 
+          }),
+          fetch(`/api/v1/artists/${artistId}/artworks`, { 
+            headers: token ? { Authorization: `Bearer ${token}` } : {} 
+          }),
+        ]);
 
-          if (profileRes.status === 404) {
-            setNotFound(true);
-            return;
-          }
-
-          const profileResult = profileRes.ok ? await profileRes.json().catch(() => ({})) : {};
-          const worksResult = worksRes.ok ? await worksRes.json().catch(() => ({})) : {};
-
-          const artist = profileResult?.data;
-          if (artist) {
-            const displayName =
-              artist.artist_name ||
-              [artist.first_name, artist.last_name].filter(Boolean).join(' ') ||
-              'غير متوفر';
-            setArtistData({
-              id: artist.id,
-              name: displayName,
-              location: artist.location || null,
-              phone: artist.phone || null,
-              bio: artist.bio || null,
-              socialMedia: parseSocialMedia(artist.social_media),
-              artistSince: artist.artist_since || null,
-              avatar: artist.profile_image || `https://ui-avatars.com/api/?name=${encodeURIComponent(displayName)}&background=5c4436&color=fff&size=200&font-size=0.4&bold=true`,
-            });
-          }
-
-          const rawWorks = worksResult?.data?.artworks ?? [];
-          setWorks(rawWorks.map(normalizeWork));
-        } else {
-          // Guest: use the public artworks endpoint which embeds artist info
-          const artworksRes = await fetch('/api/artworks?limit=200');
-          const artworksResult = artworksRes.ok ? await artworksRes.json().catch(() => ({})) : {};
-          const rawWorks = artworksResult?.data?.artworks ?? [];
-          const normalizedWorks = rawWorks.map(normalizeWork);
-          const artistWorks = normalizedWorks.filter((w) => String(w.artist_id) === String(artistId));
-
-          if (artistWorks.length === 0) {
-            setNotFound(true);
-            return;
-          }
-
-          const firstWork = artistWorks[0];
-          const displayName = firstWork.artistName || 'غير متوفر';
-          setArtistData({
-            id: artistId,
-            name: displayName,
-            location: firstWork.artistLocation || null,
-            phone: firstWork.artistPhone || null,
-            bio: firstWork.artistBio || null,
-            socialMedia: firstWork.artistSocialMedia || [],
-            artistSince: null,
-            avatar: firstWork.artistAvatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(displayName)}&background=5c4436&color=fff&size=200&font-size=0.4&bold=true`,
-          });
-          setWorks(artistWorks);
+        if (profileRes.status === 404) {
+          setNotFound(true);
+          return;
         }
+
+        const profileResult = profileRes.ok ? await profileRes.json().catch(() => ({})) : {};
+        const worksResult = worksRes.ok ? await worksRes.json().catch(() => ({})) : {};
+
+        const artist = profileResult?.data;
+        if (artist) {
+          const displayName =
+            artist.artist_name ||
+            [artist.first_name, artist.last_name].filter(Boolean).join(' ') ||
+            'غير متوفر';
+          setArtistData({
+            id: artist.id,
+            name: displayName,
+            location: artist.location || null,
+            phone: artist.phone || null,
+            bio: artist.bio || null,
+            socialMedia: parseSocialMedia(artist.social_media),
+            artistSince: artist.artist_since || null,
+            avatar: artist.profile_image || `https://ui-avatars.com/api/?name=${encodeURIComponent(displayName)}&background=5c4436&color=fff&size=200&font-size=0.4&bold=true`,
+          });
+        }
+
+        const rawWorks = worksResult?.data?.artworks ?? [];
+        setWorks(rawWorks.map(normalizeWork));
       } catch (e) {
         console.error('Failed to fetch artist details:', e);
       } finally {
@@ -421,14 +400,14 @@ export default function ArtistPage({ params }) {
     };
 
     fetchArtistDataAndWorks();
-  }, [artistId, token]);
+  }, [artistId, token, isAuthLoading]);
 
   const openSlider = async (work) => {
     setActiveSliderWork(work);
     setIsLoadingArtworkDetails(true);
 
     try {
-      const res = await fetch(`/api/artworks/${work.id}`, {
+      const res = await fetch(`/api/v1/artworks/${work.id}`, {
         headers: token ? { Authorization: `Bearer ${token}` } : undefined,
       });
 
@@ -446,7 +425,7 @@ export default function ArtistPage({ params }) {
   };
 
   return (
-    <div className="min-h-[80vh] bg-[#faf8f5] dark:bg-black py-12 px-4 sm:px-6 lg:px-8 font-art" dir="rtl">
+    <div className="min-h-[80vh] bg-[#faf8f5] dark:bg-black py-12 px-4 sm:px-6 lg:px-8" dir="rtl">
       <div className="max-w-7xl mx-auto">
         <button onClick={() => router.back()} className="inline-flex items-center gap-2 text-[#9c7b65] dark:text-[#e8dcc4] hover:text-[#5c4436] dark:text-[#e8dcc4] font-bold mb-8 transition-colors group border-none bg-transparent cursor-pointer">
           <i className="fa-solid fa-arrow-right group-hover:-translate-x-1 transition-transform"></i>
@@ -898,28 +877,33 @@ export default function ArtistPage({ params }) {
                       className="group bg-white dark:bg-[#1a0f0a] rounded-3xl overflow-hidden border border-[#e8dcc4] dark:border-gray-800 shadow-[0_4px_20px_-10px_rgba(0,0,0,0.1)] hover:shadow-xl transition-all duration-500 flex flex-col cursor-pointer"
                     >
                       <div className="relative h-64 overflow-hidden m-2 rounded-2xl">
-                        <Image
-                          src={work.images?.[work.mainImageIndex || 0] || 'https://images.unsplash.com/photo-1541963463532-d68292c34b19?auto=format&fit=crop&q=80&w=800'}
-                          alt={work.title}
-                          fill
-                          className="object-cover transition-transform duration-700 group-hover:scale-110"
-                        />
+                          <Image
+                            src={work.images?.[work.mainImageIndex || 0] || 'https://images.unsplash.com/photo-1541963463532-d68292c34b19?auto=format&fit=crop&q=80&w=800'}
+                            alt={work.title}
+                            fill
+                            className={`object-cover transition-transform duration-700 group-hover:scale-110 ${work.quantity <= 0 ? 'grayscale brightness-75' : ''}`}
+                          />
                       </div>
                       <div className="p-5 flex flex-col flex-1">
                         <h3 className="text-lg font-bold text-[#3b2012] dark:text-[#e8dcc4] mb-4 line-clamp-1">{work.title}</h3>
                         <div className="mt-auto flex items-center justify-between border-t border-gray-100 dark:border-gray-800 dark:border-gray-800 pt-4" onClick={(e) => e.stopPropagation()}>
-                          <span className="font-bold text-lg text-[#3b2012] dark:text-[#e8dcc4]">
-                            {work.price ? `${work.price} ₪` : 'حسب الطلب'}
-                          </span>
+                          <div className="flex flex-col">
+                            <span className={`font-bold text-lg ${work.quantity <= 0 ? 'text-gray-400 line-through' : 'text-[#3b2012] dark:text-[#e8dcc4]'}`}>
+                              {work.price ? `${work.price} ₪` : 'حسب الطلب'}
+                            </span>
+                            {work.quantity <= 0 && (
+                              <span className="text-[10px] text-red-500 font-black uppercase">مباع</span>
+                            )}
+                          </div>
                           <button
                             type="button"
                             onClick={(e) => {
                               e.stopPropagation();
                               openSlider(work);
                             }}
-                            className="bg-[#f0ece6] dark:bg-[#2a1f18] text-[#5c4436] dark:text-[#c4a993] hover:bg-[#5c4436] hover:text-white dark:hover:bg-[#5c4436] dark:hover:text-white px-4 py-2 rounded-xl text-xs font-bold transition-colors"
+                            className={`px-4 py-2 rounded-xl text-xs font-bold transition-colors ${work.quantity <= 0 ? 'bg-gray-100 text-gray-400 cursor-not-allowed' : 'bg-[#f0ece6] dark:bg-[#2a1f18] text-[#5c4436] dark:text-[#c4a993] hover:bg-[#5c4436] hover:text-white dark:hover:bg-[#5c4436] dark:hover:text-white'}`}
                           >
-                            عرض التفاصيل
+                            {work.quantity <= 0 ? 'نفذت الكمية' : 'عرض التفاصيل'}
                           </button>
                         </div>
                       </div>

@@ -18,14 +18,18 @@ export const ForYouSection = () => {
   useEffect(() => {
     const fetchForYou = async () => {
       try {
-        const res = await fetch('/api/artworks');
+        const res = await fetch('/api/v1/artworks');
         const result = await res.json();
         if (res.ok && result?.data?.artworks) {
+          // Filter out sold out works first
+          const availableWorks = result.data.artworks
+            .map(normalizeWork)
+            .filter(work => work.quantity > 0);
+            
           // Just take 3 or 4 random or latest works for "For You"
-          const shuffled = result.data.artworks
+          const shuffled = availableWorks
             .sort(() => 0.5 - Math.random())
-            .slice(0, 3)
-            .map(normalizeWork);
+            .slice(0, 3);
           setWorks(shuffled);
         }
       } catch (error) {
@@ -42,7 +46,7 @@ export const ForYouSection = () => {
     setIsLoadingArtworkDetails(true);
 
     try {
-      const res = await fetch(`/api/artworks/${work.id}`, {
+      const res = await fetch(`/api/v1/artworks/${work.id}`, {
         headers: token ? { Authorization: `Bearer ${token}` } : undefined,
       });
 

@@ -91,7 +91,7 @@ export default function AddWorkPage() {
         if (img.file) data.append('images', img.file);
       });
 
-      const res = await fetch('/api/artworks', {
+      const res = await fetch('/api/v1/artworks', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -132,7 +132,7 @@ export default function AddWorkPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#fdfaf7] dark:bg-black py-28 px-4 md:px-8 font-amiri" dir="rtl">
+    <div className="min-h-screen bg-[#fdfaf7] dark:bg-black py-28 px-4 md:px-8" dir="rtl">
       <div className="max-w-4xl mx-auto">
         
         {/* زر العودة */}
@@ -190,7 +190,7 @@ export default function AddWorkPage() {
                     onChange={handleInputChange}
                     rows="5"
                     placeholder="حدثنا عن تفاصيل العمل، الإلهام وراءه، المواد المستخدمة في صنعه..."
-                    className="w-full bg-[#fdfaf7] dark:bg-black border border-[#e8dcc4] dark:border-gray-800 rounded-2xl px-5 py-4 text-[#3b2012] dark:text-[#e8dcc4] outline-none focus:ring-2 focus:ring-[#5c4436]/20 focus:border-[#5c4436] transition-all resize-none font-amiri"
+                    className="w-full bg-[#fdfaf7] dark:bg-black border border-[#e8dcc4] dark:border-gray-800 rounded-2xl px-5 py-4 text-[#3b2012] dark:text-[#e8dcc4] outline-none focus:ring-2 focus:ring-[#5c4436]/20 focus:border-[#5c4436] transition-all resize-none"
                   />
                 </div>
               </div>
@@ -382,3 +382,4 @@ export default function AddWorkPage() {
     </div>
   );
 }
+

@@ -18,7 +18,7 @@ function SearchResults({ query }) {
     const fetchArtists = async () => {
       setIsFetchingArtists(true);
       try {
-        const res = await fetch('/api/artworks?limit=200');
+        const res = await fetch('/api/v1/artworks?limit=200');
         const result = res.ok ? await res.json().catch(() => ({})) : {};
         const rawWorks = result?.data?.artworks ?? [];
         const normalizedWorks = rawWorks.map(normalizeWork);
@@ -104,7 +104,7 @@ function SearchResults({ query }) {
                       {artist.name}
                       <i className="fa-solid fa-circle-check text-[#1d9bf0] text-[9px]"></i>
                     </p>
-                    <p className="text-xs text-[#9c7b65] dark:text-[#c4a993] font-amiri">
+                    <p className="text-xs text-[#9c7b65] dark:text-[#c4a993]">
                       <i className="fa-solid fa-palette ml-1 text-amber-500 text-[10px]"></i>
                       {artist.worksCount} أعمال
                     </p>
@@ -149,3 +149,4 @@ export default function Home() {
     </main>
   );
 }
+

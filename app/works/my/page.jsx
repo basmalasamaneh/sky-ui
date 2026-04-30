@@ -82,11 +82,37 @@ export default function MyWorksPage() {
     );
   };
 
+  const handleUpdateQuantity = async (e, id, newQuantity) => {
+    e.stopPropagation();
+    if (newQuantity < 0) return;
+
+    try {
+      const res = await fetch(`/api/v1/artworks/${id}`, {
+        method: 'PATCH',
+        headers: { 
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ quantity: newQuantity })
+      });
+
+      if (!res.ok) {
+        const result = await res.json().catch(() => ({}));
+        throw new Error(result.message || 'فشل تحديث الكمية');
+      }
+
+      setWorks(prev => prev.map(w => w.id === id ? { ...w, quantity: newQuantity } : w));
+    } catch (err) {
+      console.error('Update quantity failed:', err);
+      alert(err.message || 'تعذر تحديث الكمية حالياً');
+    }
+  };
+
   const handleDeleteWork = (e, id) => {
     e.stopPropagation();
     if (!window.confirm('هل أنت متأكد من رغبتك في حذف هذا العمل؟ لا يمكن التراجع عن هذه الخطوة.')) return;
 
-    fetch(`/api/artworks/${id}`, {
+    fetch(`/api/v1/artworks/${id}`, {
       method: 'DELETE',
       headers: { 'Authorization': `Bearer ${token}` },
     })
@@ -136,7 +162,7 @@ export default function MyWorksPage() {
         queryParams.append('page', currentPage.toString());
         queryParams.append('limit', limit.toString());
 
-        const res = await fetch(`/api/artworks/my-artworks?${queryParams.toString()}`, {
+        const res = await fetch(`/api/v1/artworks/my-artworks?${queryParams.toString()}`, {
           headers: { 'Authorization': `Bearer ${token}` },
         });
 
@@ -187,7 +213,7 @@ export default function MyWorksPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#fdfaf7] dark:bg-black py-28 px-4 md:px-8 font-amiri" dir="rtl">
+    <div className="min-h-screen bg-[#fdfaf7] dark:bg-black py-28 px-4 md:px-8" dir="rtl">
       <div className="max-w-7xl mx-auto">
         
         {/* قسم الترويسة (Header Section) */}
@@ -253,6 +279,14 @@ export default function MyWorksPage() {
                     <div 
                       className="relative h-72 overflow-hidden m-3 rounded-[2rem]"
                     >
+                      {/* Sold Out Overlay */}
+                      {work.quantity <= 0 && (
+                        <div className="absolute inset-0 bg-black/40 backdrop-blur-[2px] flex items-center justify-center z-20">
+                          <div className="bg-red-600 text-white px-6 py-2 rounded-full font-bold text-lg shadow-xl border-2 border-white/20 animate-pulse">
+                            نفذت الكمية
+                          </div>
+                        </div>
+                      )}
                       <Image
                         src={work.images?.[work.mainImageIndex || 0] || 'https://images.unsplash.com/photo-1541963463532-d68292c34b19?auto=format&fit=crop&q=80&w=800'}
                         alt={work.title}
@@ -261,10 +295,33 @@ export default function MyWorksPage() {
                       />
                       
                       {/* طبقة التحكم السريعة (Hover Actions) */}
-                      <div className="absolute inset-0 bg-gradient-to-t from-[#3b2012]/90 via-[#3b2012]/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center p-6">
+                      <div className="absolute inset-0 bg-gradient-to-t from-[#3b2012]/90 via-[#3b2012]/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center p-6 z-10">
                         <div className="bg-white dark:bg-black dark:black/20 dark:bg-black/20 backdrop-blur-md border border-white/30 text-white p-4 rounded-full font-bold hover:bg-white dark:bg-black hover:text-[#3b2012] dark:text-[#e8dcc4] transition-colors flex items-center justify-center shadow-xl hover:scale-110 transform">
                           <i className="fa-solid fa-expand text-2xl"></i>
                         </div>
+                      </div>
+                    </div>
+
+                    {/* Quantity Manager Bar */}
+                    <div className="px-6 py-3 bg-[#fdfaf7] dark:bg-black/40 border-y border-[#e8dcc4]/30 flex items-center justify-between" onClick={(e) => e.stopPropagation()}>
+                      <span className="text-xs font-bold text-[#9c7b65]">الكمية المتوفرة:</span>
+                      <div className="flex items-center gap-3">
+                        <button 
+                          onClick={(e) => handleUpdateQuantity(e, work.id, work.quantity - 1)}
+                          disabled={work.quantity <= 0}
+                          className="w-8 h-8 rounded-lg bg-white dark:bg-black border border-[#e8dcc4] flex items-center justify-center text-[#3b2012] dark:text-[#e8dcc4] hover:bg-red-50 hover:text-red-600 transition-all disabled:opacity-30"
+                        >
+                          <i className="fa-solid fa-minus text-[10px]"></i>
+                        </button>
+                        <span className={`text-sm font-black w-6 text-center ${work.quantity <= 0 ? 'text-red-600' : 'text-[#3b2012] dark:text-[#e8dcc4]'}`}>
+                          {work.quantity}
+                        </span>
+                        <button 
+                          onClick={(e) => handleUpdateQuantity(e, work.id, work.quantity + 1)}
+                          className="w-8 h-8 rounded-lg bg-white dark:bg-black border border-[#e8dcc4] flex items-center justify-center text-[#3b2012] dark:text-[#e8dcc4] hover:bg-green-50 hover:text-green-600 transition-all"
+                        >
+                          <i className="fa-solid fa-plus text-[10px]"></i>
+                        </button>
                       </div>
                     </div>
 
@@ -375,7 +432,7 @@ export default function MyWorksPage() {
             className="flex flex-col items-center justify-center py-24 px-6 bg-white dark:bg-black rounded-[3rem] border border-[#e8dcc4] dark:border-gray-800 text-center shadow-lg"
           >
             {fetchError && (
-              <div className="w-full mb-8 bg-red-50 border border-red-200 text-red-700 px-5 py-4 rounded-2xl flex items-center gap-3 text-sm font-bold font-amiri">
+              <div className="w-full mb-8 bg-red-50 border border-red-200 text-red-700 px-5 py-4 rounded-2xl flex items-center gap-3 text-sm font-bold">
                 <i className="fa-solid fa-circle-exclamation text-red-500"></i>
                 {fetchError}
               </div>
@@ -387,7 +444,7 @@ export default function MyWorksPage() {
                </div>
             </div>
             <h3 className="text-3xl font-bold text-[#3b2012] dark:text-[#e8dcc4] mb-4 font-art">لم تقم بإضافة أي أعمال بعد</h3>
-            <p className="text-[#9c7b65] dark:text-[#e8dcc4] text-lg max-w-md mb-10 leading-relaxed font-amiri">
+            <p className="text-[#9c7b65] dark:text-[#e8dcc4] text-lg max-w-md mb-10 leading-relaxed">
               معرضك الفني جاهز! ابدأ بمشاركة إبداعاتك مع العالم ودع الجميع يرى بصمتك الفنية الفريدة على منصة أثر.
             </p>
             <Link 
@@ -534,7 +591,7 @@ export default function MyWorksPage() {
                          <i className="fa-solid fa-align-right text-amber-600 text-sm"></i>
                          عن العمل الفني
                       </h4>
-                      <p className="text-[#9c7b65] dark:text-[#e8dcc4] text-lg leading-relaxed font-amiri">
+                      <p className="text-[#9c7b65] dark:text-[#e8dcc4] text-lg leading-relaxed">
                         {activeSliderWork.description}
                       </p>
                       <p className="text-[10px] text-gray-400 font-bold bg-gray-50 dark:bg-gray-900 inline-block px-3 py-1 rounded-md">
@@ -569,3 +626,4 @@ export default function MyWorksPage() {
     </div>
   );
 }
+

@@ -6,12 +6,14 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { Header } from '@/components/Header';
 import { useAuth } from '@/contexts/AuthContext';
+import { useCart } from '@/contexts/CartContext';
 import { useSearch } from '@/contexts/SearchContext';
 import { categories, normalizeWork } from '@/lib/artwork-utils';
 import ArtworkDetailModal from '@/components/ArtworkDetailModal';
 
 export default function ProductsPage() {
   const { isAuthenticated, user, token } = useAuth();
+  const { addItem } = useCart();
   const {
     marketplaceSearchQuery,
     setMarketplaceSearchQuery,
@@ -47,7 +49,7 @@ export default function ProductsPage() {
     setIsLoadingArtworkDetails(true);
 
     try {
-      const res = await fetch(`/api/artworks/${work.id}`, {
+      const res = await fetch(`/api/v1/artworks/${work.id}`, {
         headers: token ? { Authorization: `Bearer ${token}` } : undefined,
       });
 
@@ -103,7 +105,7 @@ export default function ProductsPage() {
         queryParams.append('page', currentPage.toString());
         queryParams.append('limit', limit.toString());
 
-        const res = await fetch(`/api/artworks?${queryParams.toString()}`);
+        const res = await fetch(`/api/v1/artworks?${queryParams.toString()}`);
         const contentType = res.headers.get('content-type') || '';
         const result = contentType.includes('application/json')
           ? await res.json().catch(() => ({}))
@@ -146,7 +148,7 @@ export default function ProductsPage() {
   const isOwnerArtwork = (work) => Boolean(user?.id && work?.artist_id && user.id === work.artist_id);
 
   return (
-    <div className="min-h-screen bg-[#fdfaf7] dark:bg-black font-amiri" dir="rtl">
+    <div className="min-h-screen bg-[#fdfaf7] dark:bg-black" dir="rtl">
       <Header />
       
       <div className="pt-32 pb-20 px-4 md:px-8 max-w-7xl mx-auto">
@@ -225,59 +227,75 @@ export default function ProductsPage() {
                     onClick={() => openSlider(work)}
                     className="group bg-white dark:bg-black rounded-3xl overflow-hidden border border-[#e8dcc4] dark:border-gray-800 shadow-[0_4px_20px_-10px_rgba(0,0,0,0.1)] hover:shadow-xl transition-all duration-500 flex flex-col cursor-pointer"
                   >
-                    <div 
-                      className="relative h-64 overflow-hidden m-2 rounded-2xl"
-                    >
-                      <Image
-                        src={work.images?.[work.mainImageIndex || 0] || 'https://images.unsplash.com/photo-1541963463532-d68292c34b19?auto=format&fit=crop&q=80&w=800'}
-                        alt={work.title}
-                        fill
-                        className="object-cover transition-transform duration-700 group-hover:scale-110"
-                      />
+                      <div 
+                        className="relative h-64 overflow-hidden m-2 rounded-2xl"
+                      >
+                        <Image
+                          src={work.images?.[work.mainImageIndex || 0] || 'https://images.unsplash.com/photo-1541963463532-d68292c34b19?auto=format&fit=crop&q=80&w=800'}
+                          alt={work.title}
+                          fill
+                          className={`object-cover transition-transform duration-700 group-hover:scale-110 ${work.quantity <= 0 ? 'grayscale opacity-60' : ''}`}
+                        />
 
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-4">
-                        <div className="self-end bg-white dark:bg-black dark:black/20 dark:bg-black/20 backdrop-blur-md border border-white/30 text-white w-10 h-10 rounded-full flex items-center justify-center hover:bg-white dark:bg-black hover:text-[#3b2012] dark:text-[#e8dcc4] transition-colors mb-2">
-                          <i className="fa-solid fa-expand text-sm"></i>
+                        {work.quantity <= 0 && (
+                          <div className="absolute top-4 right-4 bg-red-600 text-white px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest shadow-xl z-10">
+                            نفذت الكمية
+                          </div>
+                        )}
+
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-4">
+                          <div className="self-end bg-white dark:bg-black dark:black/20 dark:bg-black/20 backdrop-blur-md border border-white/30 text-white w-10 h-10 rounded-full flex items-center justify-center hover:bg-white dark:bg-black hover:text-[#3b2012] dark:text-[#e8dcc4] transition-colors mb-2">
+                            <i className="fa-solid fa-expand text-sm"></i>
+                          </div>
                         </div>
                       </div>
-                    </div>
 
-                    <div className="p-5 flex flex-col flex-1">
-                      <h3 className="text-lg font-bold text-[#3b2012] dark:text-[#e8dcc4] mb-4 line-clamp-1">{work.title}</h3>
-                      
-                      <div className="mt-auto flex items-center justify-between border-t border-gray-100 dark:border-gray-800 dark:border-gray-800 pt-4" onClick={(e) => e.stopPropagation()}>
-                        <span className="font-bold text-lg text-[#3b2012] dark:text-[#e8dcc4]">
-                          {work.price ? `${work.price} ₪` : 'متاح للعرض'}
-                        </span>
-                        {isOwnerArtwork(work) ? (
-                          <Link
-                            href={`/works/edit/${work.id}`}
-                            className="bg-[#f0ece6] dark:bg-black text-[#5c4436] dark:text-[#e8dcc4] hover:bg-[#5c4436] hover:text-white px-4 py-2 rounded-xl text-xs font-bold transition-colors"
-                          >
-                            تعديل العمل
-                          </Link>
-                        ) : !isAuthenticated ? (
-                          <button
+                      <div className="p-5 flex flex-col flex-1">
+                        <h3 className={`text-lg font-bold text-[#3b2012] dark:text-[#e8dcc4] mb-4 line-clamp-1 ${work.quantity <= 0 ? 'opacity-50' : ''}`}>{work.title}</h3>
+                        
+                        <div className="mt-auto flex items-center justify-between border-t border-gray-100 dark:border-gray-800 dark:border-gray-800 pt-4" onClick={(e) => e.stopPropagation()}>
+                          <span className={`font-bold text-lg text-[#3b2012] dark:text-[#e8dcc4] ${work.quantity <= 0 ? 'opacity-50 line-through' : ''}`}>
+                            {work.price ? `${work.price} ₪` : 'متاح للعرض'}
+                          </span>
+                          {isOwnerArtwork(work) ? (
+                            <Link
+                              href={`/works/edit/${work.id}`}
+                              className="bg-[#f0ece6] dark:bg-black text-[#5c4436] dark:text-[#e8dcc4] hover:bg-[#5c4436] hover:text-white px-4 py-2 rounded-xl text-xs font-bold transition-colors"
+                            >
+                              تعديل العمل
+                            </Link>
+                          ) : !isAuthenticated ? (
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                openSlider(work);
+                              }}
+                              className="bg-[#f0ece6] dark:bg-black text-[#5c4436] dark:text-[#e8dcc4] hover:bg-[#5c4436] hover:text-white px-4 py-2 rounded-xl text-xs font-bold transition-colors"
+                            >
+                              تسوق الآن
+                            </button>
+                          ) : (
+                            <button
                             type="button"
+                            disabled={work.quantity <= 0}
                             onClick={(e) => {
                               e.stopPropagation();
-                              openSlider(work);
+                              addItem({
+                                id: work.id,
+                                title: work.title,
+                                price: work.price,
+                                image: work.images?.[0],
+                                artistName: work.artistName
+                              });
                             }}
-                            className="bg-[#f0ece6] dark:bg-black text-[#5c4436] dark:text-[#e8dcc4] hover:bg-[#5c4436] hover:text-white px-4 py-2 rounded-xl text-xs font-bold transition-colors"
+                            className={`bg-[#f0ece6] dark:bg-black text-[#5c4436] dark:text-[#e8dcc4] px-4 py-2 rounded-xl text-xs font-bold transition-colors ${work.quantity <= 0 ? 'opacity-50 cursor-not-allowed line-through' : 'hover:bg-[#5c4436] hover:text-white'}`}
                           >
-                            تسوق الآن
+                            {work.quantity <= 0 ? 'مباع' : 'إضافة للسلة'}
                           </button>
-                        ) : (
-                          <button
-                            type="button"
-                            onClick={(e) => e.stopPropagation()}
-                            className="bg-[#f0ece6] dark:bg-black text-[#5c4436] dark:text-[#e8dcc4] hover:bg-[#5c4436] hover:text-white px-4 py-2 rounded-xl text-xs font-bold transition-colors"
-                          >
-                            إضافة للسلة
-                          </button>
-                        )}
+                          )}
+                        </div>
                       </div>
-                    </div>
                   </motion.div>
                 ))}
               </AnimatePresence>
@@ -358,3 +376,4 @@ export default function ProductsPage() {
     </div>
   );
 }
+

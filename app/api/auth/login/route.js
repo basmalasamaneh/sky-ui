@@ -14,7 +14,7 @@ export async function POST(req) {
     }
 
     try {
-      const backendResponse = await fetch(buildBackendApiUrl('/api/auth/login'), {
+      const backendResponse = await fetch(buildBackendApiUrl('/api/v1/auth/login'), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

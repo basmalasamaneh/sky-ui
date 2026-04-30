@@ -135,7 +135,7 @@ export default function SettingsPage() {
     const fetchProfile = async () => {
       setIsFetchingProfile(true);
       try {
-        const res = await fetch('/api/users/profile', {
+        const res = await fetch('/api/v1/users/profile', {
           headers: { 'Authorization': `Bearer ${token}` },
         });
         const result = await res.json();
@@ -209,7 +209,7 @@ export default function SettingsPage() {
     }
 
     try {
-      const res = await fetch('/api/users/profile', {
+      const res = await fetch('/api/v1/users/profile', {
         method: 'PATCH',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -262,7 +262,7 @@ export default function SettingsPage() {
     setDeleteMessage('');
 
     try {
-      const response = await fetch('/api/users/delete-account', {
+      const response = await fetch('/api/v1/users/delete-account', {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -297,7 +297,7 @@ export default function SettingsPage() {
       const formData = new FormData();
       formData.append('image', file);
 
-      const response = await fetch('/api/users/profile/image', {
+      const response = await fetch('/api/v1/users/profile/image', {
         method: 'PATCH',
         headers: {
           Authorization: `Bearer ${token}`,
@@ -344,7 +344,7 @@ export default function SettingsPage() {
   const isArtist = user?.role === 'artist';
 
   return (
-    <div className="min-h-screen bg-[#fdfaf7] dark:bg-black py-20 px-4 md:px-8 font-amiri" dir="rtl">
+    <div className="min-h-screen bg-[#fdfaf7] dark:bg-black py-20 px-4 md:px-8" dir="rtl">
       <div className="max-w-4xl mx-auto">
         
         {/* Header Section */}
@@ -458,6 +458,7 @@ export default function SettingsPage() {
                           name="artistName"
                           value={formData.artistName}
                           onChange={handleInputChange}
+                          placeholder="أدخل اسمك الفني أو الاسم الذي تفضل الظهور به"
                           className={`w-full h-14 bg-[#fdfaf7] dark:bg-black border ${fieldErrors.artistName ? 'border-red-400' : 'border-[#e8dcc4] dark:border-gray-800'} rounded-2xl px-5 text-[#3b2012] dark:text-[#e8dcc4] outline-none focus:ring-2 focus:ring-[#5c4436]/20 focus:border-[#5c4436] transition-all font-bold`}
                         />
                       </div>
@@ -522,6 +523,7 @@ export default function SettingsPage() {
                         value={formData.bio}
                         onChange={handleInputChange}
                         rows="4"
+                        placeholder="اكتب نبذة قصيرة تعبر عن هويتك الفنية وأسلوبك..."
                         className={`w-full bg-[#fdfaf7] dark:bg-black border ${fieldErrors.bio ? 'border-red-400' : 'border-[#e8dcc4] dark:border-gray-800'} rounded-2xl px-5 py-4 text-[#3b2012] dark:text-[#e8dcc4] outline-none focus:ring-2 focus:ring-[#5c4436]/20 focus:border-[#5c4436] transition-all resize-none`}
                       />
                       {fieldErrors.bio && (
@@ -576,6 +578,7 @@ export default function SettingsPage() {
                           dir="ltr"
                           value={formData.phone}
                           onChange={handleInputChange}
+                          placeholder="05XXXXXXXX"
                           className={`w-full h-14 bg-[#fdfaf7] dark:bg-black border ${fieldErrors.phone ? 'border-red-400' : 'border-[#e8dcc4] dark:border-gray-800'} rounded-2xl px-5 text-right text-[#3b2012] dark:text-[#e8dcc4] outline-none focus:ring-2 focus:ring-[#5c4436]/20 focus:border-[#5c4436] transition-all`}
                         />
                         {fieldErrors.phone && (

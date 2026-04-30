@@ -49,7 +49,7 @@ export async function PATCH(req) {
     const body = await req.json();
 
     try {
-      const { backendResponse, result } = await patchBackend('/api/users/profile', authHeader, body);
+      const { backendResponse, result } = await patchBackend('/api/v1/users/profile', authHeader, body);
 
       if (!backendResponse.ok) {
         const mappedErrors = Array.isArray(result?.errors)

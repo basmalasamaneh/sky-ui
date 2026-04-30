@@ -52,7 +52,7 @@ export const Header = () => {
           <div className="flex h-16 items-center justify-between">
             
             {/* Logo */}
-            <Link href="/" className="flex items-center gap-4 group">
+            <Link href="/" className="flex items-center gap-4 group shrink-0">
               <div className="relative w-12 h-12 transition-transform group-hover:scale-110 duration-300">
                 <Image 
                   src="/images/logo.png" 
@@ -75,7 +75,7 @@ export const Header = () => {
             </Link>
 
             {/* Nav Pill / Search Bar Hub */}
-            <div className="flex-1 max-w-xl mx-8 relative flex justify-center">
+            <div className="flex-1 max-w-xl mx-2 md:mx-8 relative flex justify-center">
               <AnimatePresence mode="wait">
                 {!isSearchVisible || !canUseGlobalSearch ? (
                   <motion.nav 
@@ -125,7 +125,7 @@ export const Header = () => {
             </div>
 
             {/* Actions */}
-            <div className="flex items-center gap-5">
+            <div className="flex items-center gap-2 md:gap-5 shrink-0">
               <div className="flex items-center gap-2 text-gray-400">
                 {canUseGlobalSearch && (
                   <button 
@@ -138,6 +138,11 @@ export const Header = () => {
 
                 <Link href="/cart" className="relative hover:text-[#5c4436] dark:text-[#e8dcc4] transition-colors p-2.5">
                   <i className="fa-solid fa-bag-shopping text-lg"></i>
+                  {totalItems > 0 && (
+                    <span className="absolute top-0 right-0 bg-amber-600 text-white text-[10px] font-bold w-5 h-5 flex items-center justify-center rounded-full border-2 border-white dark:border-black animate-in fade-in zoom-in duration-300">
+                      {totalItems}
+                    </span>
+                  )}
                 </Link>
               </div>
 
@@ -225,6 +230,15 @@ export const Header = () => {
                               )}
                               
                               <Link 
+                                href="/dashboard/orders" 
+                                className="flex items-center gap-3 px-5 py-3 text-gray-700 dark:text-[#e8dcc4] hover:bg-[#fdfaf7] dark:bg-black hover:text-[#3b2012] dark:text-[#e8dcc4] transition-colors text-right font-art"
+                                onClick={() => setUserMenuOpen(false)}
+                              >
+                                <i className="fa-solid fa-box text-[#9c7b65] dark:text-[#e8dcc4]"></i>
+                                <span className="text-sm font-bold">طلباتي</span>
+                              </Link>
+                              
+                              <Link 
                                 href="/settings" 
                                 className="flex items-center gap-3 px-5 py-3 text-gray-700 dark:text-[#e8dcc4] hover:bg-[#fdfaf7] dark:bg-black hover:text-[#3b2012] dark:text-[#e8dcc4] transition-colors text-right font-art"
                                 onClick={() => setUserMenuOpen(false)}
@@ -271,7 +285,7 @@ export const Header = () => {
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: 'auto' }}
               exit={{ opacity: 0, height: 0 }}
-              className="lg:hidden bg-white dark:bg-black border-t border-gray-100 dark:border-gray-800 dark:border-gray-800 overflow-hidden"
+              className="lg:hidden bg-white dark:bg-black border-t border-gray-100 dark:border-gray-800 overflow-y-auto max-h-[calc(100vh-64px)]"
             >
               <div className="flex flex-col p-6 gap-2">
                 <Link href="/" className="py-5 px-4 text-xl font-bold text-gray-800 dark:text-[#e8dcc4] rounded-xl hover:bg-gray-50 dark:hover:bg-gray-900 dark:bg-gray-900 text-right font-art">الرئيسية</Link>
@@ -331,6 +345,9 @@ export const Header = () => {
                               <i className="fa-solid fa-palette text-xl"></i>
                             </Link>
                           )}
+                          <Link href="/dashboard/orders" className="text-[#9c7b65] dark:text-[#e8dcc4] hover:text-[#3b2012] dark:text-[#e8dcc4] transition-colors" onClick={() => setMobileMenuOpen(false)}>
+                            <i className="fa-solid fa-box text-xl"></i>
+                          </Link>
                           <Link href="/settings" className="text-[#9c7b65] dark:text-[#e8dcc4] hover:text-[#3b2012] dark:text-[#e8dcc4] transition-colors" onClick={() => setMobileMenuOpen(false)}>
                             <i className="fa-solid fa-gear text-xl"></i>
                           </Link>
